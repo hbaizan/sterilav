@@ -1,0 +1,65 @@
+<style>
+.form-horizontal .form-actions {
+	text-align: right;
+}
+</style>
+<div id="loginForm" class="row">
+	<div class="span3">&nbsp;</div>
+	<div class="span5 well">
+		<form class="form-horizontal">
+			<legend>Ingreso de usuarios</legend>
+			<fieldset>
+				<div data-bind="validationElement: usuario" class="control-group">
+					<label class="control-label" for="inputUsuario">Usuario</label>
+					<div class="controls">
+						<input type="text" id="inputUsuario" data-bind="value: usuario" class="input-large">
+						<p class="help-inline" data-bind="validationMessage: usuario"></p>
+					</div>
+				</div>
+				<div data-bind="validationElement: password" class="control-group">
+					<label class="control-label" for="inputPassword">Contrase&ntilde;a</label>
+					<div class="controls">
+						<input type="password" id="inputPassword" data-bind="value: password" class="input-large">
+						<p class="help-inline" data-bind="validationMessage: password"></p>
+					</div>
+				</div>
+				<div class="form-actions">
+					<button id="login" class="btn btn-primary" data-bind="click: login">Entrar</button><br>
+					Olvid&oacute; su contrase&ntilde;a? <a href="#" data-bind="click: reset">Click aqu&iacute;</a><br>
+					Nuevo usuario? <a href="#" data-bind="click: registrar">Click aqu&iacute;</a>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+	<div class="span3">&nbsp;</div>
+</div>
+<script language="javascript">
+   var credencialesModelo;
+
+	function Credenciales() {
+		var self = this;
+
+		self.usuario = ko.observable().extend({required: true});
+		self.password = ko.observable().extend({required: true});
+
+		self.login = function() {
+			//Chequeo en la base de datos la contraseña
+			if(true) {
+				amplify.store.sessionStorage("sterilav.usuarioLogueado", self.usuario());
+				$("#container").load("./cliente/paginas/principal.html");
+				$("#logoutLink").show();
+			}
+		};
+
+		self.registrar = function() {
+			$("#container").load("./cliente/paginas/registro.html");			
+		};
+
+		self.reset = function() {
+			$("#container").load("./cliente/paginas/reset.html");
+		};
+	};
+
+	credencialesModelo = new Credenciales();
+	ko.applyBindings(credencialesModelo, document.getElementById("loginForm"));  
+</script>
