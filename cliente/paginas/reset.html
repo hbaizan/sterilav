@@ -1,0 +1,39 @@
+<div class="row" id="resetForm">
+	<div class="span6">
+		<div class="well">
+			<h4>Reseteo de Contrase&ntilde;a</h4>
+			<div id="login-form" class="form-horizontal">
+				<div class="control-group">
+					<label class="control-label" for="inputUsuario">Correo:</label>
+					<div class="controls">
+						<input type="text" id="inputUsuario" data-bind="value: usuario" class="">
+					</div>
+				</div>
+				<div class="form-actions">
+					<button id="login" class="btn btn-primary" data-bind="click: reset">Resetear</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script language="javascript">
+   var credencialesModelo;
+
+	function Credenciales() {
+		var self = this;
+
+		self.usuario = ko.observable("");
+		self.password = ko.observable("");
+
+		self.registrar = function() {
+			$("#container").load("./cliente/paginas/registro.html");			
+		};
+
+		self.reset = function() {
+			$("#container").load("./cliente/paginas/login.html");
+		};
+	};
+
+	credencialesModelo = new Credenciales();
+	ko.applyBindings(credencialesModelo, document.getElementById("resetForm"));
+</script>
