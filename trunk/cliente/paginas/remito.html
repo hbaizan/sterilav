@@ -1,0 +1,77 @@
+<div class="row" id="remitoForm">
+	<div id="resultado" class="alert alert-success" style="display:none;">
+		El usuario se ha creado correctamente.
+	</div>
+	<div class="well">
+		<label class="control-label" for="inputNombre">Se&ntilde;or(es):</label>
+		<span class="span5" id="inputNombre" data-bind="">Nombre Cliente</span>
+		<label class="control-label" for="inputApellido">Domicilio:</label>
+		<span id="inputApellido" data-bind="">Domicilio 1234</span>
+		<label class="control-label" for="inputCalle">Localidad:</label>
+		<span id="inputCalle" data-bind=""> Localidad</span>
+		<label class="control-label" for="inputIVA">Condici&oacute;n de IVA:</label>
+		<span id="inputIVA" data-bind="">IVA Responsable</span>
+		<label class="control-label" for="inputCUIT">N&uacute;mero de CUIT :</label>
+		<span id="inputCUIT" data-bind="">11-11111111-1</span>
+	</div>
+	<div class="well form-inline">
+		<label class="control-label" for="inputTipo">Condici&oacute;n de Venta:</label>
+		<span id="inputTipo" data-bind=""></span>
+		<label class="control-label" for="inputTipo">Factura N&uacute;mero:</label>
+		<span id="inputTipo" data-bind=""></span>
+	</div>
+	<form id="login-form" class="form-inline">
+	<legend>Remito</legend>
+	<fieldset>
+		<label class="control-label" for="inputTipo">C&oacute;digo:</label>
+		<input type="text" id="inputTipo" data-bind="value: nuevaLinea().codigo" class="input-large">
+		<label class="control-label" for="inputTipo">Cantidad:</label>
+		<input type="text" id="inputTipo" data-bind="value: nuevaLinea().cantidad" class="input-large">
+		<label class="control-label" for="inputTipo">Descripcion:</label>
+		<input type="text" id="inputTipo" data-bind="value: nuevaLinea().descripcion" class="input-large">
+		<button id="registro" class="btn btn-primary" data-bind="click: agregar">Agregar</button>
+	</fieldset>
+	</form>
+	<table class="table table-striped table-bordered">
+		<thead>
+			<tr>
+				<th>Codigo</th><th>Cantidad</th><th>Descripcion</th>
+			</tr>
+		</thead>
+		<tbody data-bind="foreach: articulos">
+			<tr>
+				<td data-bind="text: codigo"></td>
+				<td data-bind="text: cantidad"></td>
+				<td data-bind="text: descripcion"></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<script language="javascript">
+	function lineaRemito() {
+		var self = this;
+		
+		self.codigo = ko.observable();
+		self.cantidad = ko.observable();
+		self.descripcion = ko.observable();
+	}
+	
+	function Remito() {
+		var self = this;
+		self.nuevaLinea = ko.observable(new lineaRemito());
+		self.articulos = ko.observableArray();
+
+		self.agregar = function() {			
+			self.articulos.push(self.nuevaLinea());
+			self.nuevaLinea(new lineaRemito());
+		};
+		
+		self.volver = function() {
+			window.location.href = "./index.html";
+		};
+		
+	};
+
+	var remitoModel = new Remito();
+	ko.applyBindings(remitoModel, document.getElementById("remitoForm"));  
+</script>

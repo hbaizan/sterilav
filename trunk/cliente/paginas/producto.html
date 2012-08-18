@@ -1,0 +1,64 @@
+<div class="row" id="registroForm">
+	<div class="span5 well">
+		<div id="resultado" class="alert alert-success" style="display:none;">
+			El usuario se ha creado correctamente. Ingrese desde <a href="#" data-bind="click: ingreso">aqu&iacute;</a>
+		</div>
+		<form id="login-form" class="form-horizontal">
+		<legend>Nuevo producto </legend>
+		<fieldset>
+			<div class="control-group">
+				<label class="control-label" for="inputDescripcion">Descripci&oacute;n:</label>
+				<div class="controls">
+					<input type="text" id="inputDescripcion" data-bind="value: descripcion" class="input-large">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputEstado">Estado:</label>
+				<div class="controls">
+					<input type="text" id="inputEstado" data-bind="value: estado" class="input-large">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputCantidad">Cantidad:</label>
+				<div class="controls">
+					<input type="text" id="inputCantidad" data-bind="value: cantidad" class="input-large">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputCodigo">C&oacute;digo:</label>
+				<div class="controls">
+					<input type="text" id="inputCodigo" data-bind="value: codigo" class="input-large">
+				</div>
+			</div>
+			<div class="form-actions">
+				<button id="registro" class="btn btn-primary" data-bind="click: registro">Salvar</button>
+				<button id="registro" class="btn" data-bind="click: volver">Cancelar</button>
+			</div>
+		</fieldset>
+		</form>
+	</div>
+</div>
+<script language="javascript">
+	function NuevoUsuario() {
+		var self = this;
+
+		self.usuario = ko.observable("");
+		self.password = ko.observable("");
+
+		self.registro = function() {
+			//Guardar en la base de datos
+			$("#login-form").hide();
+			$("#resultado").show();
+		};
+
+		self.ingreso = function() {
+			$("#container").load("./cliente/paginas/login.html");
+		};
+		self.volver = function() {
+			window.location.href = "./index.html";
+		};
+	};
+
+	var usuarioModelo = new NuevoUsuario();
+	ko.applyBindings(usuarioModelo, document.getElementById("registroForm"));  
+</script>

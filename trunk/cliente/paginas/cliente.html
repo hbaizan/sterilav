@@ -1,0 +1,79 @@
+<div class="row" id="registroForm">
+	<div class="span5 well">
+		<div id="resultado" class="alert alert-success" style="display:none;">
+			El usuario se ha creado correctamente. Ingrese desde <a href="#" data-bind="click: ingreso">aqu&iacute;</a>
+		</div>
+		<form id="login-form" class="form-horizontal">
+		<legend>Nuevo cliente </legend>
+		<fieldset>
+			<div class="control-group">
+				<label class="control-label" for="inputNombre">Nombre:</label>
+				<div class="controls">
+					<input type="text" id="inputNombre" data-bind="value: nombre" class="input-large">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputApellido">Apellido:</label>
+				<div class="controls">
+					<input type="text" id="inputApellido" data-bind="value: apellido" class="input-large">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputCalle">Domicilio:</label>
+				<div class="controls">
+					<input type="text" id="inputCalle" data-bind="value: calle" class="input-large">
+					<input type="text" id="inputLocalidad" data-bind="value: localidad" class="input-large">
+					<input type="text" id="inputProvincia" data-bind="value: provincia" class="input-large">
+					<input type="text" id="inputCP" data-bind="value: codPostal" class="input-large">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputIVA">Condici&oacute;n de IVA:</label>
+				<div class="controls">
+					<input type="text" id="inputIVA" data-bind="value: iva" class="input-large">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputCUIT">N&uacute;mero de CUIT :</label>
+				<div class="controls">
+					<input type="text" id="inputCUIT" data-bind="value: cuit" class="input-large">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputTipo">Tipo Cliente :</label>
+				<div class="controls">
+					<input type="text" id="inputTipo" data-bind="value: tipo" class="input-large">
+				</div>
+			</div>
+			<div class="form-actions">
+				<button id="registro" class="btn btn-primary" data-bind="click: registro">Salvar</button>
+				<button id="registro" class="btn" data-bind="click: volver">Cancelar</button>
+			</div>
+		</fieldset>
+		</form>
+	</div>
+</div>
+<script language="javascript">
+	function NuevoUsuario() {
+		var self = this;
+
+		self.usuario = ko.observable("");
+		self.password = ko.observable("");
+
+		self.registro = function() {
+			//Guardar en la base de datos
+			$("#login-form").hide();
+			$("#resultado").show();
+		};
+
+		self.ingreso = function() {
+			$("#container").load("./cliente/paginas/login.html");
+		};
+		self.volver = function() {
+			window.location.href = "./index.html";
+		};
+	};
+
+	var usuarioModelo = new NuevoUsuario();
+	ko.applyBindings(usuarioModelo, document.getElementById("registroForm"));  
+</script>

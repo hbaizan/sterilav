@@ -5,10 +5,10 @@
 				<div class="accordion-heading"><a class="accordion-toggle category label">Menu</a></div>
 				<div class="accordion-body">
 					<ul class="accordion-inner unstyled">
-						<li class="sidelink"><a href="#">menu option 1</a></li>
-						<li class="sidelink"><a href="#">menu option 2</a></li>
-						<li class="sidelink"><a href="#">menu option 3</a></li>
-						<li class="sidelink"><a href="#">menu option 4</a></li>
+						<li class="sidelink"><a href="#" onclick="abrir('usuario');">Usuarios</a></li>
+						<li class="sidelink"><a href="#" onclick="abrir('producto');">Productos</a></li>
+						<li class="sidelink"><a href="#" onclick="abrir('cliente');">Cliente</a></li>
+						<li class="sidelink"><a href="#" onclick="abrir('remito');">Remito</a></li>
 						<li class="sidelink"><a href="#">menu option 5</a></li>
 					</ul>
 				</div>
@@ -22,7 +22,6 @@
 	</div>
 </div>
 <script>
-
 	function UsuarioLogueado() {
 		var self = this;
 
@@ -33,4 +32,16 @@
 
 	var usuarioModelo = new UsuarioLogueado();
 	ko.applyBindings(usuarioModelo, document.getElementById("principalForm")); 	
+
+	function abrir(pagina) {
+		switch(pagina) {
+			case 'usuario':
+				$("#container").load("./cliente/paginas/registro.html");		
+				break;
+			default:
+				$("#container").load("./cliente/paginas/" + pagina + ".html");
+				break;
+		}
+	}
+
 </script>
