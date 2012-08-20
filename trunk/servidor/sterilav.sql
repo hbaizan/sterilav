@@ -1,13 +1,14 @@
 -- phpMyAdmin SQL Dump
--- version 3.3.9
+-- version 3.5.2
 -- http://www.phpmyadmin.net
 --
--- Servidor: localhost
--- Tiempo de generación: 07-08-2012 a las 03:26:17
--- Versión del servidor: 5.5.8
--- Versión de PHP: 5.3.5
+-- Host: localhost
+-- Generation Time: Aug 21, 2012 at 01:45 AM
+-- Server version: 5.5.25a
+-- PHP Version: 5.4.4
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -16,16 +17,17 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Base de datos: `sterilav`
+-- Database: `sterilav`
 --
+CREATE DATABASE `sterilav` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `sterilav`;
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `articulo`
+-- Table structure for table `articulo`
 --
 
-DROP TABLE IF EXISTS `articulo`;
 CREATE TABLE IF NOT EXISTS `articulo` (
   `idArticulo` int(11) NOT NULL,
   `descripcion` varchar(100) NOT NULL,
@@ -38,10 +40,9 @@ CREATE TABLE IF NOT EXISTS `articulo` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `cliente`
+-- Table structure for table `cliente`
 --
 
-DROP TABLE IF EXISTS `cliente`;
 CREATE TABLE IF NOT EXISTS `cliente` (
   `idCliente` int(11) NOT NULL,
   `nombre` varchar(50) NOT NULL,
@@ -59,10 +60,9 @@ CREATE TABLE IF NOT EXISTS `cliente` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `detalleremito`
+-- Table structure for table `detalleremito`
 --
 
-DROP TABLE IF EXISTS `detalleremito`;
 CREATE TABLE IF NOT EXISTS `detalleremito` (
   `idDetalleRemito` int(11) NOT NULL,
   `idRemito` int(11) NOT NULL,
@@ -75,10 +75,9 @@ CREATE TABLE IF NOT EXISTS `detalleremito` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `detalleventa`
+-- Table structure for table `detalleventa`
 --
 
-DROP TABLE IF EXISTS `detalleventa`;
 CREATE TABLE IF NOT EXISTS `detalleventa` (
   `idDetalle` int(11) NOT NULL,
   `idVenta` int(11) NOT NULL,
@@ -90,10 +89,9 @@ CREATE TABLE IF NOT EXISTS `detalleventa` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `remito`
+-- Table structure for table `remito`
 --
 
-DROP TABLE IF EXISTS `remito`;
 CREATE TABLE IF NOT EXISTS `remito` (
   `idRemito` int(11) NOT NULL,
   `numeroRemito` int(11) NOT NULL,
@@ -105,26 +103,34 @@ CREATE TABLE IF NOT EXISTS `remito` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `usuario`
+-- Table structure for table `usuario`
 --
 
-DROP TABLE IF EXISTS `usuario`;
 CREATE TABLE IF NOT EXISTS `usuario` (
-  `idUsuario` int(11) NOT NULL,
+  `idUsuario` int(11) NOT NULL AUTO_INCREMENT,
   `legajo` varchar(10) NOT NULL,
   `nombre` varchar(50) NOT NULL,
   `apellido` varchar(50) NOT NULL,
   `puesto` int(11) NOT NULL,
-  PRIMARY KEY (`idUsuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `usuario` varchar(50) NOT NULL,
+  `password` varchar(50) NOT NULL,
+  PRIMARY KEY (`idUsuario`),
+  UNIQUE KEY `usuario` (`usuario`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
+
+--
+-- Dumping data for table `usuario`
+--
+
+INSERT INTO `usuario` (`idUsuario`, `legajo`, `nombre`, `apellido`, `puesto`, `usuario`, `password`) VALUES
+(2, '0000000001', 'sterilav', 'admin', 1, 'sterilav', 'sterilav');
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `venta`
+-- Table structure for table `venta`
 --
 
-DROP TABLE IF EXISTS `venta`;
 CREATE TABLE IF NOT EXISTS `venta` (
   `idVenta` int(11) NOT NULL,
   `condicion` varchar(10) NOT NULL,
@@ -132,3 +138,7 @@ CREATE TABLE IF NOT EXISTS `venta` (
   `fecha` date NOT NULL,
   PRIMARY KEY (`idVenta`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
