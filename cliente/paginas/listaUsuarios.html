@@ -1,0 +1,53 @@
+<div class="row" id="listaUsuarioForm">
+	<div class="span5 well">
+		<div id="resultado" class="alert alert-error" style="display:none;">
+			No hay usuarios en el sistema.
+		</div>
+		<h4>Listado usuarios</h4>
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Nombre</th>
+					<th>Apellido</th>
+					<th>Usuario</th>
+					<th>Contrase&ntilde;a</th>
+				</tr>
+			</thead>
+			<tbody data-bind="foreach: usuarios">
+				<tr>
+					<td data-bind="text: id"></td>
+					<td data-bind="text: nombre"></td>
+					<td data-bind="text: apellido"></td>
+					<td data-bind="text: usuario"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<script language="javascript">
+	function ListaUsuario() {
+		var self = this;
+
+		self.usuarios = ko.observableArray();
+
+		self.cargar = function() {
+			//Llamar a la base de datos
+			self.usuarios.push(new Usuario());
+		};
+
+		self.volver = function() {
+			window.location.href = "./index.html";
+		};
+	};
+
+	function Usuario() {
+		var self = this;
+
+		self.id = "id1";
+		self.nombre = "nombre1";
+		self.apellido = "apellido1";
+	};
+
+	var usuarioModelo = new ListaUsuario();
+	ko.applyBindings(usuarioModelo, document.getElementById("listaUsuarioForm"));  
+</script>
