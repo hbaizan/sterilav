@@ -19,9 +19,26 @@ function Sesion() {
 	self.logout = function() {
 		amplify.store.sessionStorage("sterilav.usuarioLogueado", null);
 		$("#container").load("./cliente/paginas/login.html");	
+		$("#menuLateral").hide();
 		$("#logoutLink").hide();
 	};
 }
+
+function abrir(pagina) {
+	switch(pagina) {
+		default:
+			$("#container").load("./cliente/paginas/" + pagina + ".html");
+			break;
+	}
+}
+ko.validation.init({
+		grouping: {deep: true},
+        registerExtenders: true,
+        messagesOnModified: true,
+        insertMessages: false,
+        parseInputAttributes: true,
+        messageTemplate: null  /* Template not working  - exception */
+    }); 
 
 var sesionModelo = new Sesion();
 ko.applyBindings(sesionModelo, document.getElementById("navBar")); 	

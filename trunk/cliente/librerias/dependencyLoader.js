@@ -7,6 +7,7 @@ Pyramid.newDependency({
     'librerias/jquery-1.7.2.min.js',
 	 'librerias/knockout-2.1.0.js',
 	 'librerias/knockout.simpleGrid.js',	 
+	 'librerias/knockout.validation.v0.9.js',
 	 'librerias/bootstrap.js',
 	 'librerias/bootstrap-tab.js',
 	 'librerias/bootstrap-collapse.js',
