@@ -1,0 +1,112 @@
+<div class="row" id="registroForm">
+	<div class="span5 well">
+		<div id="resultado" class="alert alert-success" style="display:none;">
+			El usuario se ha creado correctamente. Ingrese desde <a href="#" data-bind="click: ingreso">aqu&iacute;</a>
+		</div>
+		<form id="login-form" class="form-horizontal">
+		<legend>Nuevo usuario</legend>
+		<fieldset>
+			<div class="control-group">
+				<label class="control-label" for="inputNombre">Nombre:</label>
+				<div class="controls" data-bind="validationElement: nombre">
+					<input type="text" id="inputNombre" data-bind="value: nombre" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: nombre"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputApellido">Apellido:</label>
+				<div class="controls" data-bind="validationElement: apellido">
+					<input type="text" id="inputApellido" data-bind="value: apellido" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: apellido"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputUsuario">Usuario:</label>
+				<div class="controls" data-bind="validationElement: usuario">
+					<input type="text" id="inputUsuario" data-bind="value: usuario" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: usuario"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputPassword">Contrase&ntilde;a:</label>
+				<div class="controls" data-bind="validationElement: password">
+					<input type="password" id="inputPassword" data-bind="value: password" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: password"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputRepite">Repita la contrase&ntilde;a:</label>
+				<div class="controls">
+					<input type="password" id="inputRepite" data-bind="" class="input-large">
+				</div>
+			</div>
+			<div id="errorMsg" class="alert alert-error" style="display:none;"></div>
+			<div class="form-actions">
+				<button id="registro" class="btn btn-primary" data-bind="click: registro">Registrar</button>
+				<button id="registro" class="btn" data-bind="click: volver">Cancelar</button>
+			</div>
+		</fieldset>
+		</form>
+	</div>
+</div>
+<script language="javascript">
+	function NuevoUsuario() {
+		var self = this;
+
+		self.nombre = ko.observable().extend({required: true});
+		self.apellido = ko.observable().extend({required: true});
+		self.usuario = ko.observable().extend({required: true});
+		self.password = ko.observable().extend({required: true});
+		
+		self.errors = ko.validation.group(self);
+		
+		self.isValid = function() {
+			return self.nombre.isValid() && self.apellido.isValid() && self.usuario.isValid() && self.password.isValid();
+		};
+		
+		self.registro = function() {
+			if(!self.isValid()) {
+				self.errors.showAllMessages();
+			} else {
+				//Guardar en la base de datos
+				var exito = function(data) {
+					if(data.status != "OK") {
+						$("#errorMsg").show();
+						$("#errorMsg").append(data.data);
+					} else {
+						$("#login-form").hide();
+						$("#resultado").show();
+					}
+				};
+				var falla = function(data) {
+					$("#errorMsg").show();
+					$("#errorMsg").append(data.data);
+				};
+				var usuarioCreado = {
+					nombre: self.nombre(),
+					apellido: self.apellido(),
+					usuario: self.usuario(),
+					password: self.password()
+				};
+				$.ajax({
+					url:"./servidor/usuario.php?op=putUsuario",
+					data: usuarioCreado,
+					success:exito,
+					error:falla,
+					type:"POST",
+					dataType:"json"
+				});
+			}
+		};
+
+		self.ingreso = function() {
+			$("#container").load("./cliente/paginas/login.html");
+		};
+		self.volver = function() {
+			window.location.href = "./index.html";
+		};
+	};
+
+	var usuarioModelo = new NuevoUsuario();
+	ko.applyBindings(usuarioModelo, document.getElementById("registroForm"));  
+</script>

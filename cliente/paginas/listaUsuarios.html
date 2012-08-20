@@ -3,25 +3,28 @@
 		<div id="resultado" class="alert alert-error" style="display:none;">
 			No hay usuarios en el sistema.
 		</div>
-		<h4>Listado usuarios</h4>
-		<table class="table table-striped">
+		<h3>Listado de Usuarios</h3>
+		<table class="table table-striped table-bordered">
 			<thead>
 				<tr>
+					<th>ID</th>
 					<th>Nombre</th>
 					<th>Apellido</th>
 					<th>Usuario</th>
-					<th>Contrase&ntilde;a</th>
+					<th>Legajo</th>
 				</tr>
 			</thead>
-			<tbody data-bind="foreach: usuarios">
+			<tbody data-bind="foreach: usuarios()">
 				<tr>
 					<td data-bind="text: id"></td>
 					<td data-bind="text: nombre"></td>
 					<td data-bind="text: apellido"></td>
 					<td data-bind="text: usuario"></td>
+					<td data-bind="text: legajo"></td>
 				</tr>
 			</tbody>
 		</table>
+		<button id="nuevo" class="btn btn-primary" data-bind="click: nuevo">Agregar</button>
 	</div>
 </div>
 <script language="javascript">
@@ -32,20 +35,48 @@
 
 		self.cargar = function() {
 			//Llamar a la base de datos
-			self.usuarios.push(new Usuario());
+			var exito = function(data) {
+				for(i=0; i<data.data.length;i++) {
+					var newUsuario = new Usuario();
+					newUsuario.id = data.data[i].id;
+					newUsuario.nombre = data.data[i].nombre;
+					newUsuario.apellido = data.data[i].apellido;
+					newUsuario.usuario = data.data[i].usuario;
+					newUsuario.legajo = data.data[i].legajo;
+					self.usuarios.push(newUsuario);
+				}
+			};
+			var falla = function(data) {
+				alert(JSON.stringify(data));
+			};		
+			$.ajax({
+				url:"./servidor/usuario.php?op=listaUsuarios",
+				success:exito,
+				error:falla,
+				type:"GET",
+				dataType:"json"
+			});
 		};
 
 		self.volver = function() {
 			window.location.href = "./index.html";
 		};
+		
+		self.nuevo = function() {
+			$("#container").load("./cliente/paginas/registro.html");		
+		};
+		
+		self.cargar();
 	};
 
 	function Usuario() {
 		var self = this;
 
-		self.id = "id1";
-		self.nombre = "nombre1";
-		self.apellido = "apellido1";
+		self.id = "";
+		self.nombre = "";
+		self.apellido = "";
+		self.usuario = "";
+		self.legajo = "";
 	};
 
 	var usuarioModelo = new ListaUsuario();

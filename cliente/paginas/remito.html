@@ -1,51 +1,61 @@
 <div class="row" id="remitoForm">
 	<div id="resultado" class="alert alert-success" style="display:none;">
-		El usuario se ha creado correctamente.
+		El remito se ha creado correctamente.
 	</div>
-	<div class="well">
-		<label class="control-label" for="inputNombre">Se&ntilde;or(es):</label>
-		<span class="span5" id="inputNombre" data-bind="">Nombre Cliente</span>
-		<label class="control-label" for="inputApellido">Domicilio:</label>
-		<span id="inputApellido" data-bind="">Domicilio 1234</span>
-		<label class="control-label" for="inputCalle">Localidad:</label>
-		<span id="inputCalle" data-bind=""> Localidad</span>
-		<label class="control-label" for="inputIVA">Condici&oacute;n de IVA:</label>
-		<span id="inputIVA" data-bind="">IVA Responsable</span>
-		<label class="control-label" for="inputCUIT">N&uacute;mero de CUIT :</label>
-		<span id="inputCUIT" data-bind="">11-11111111-1</span>
+	<div class="span8 well">
+		<h3>Remito</h3>
+		<div class="row">
+			<label class="control-label span2" for="inputNombre">Se&ntilde;or(es):</label>
+			<span class="span5" id="inputNombre" data-bind="">Nombre Cliente</span>
+		</div>
+		<div class="row">
+			<label class="control-label span2" for="inputApellido">Domicilio:</label>
+			<span class="span5" id="inputApellido" data-bind="">Domicilio 1234</span>
+		</div>
+		<div class="row">
+			<label class="control-label span2" for="inputCalle">Localidad:</label>
+			<span class="span2" id="inputCalle" data-bind=""> Localidad</span>
+			<label class="control-label span2" for="inputCUIT">N&uacute;mero de CUIT :</label>
+			<span class="span2" id="inputCUIT" data-bind="">11-11111111-1</span>
+		</div>
+		<div class="row">
+			<label class="control-label span2" for="inputIVA">Condici&oacute;n de IVA:</label>
+			<span class="span5" id="inputIVA" data-bind="">IVA Responsable</span>
+		</div>
 	</div>
-	<div class="well form-inline">
+	<div class="span8 well form-inline">
 		<label class="control-label" for="inputTipo">Condici&oacute;n de Venta:</label>
-		<span id="inputTipo" data-bind=""></span>
+		<span id="inputTipo" data-bind="">Contado</span>
 		<label class="control-label" for="inputTipo">Factura N&uacute;mero:</label>
-		<span id="inputTipo" data-bind=""></span>
+		<span id="inputTipo" data-bind="">0001-12345678</span>
 	</div>
-	<form id="login-form" class="form-inline">
-	<legend>Remito</legend>
-	<fieldset>
-		<label class="control-label" for="inputTipo">C&oacute;digo:</label>
-		<input type="text" id="inputTipo" data-bind="value: nuevaLinea().codigo" class="input-large">
-		<label class="control-label" for="inputTipo">Cantidad:</label>
-		<input type="text" id="inputTipo" data-bind="value: nuevaLinea().cantidad" class="input-large">
-		<label class="control-label" for="inputTipo">Descripcion:</label>
-		<input type="text" id="inputTipo" data-bind="value: nuevaLinea().descripcion" class="input-large">
-		<button id="registro" class="btn btn-primary" data-bind="click: agregar">Agregar</button>
-	</fieldset>
-	</form>
-	<table class="table table-striped table-bordered">
-		<thead>
-			<tr>
-				<th>Codigo</th><th>Cantidad</th><th>Descripcion</th>
-			</tr>
-		</thead>
-		<tbody data-bind="foreach: articulos">
-			<tr>
-				<td data-bind="text: codigo"></td>
-				<td data-bind="text: cantidad"></td>
-				<td data-bind="text: descripcion"></td>
-			</tr>
-		</tbody>
-	</table>
+	<div class="span8 well">
+		<form id="login-form" class="form-inline">
+			<legend>Remito</legend>
+			<fieldset>
+				<label class="control-label" for="inputTipo">C&oacute;digo:</label>
+				<select type="text" id="inputCodigo" data-bind="options: codigos, optionsText: 'id', value: codigoSeleccionado" class="input-large" style="width:150px;">
+				</select>
+				<input type="text" id="inputCantidad" class="input-large" style="width:150px;">
+				<input type="text" id="inputDescripcion" data-bind="value: codigoSeleccionado() ? codigoSeleccionado().descripcion : ''" class="input-large" style="width:250px;" disabled>
+				<button id="registro" class="btn btn-primary" data-bind="click: agregar">Agregar</button>
+			</fieldset>
+		</form>
+		<table class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>Codigo</th><th>Cantidad</th><th>Descripcion</th>
+				</tr>
+			</thead>
+			<tbody data-bind="foreach: articulos">
+				<tr>
+					<td data-bind="text: codigo"></td>
+					<td data-bind="text: cantidad"></td>
+					<td data-bind="text: descripcion"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
 </div>
 <script language="javascript">
 	function lineaRemito() {
@@ -60,16 +70,31 @@
 		var self = this;
 		self.nuevaLinea = ko.observable(new lineaRemito());
 		self.articulos = ko.observableArray();
+		self.codigos = ko.observableArray();
+		self.codigoSeleccionado = ko.observable(null);
+		
+		self.cargar = function() {
+			self.codigos.push({"id":"1", "descripcion":"producto1"});
+			self.codigos.push({"id":"2", "descripcion":"producto2"});
+			self.codigos.push({"id":"3", "descripcion":"producto3"});
+			self.codigos.push({"id":"4", "descripcion":"producto4"});
+			self.codigos.push({"id":"5", "descripcion":"producto5"});
+			self.codigos.push({"id":"6", "descripcion":"producto6"});
+		};
 
-		self.agregar = function() {			
-			self.articulos.push(self.nuevaLinea());
-			self.nuevaLinea(new lineaRemito());
+		self.agregar = function() {
+			var linea = new lineaRemito();
+			linea.codigo(self.codigoSeleccionado().id);			
+			linea.cantidad($("#inputCantidad").val());			
+			linea.descripcion(self.codigoSeleccionado().descripcion);			
+			self.articulos.push(linea);
 		};
 		
 		self.volver = function() {
 			window.location.href = "./index.html";
 		};
 		
+		self.cargar();
 	};
 
 	var remitoModel = new Remito();

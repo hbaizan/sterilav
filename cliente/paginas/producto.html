@@ -1,7 +1,7 @@
-<div class="row" id="registroForm">
+<div class="row" id="productoForm">
 	<div class="span5 well">
 		<div id="resultado" class="alert alert-success" style="display:none;">
-			El usuario se ha creado correctamente. Ingrese desde <a href="#" data-bind="click: ingreso">aqu&iacute;</a>
+			El producto se ha creado correctamente.
 		</div>
 		<form id="login-form" class="form-horizontal">
 		<legend>Nuevo producto </legend>
@@ -39,11 +39,13 @@
 	</div>
 </div>
 <script language="javascript">
-	function NuevoUsuario() {
+	function NuevoProducto() {
 		var self = this;
 
-		self.usuario = ko.observable("");
-		self.password = ko.observable("");
+		self.descripcion = ko.observable("");
+		self.estado = ko.observable("");
+		self.cantidad = ko.observable("");
+		self.codigo = ko.observable("");
 
 		self.registro = function() {
 			//Guardar en la base de datos
@@ -59,6 +61,6 @@
 		};
 	};
 
-	var usuarioModelo = new NuevoUsuario();
-	ko.applyBindings(usuarioModelo, document.getElementById("registroForm"));  
+	var productoModelo = new NuevoProducto();
+	ko.applyBindings(productoModelo, document.getElementById("productoForm"));  
 </script>
