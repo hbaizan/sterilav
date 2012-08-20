@@ -9,7 +9,7 @@
 						<li class="sidelink"><a href="#" onclick="abrir('producto');">Productos</a></li>
 						<li class="sidelink"><a href="#" onclick="abrir('cliente');">Cliente</a></li>
 						<li class="sidelink"><a href="#" onclick="abrir('remito');">Remito</a></li>
-						<li class="sidelink"><a href="#">menu option 5</a></li>
+						<li class="sidelink"><a href="#" onclick="abrir('listaUsuarios');">Lista Usuarios</a></li>
 					</ul>
 				</div>
 			</div>
@@ -28,6 +28,17 @@
 		self.nombre = ko.observable(amplify.store.sessionStorage("sterilav.usuarioLogueado"));
 		self.apellido = ko.observable("");
 
+	}
+
+	function abrir(pagina) {
+		switch(pagina) {
+			case "usuario":
+				$("#container").load("./cliente/paginas/registro.html");
+				break;
+			case else:
+				$("#container").load("./cliente/paginas/" + pagina + ".html");
+				break;
+		}
 	}
 
 	var usuarioModelo = new UsuarioLogueado();
