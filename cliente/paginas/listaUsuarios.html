@@ -1,10 +1,11 @@
-<div class="row" id="listaUsuarioForm">
-	<div class="span5 well">
-		<div id="resultado" class="alert alert-error" style="display:none;">
-			No hay usuarios en el sistema.
-		</div>
-		<h3>Listado de Usuarios</h3>
-		<table class="table table-striped table-bordered">
+<div class="row">
+	<div class="well span5" id="listaUsuarioForm">
+		<h4>Listado de Usuarios</h4>
+		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
+			<h4 class="alert-heading">Problema al obtener los usuarios.</h4>
+			<span data-bind="html: mensajeError"></span>
+		</div>	
+		<table data-bind="visible: !mostrarError()" class="table table-striped table-bordered">
 			<thead>
 				<tr>
 					<th>ID</th>
@@ -12,19 +13,36 @@
 					<th>Apellido</th>
 					<th>Usuario</th>
 					<th>Legajo</th>
+					<th>Acciones</th>
 				</tr>
 			</thead>
-			<tbody data-bind="foreach: usuarios()">
+			<tbody data-bind="visible: cargando()">
+				<tr>
+					<td colspan="5">Cargando <img class="icon-refresh" /></td>
+				</tr>
+			</tbody>
+			<tbody data-bind="visible: usuarios().length == 0 && !cargando()">
+				<tr>
+					<td colspan="5">No hay usuarios en el sistema.</td>
+				</tr>
+			</tbody>		
+			<tbody data-bind="foreach: usuarios(), visible: usuarios().length > 0 && !cargando()">
 				<tr>
 					<td data-bind="text: id"></td>
 					<td data-bind="text: nombre"></td>
 					<td data-bind="text: apellido"></td>
 					<td data-bind="text: usuario"></td>
 					<td data-bind="text: legajo"></td>
+					<td><a href="#" data-bind="click: $root.editar">Editar</a></td>
 				</tr>
 			</tbody>
 		</table>
-		<button id="nuevo" class="btn btn-primary" data-bind="click: nuevo">Agregar</button>
+		<div class="form-actions">
+			<div class="form-buttons-right">		
+				<button id="nuevo" class="btn btn-primary" data-bind="click: nuevo, enable: !mostrarError()">Agregar</button>
+				<button id="volver" class="btn" data-bind="click: volver">Volver</button>
+			</div>
+		</div>
 	</div>
 </div>
 <script language="javascript">
@@ -32,10 +50,14 @@
 		var self = this;
 
 		self.usuarios = ko.observableArray();
+		self.cargando = ko.observable(true);
+		self.mostrarError = ko.observable(false);
+		self.mensajeError = ko.observable("Hubo un problema al buscar los usuarios.");
 
 		self.cargar = function() {
 			//Llamar a la base de datos
 			var exito = function(data) {
+				self.cargando(false);
 				for(i=0; i<data.data.length;i++) {
 					var newUsuario = new Usuario();
 					newUsuario.id = data.data[i].id;
@@ -47,7 +69,11 @@
 				}
 			};
 			var falla = function(data) {
-				alert(JSON.stringify(data));
+				self.cargando(false);
+				if (data) {
+					self.mensajeError(data.responseText);
+				}
+				self.mostrarError(true);
 			};		
 			$.ajax({
 				url:"./servidor/usuario.php?op=listaUsuarios",
@@ -63,7 +89,14 @@
 		};
 		
 		self.nuevo = function() {
-			$("#container").load("./cliente/paginas/registro.html");		
+			$("#container").load("./cliente/paginas/usuario.html");		
+		};
+		
+		self.editar = function(usuario) {
+			$("#container").load("./cliente/paginas/usuario.html?id=" + usuario.id, function() {
+				$("#editId").val(usuario.id);
+				usuarioModelo.cargar();
+			});
 		};
 		
 		self.cargar();
@@ -71,7 +104,6 @@
 
 	function Usuario() {
 		var self = this;
-
 		self.id = "";
 		self.nombre = "";
 		self.apellido = "";

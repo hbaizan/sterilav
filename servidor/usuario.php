@@ -13,6 +13,9 @@ switch($_GET['op']) {
 	case "putUsuario":
 		putUsuario();
 		break;
+	case "updateUsuario":
+		updateUsuario();
+		break;
 	case "validarUsuario":
 		validarUsuario($_GET['usuario'],$_GET['password']);
 		break;	
@@ -116,6 +119,47 @@ function putUsuario() {
 	}
 	$password = $_POST['password'];
 	$query = "INSERT INTO ".$tabla." (legajo, nombre, apellido, usuario, puesto, password) VALUES ('$legajo', '$nombre','$apellido','$usuario',1,'$password')";
+	$result = mysql_query($query, $conn);
+	if(!$result) {
+		echo '{"status":"error","data":"'.mysql_error().'"}';
+	} else {
+		echo '{"status":"OK","data":"El usuario ha sido creado."}';
+	}
+}
+
+function updateUsuario() {
+	global $conn, $tabla;
+	if(!isset($_POST['id']) || $_POST['id']=="") {
+		echo '{"status":"error","data":"El id no puede estar vacio"}';
+		exit();
+	}
+	$id = $_POST['id'];
+	if(!isset($_POST['legajo']) || $_POST['legajo']=="") {
+		echo '{"status":"error","data":"El legajo no puede estar vacio"}';
+		exit();
+	}
+	$legajo = $_POST['legajo'];
+	if(!isset($_POST['nombre']) || $_POST['nombre']=="") {
+		echo '{"status":"error","data":"El nombre no puede estar vacio"}';
+		exit();
+	}
+	$nombre = $_POST['nombre'];
+	if(!isset($_POST['apellido']) || $_POST['apellido']=="") {
+		echo '{"status":"error","data":"El apellido no puede estar vacio"}';
+		exit();
+	}
+	$apellido = $_POST['apellido'];
+	if(!isset($_POST['usuario']) || $_POST['usuario']=="") {
+		echo '{"status":"error","data":"El usuario no puede estar vacio"}';
+		exit();
+	}
+	$usuario = $_POST['usuario'];
+	if(!isset($_POST['password']) || $_POST['password']=="") {
+		echo '{"status":"error","data":"La contraseña no puede estar vacia"}';
+		exit();
+	}
+	$password = $_POST['password'];
+	$query = "UPDATE ".$tabla." SET legajo='$legajo', nombre='$nombre', apellido='$apellido', usuario='$usuario', puesto=1, password='$password' WHERE idUsuario = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		echo '{"status":"error","data":"'.mysql_error().'"}';
