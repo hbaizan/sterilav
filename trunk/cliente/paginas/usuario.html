@@ -1,11 +1,9 @@
 <div class="row" id="registroForm">
 	<div class="span5 well">
-		<div id="resultado" class="alert alert-success" style="display:none;">
-			El usuario se ha creado correctamente. Ingrese desde <a href="#" data-bind="click: ingreso">aqu&iacute;</a>
-		</div>
-		<form id="login-form" class="form-horizontal">
-		<legend>Nuevo usuario</legend>
-		<fieldset>
+		<h4 data-bind="text: title">Usuario</h4>	
+		<input type="hidden" id="editId" />
+		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
+		<fieldset data-bind="with: usuarioNuevo">
 			<div class="control-group">
 				<label class="control-label" for="inputNombre">Nombre:</label>
 				<div class="controls" data-bind="validationElement: nombre">
@@ -18,6 +16,13 @@
 				<div class="controls" data-bind="validationElement: apellido">
 					<input type="text" id="inputApellido" data-bind="value: apellido" class="input-large">
 					<span class="help-block error" data-bind="validationMessage: apellido"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputLegajo">Legajo:</label>
+				<div class="controls" data-bind="validationElement: legajo">
+					<input type="text" id="inputLegajo" data-bind="value: legajo" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: legajo"></span>
 				</div>
 			</div>
 			<div class="control-group">
@@ -37,66 +42,115 @@
 			<div class="control-group">
 				<label class="control-label" for="inputRepite">Repita la contrase&ntilde;a:</label>
 				<div class="controls">
-					<input type="password" id="inputRepite" data-bind="" class="input-large">
+					<input type="password" id="inputRepite" data-bind="value: repite" class="input-large">
 				</div>
 			</div>
-			<div id="errorMsg" class="alert alert-error" style="display:none;"></div>
+			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
+				<h4 class="alert-heading">Fix the form!</h4>
+				There are some invalid values in the form. Please correct them before saving.
+			</div>
+			<div data-bind="visible: $root.mostrarFormError" class="alert alert-error">
+				<span data-bind="text: $root.formErrorMensaje"></span>
+			</div>			
 			<div class="form-actions">
-				<button id="registro" class="btn btn-primary" data-bind="click: registro">Registrar</button>
-				<button id="registro" class="btn" data-bind="click: volver">Cancelar</button>
+				<button id="registro" class="btn btn-primary" data-bind="click: $root.registro">Registrar</button>
+				<button id="registro" class="btn" data-bind="click: $root.volver">Cancelar</button>
 			</div>
 		</fieldset>
 		</form>
+		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
+			<span data-bind="text: successMensaje"></span>
+		</div>
+		<div data-bind="visible: mostrarError" class="alert alert-error">
+			<span data-bind="text: errorMensaje"></span>
+		</div>		
 	</div>
 </div>
 <script language="javascript">
 	function NuevoUsuario() {
 		var self = this;
 
-		self.nombre = ko.observable().extend({required: true});
-		self.apellido = ko.observable().extend({required: true});
-		self.usuario = ko.observable().extend({required: true});
-		self.password = ko.observable().extend({required: true});
+		self.title = ko.observable("Administrar Usuario");
+		self.mostrarForm = ko.observable(true);
+		self.mostrarSuccess = ko.observable(false);
+		self.successMensaje = ko.observable("");
+		self.mostrarError = ko.observable(false);
+		self.errorMensaje = ko.observable("");
+		self.mostrarFormError = ko.observable(false);
+		self.formErrorMensaje = ko.observable("");
+
+		self.usuarioNuevo = ko.validatedObservable(new CUsuario());		
 		
-		self.errors = ko.validation.group(self);
-		
-		self.isValid = function() {
-			return self.nombre.isValid() && self.apellido.isValid() && self.usuario.isValid() && self.password.isValid();
+		self.cargar = function() {
+			var exito = function(data) {
+				if(data.status != "OK") {
+				} else {
+					self.usuarioNuevo().nombre(data.data.nombre);
+					self.usuarioNuevo().apellido(data.data.apellido);
+					self.usuarioNuevo().usuario(data.data.usuario);
+					self.usuarioNuevo().password(data.data.password);
+					self.usuarioNuevo().repite(data.data.password);
+					self.usuarioNuevo().legajo(data.data.legajo);
+				}
+			};
+			var falla = function(data) {
+			};
+			$.ajax({
+				url:"./servidor/usuario.php?op=getUsuario&id=" + $("#editId").val(),
+				success:exito,
+				error:falla,
+				type:"GET",
+				dataType:"json"
+			});
 		};
 		
 		self.registro = function() {
-			if(!self.isValid()) {
-				self.errors.showAllMessages();
-			} else {
-				//Guardar en la base de datos
-				var exito = function(data) {
-					if(data.status != "OK") {
-						$("#errorMsg").show();
-						$("#errorMsg").append(data.data);
-					} else {
-						$("#login-form").hide();
-						$("#resultado").show();
-					}
-				};
-				var falla = function(data) {
+			self.usuarioNuevo().errors.showAllMessages(true);
+			if (!self.usuarioNuevo().isValid()) {
+				return;
+			}
+			//Guardar en la base de datos
+			self.mostrarFormError(false);
+			var exito = function(data) {
+				if(data.status != "OK") {
 					$("#errorMsg").show();
 					$("#errorMsg").append(data.data);
-				};
-				var usuarioCreado = {
-					nombre: self.nombre(),
-					apellido: self.apellido(),
-					usuario: self.usuario(),
-					password: self.password()
-				};
-				$.ajax({
-					url:"./servidor/usuario.php?op=putUsuario",
-					data: usuarioCreado,
-					success:exito,
-					error:falla,
-					type:"POST",
-					dataType:"json"
-				});
+				} else {
+					self.mostrarForm(false);
+					self.successMensaje("El usuario se actualizó correctamente.");
+					self.mostrarSuccess(true);
+				}
+			};
+			var falla = function(data) {
+				if(data.data) {
+					self.formErrorMensaje(data.data);
+				} else {
+					self.formErrorMensaje("Hubo un error tratando de actualizar el usuario.");
+				}
+				self.mostrarFormError(true);				
+			};
+			var usuarioCreado = {
+				id: $("#editId").val(),
+				nombre: self.usuarioNuevo().nombre(),
+				apellido: self.usuarioNuevo().apellido(),
+				usuario: self.usuarioNuevo().usuario(),
+				password: self.usuarioNuevo().password(),
+				legajo: self.usuarioNuevo().legajo()
+			};
+			var url = "";
+			if($("#editId").val()) {
+				url = "./servidor/usuario.php?op=updateUsuario";
+			} else {
+				url = "./servidor/usuario.php?op=putUsuario";
 			}
+			$.ajax({
+				url: url,
+				data: usuarioCreado,
+				success:exito,
+				error:falla,
+				type:"POST",
+				dataType:"json"
+			});
 		};
 
 		self.ingreso = function() {
@@ -105,8 +159,21 @@
 		self.volver = function() {
 			window.location.href = "./index.html";
 		};
+		
 	};
 
+	function CUsuario() {
+		var self = this;
+		
+		self.id = ko.observable();
+		self.nombre = ko.observable().extend({required: true});
+		self.apellido = ko.observable().extend({required: true});
+		self.usuario = ko.observable().extend({required: true});
+		self.password = ko.observable().extend({required: true});
+		self.legajo = ko.observable().extend({required: true});
+		self.repite = ko.observable();		
+	};
+	
 	var usuarioModelo = new NuevoUsuario();
-	ko.applyBindings(usuarioModelo, document.getElementById("registroForm"));  
+	ko.applyBindings(usuarioModelo, document.getElementById("registroForm"));  	
 </script>
