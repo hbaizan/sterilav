@@ -5,7 +5,7 @@
 //Chequeo login
 $(document).ready(function() {
 	if(!amplify.store.sessionStorage("sterilav.usuarioLogueado")) {
-		$("#container").load("./cliente/paginas/login.html");		
+		window.document.location="./cliente/paginas/login.html";
 		$("#logoutLink").hide();
 	} else {
 		$("#container").load("./cliente/paginas/principal.html");		
@@ -14,22 +14,64 @@ $(document).ready(function() {
 });
 
 function Sesion() { 
-	var self = this;
-
+	var self = this;	
 	self.logout = function() {
 		amplify.store.sessionStorage("sterilav.usuarioLogueado", null);
-		$("#container").load("./cliente/paginas/login.html");	
-		$("#menuLateral").hide();
-		$("#logoutLink").hide();
-	};
+		window.document.location="./cliente/paginas/login.html";
+	};	
 }
 
-function abrir(pagina) {
-	switch(pagina) {
-		default:
-			$("#container").load("./cliente/paginas/" + pagina + ".html");
-			break;
-	}
+function Menu() {
+	var self = this;
+	
+	self.permisos = ko.observableArray();
+	
+	self.getPermisos = function() {
+		var exito = function(data) {
+			if(data.status != "OK") {
+			} else {
+				for(var i=0; i< data.data.length; i++) {
+					var newGrupo = new Grupo();
+					newGrupo.nombre(data.data[i].grupo);
+					for(var j=0; j< data.data[i].pantallas.length; j++) {
+						var newPantalla = new Pantalla();
+						newPantalla.pantalla = data.data[i].pantallas[j].pantalla;
+						newPantalla.aplicacion = data.data[i].pantallas[j].aplicacion;
+						newGrupo.pantallas().push(newPantalla);
+					}
+					self.permisos().push(newGrupo);
+				}
+			}
+		};
+		var falla = function(data) {
+		};
+		$.ajax({
+			url:"./servidor/perfil.php?op=listaPermisos&id=2",
+			async:false,
+			success:exito,
+			error:falla,
+			type:"GET",
+			dataType:"json"
+		});		
+	};
+	
+	self.getPermisos();
+}
+
+function Grupo() {
+	this.nombre = ko.observable("");
+	this.pantallas = ko.observableArray();
+}
+
+function Pantalla() {
+	var self = this;
+	
+	self.pantalla = ko.observable("");
+	self.aplicacion = ko.observable("");
+	
+	self.abrir = function(item) {
+		$("#container").load("./cliente/paginas/"+item.aplicacion+".html");
+	};	
 }
 
 function getUrlVars() {
@@ -53,7 +95,9 @@ ko.validation.init({
 		errorMessageClass: 'error',
 		errorElementClass: 'error',
         messageTemplate: null  /* Template not working  - exception */
-    }); 
+}); 
 
 var sesionModelo = new Sesion();
-ko.applyBindings(sesionModelo, document.getElementById("navBar")); 	
+var menuModelo = new Menu();
+ko.applyBindings(sesionModelo, document.getElementById("navBar")); 
+ko.applyBindings(menuModelo, document.getElementById("menuLateral")); 

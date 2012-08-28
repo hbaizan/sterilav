@@ -21,39 +21,14 @@
 		<br>
 		<div class="span3" id="menuLateral">
 			<div class="well">
-				<div class="accordion-group">
-					<div class="accordion-heading"><a class="accordion-toggle category label">Usuarios</a></div>
-					<div class="accordion-body">
-						<ul class="accordion-inner unstyled">
-							<li class="sidelink"><a href="#" onclick="abrir('usuario');">Usuarios</a></li>
-							<li class="sidelink"><a href="#" onclick="abrir('listaUsuarios');">Lista Usuarios</a></li>
-						</ul>
-					</div>
-				</div>
-				<div class="accordion-group">
-					<div class="accordion-heading"><a class="accordion-toggle category label">Productos</a></div>
-					<div class="accordion-body">
-						<ul class="accordion-inner unstyled">
-							<li class="sidelink"><a href="#" onclick="abrir('producto');">Productos</a></li>
-							<li class="sidelink"><a href="#" onclick="abrir('listaProductos');">Lista Productos</a></li>
-						</ul>
-					</div>
-				</div>
-				<div class="accordion-group">
-					<div class="accordion-heading"><a class="accordion-toggle category label">Clientes</a></div>
-					<div class="accordion-body">
-						<ul class="accordion-inner unstyled">
-							<li class="sidelink"><a href="#" onclick="abrir('cliente');">Cliente</a></li>
-							<li class="sidelink"><a href="#" onclick="abrir('listaClientes');">Lista Clientes</a></li>
-						</ul>
-					</div>
-				</div>
-				<div class="accordion-group">
-					<div class="accordion-heading"><a class="accordion-toggle category label">Administracion</a></div>
-					<div class="accordion-body">
-						<ul class="accordion-inner unstyled">
-							<li class="sidelink"><a href="#" onclick="abrir('remito');">Remito</a></li>
-						</ul>
+				<div class="accordion-group" data-bind="foreach: permisos">
+					<div data-bind="visible: $data.pantallas().length>0">
+						<div class="accordion-heading"><a class="accordion-toggle category label" data-bind="text: nombre"></a></div>
+						<div class="accordion-body">
+							<ul class="accordion-inner unstyled" data-bind="foreach: $data.pantallas()">
+								<li class="sidelink"><a href="#" data-bind="text: pantalla, click: abrir"></a></li>
+							</ul>
+						</div>
 					</div>
 				</div>
 			</div>

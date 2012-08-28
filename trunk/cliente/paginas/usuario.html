@@ -26,6 +26,13 @@
 				</div>
 			</div>
 			<div class="control-group">
+				<label class="control-label" for="inputUsuario">Perfil:</label>
+				<div class="controls" data-bind="validationElement: perfil">
+					<select id="selectPerfil" data-bind="options: $root.perfiles, optionsText: 'descripcion', optionsValue: 'id', value: perfil" class="input-large"></select>
+					<span class="help-block error" data-bind="validationMessage: perfil"></span>
+				</div>
+			</div>
+			<div class="control-group">
 				<label class="control-label" for="inputUsuario">Usuario:</label>
 				<div class="controls" data-bind="validationElement: usuario">
 					<input type="text" id="inputUsuario" data-bind="value: usuario" class="input-large">
@@ -80,7 +87,30 @@
 		self.formErrorMensaje = ko.observable("");
 
 		self.usuarioNuevo = ko.validatedObservable(new CUsuario());		
-		
+		self.perfiles = ko.observableArray();
+
+		self.cargaPerfiles = function() {
+			var exitoPerfil = function(perfiles) {
+				if(perfiles.status != "OK") {
+				} else {
+					for(var i=0; i< perfiles.data.length; i++) {
+						//alert("agrego " + per);
+						self.perfiles().push({id:perfiles.data[i].id, descripcion:perfiles.data[i].descripcion});
+					}
+				}
+			};
+			var fallaPerfil = function(data) {
+			};
+			$.ajax({
+				url:"./servidor/perfil.php?op=listaPerfiles",
+				async:false,
+				success:exitoPerfil,
+				error:fallaPerfil,
+				type:"GET",
+				dataType:"json"
+			});
+		};
+				
 		self.cargar = function() {
 			var exito = function(data) {
 				if(data.status != "OK") {
@@ -134,6 +164,7 @@
 				nombre: self.usuarioNuevo().nombre(),
 				apellido: self.usuarioNuevo().apellido(),
 				usuario: self.usuarioNuevo().usuario(),
+				perfil: self.usuarioNuevo().perfil(),
 				password: self.usuarioNuevo().password(),
 				legajo: self.usuarioNuevo().legajo()
 			};
@@ -160,6 +191,7 @@
 			window.location.href = "./index.html";
 		};
 		
+		self.cargaPerfiles();
 	};
 
 	function CUsuario() {
@@ -169,6 +201,7 @@
 		self.nombre = ko.observable().extend({required: true});
 		self.apellido = ko.observable().extend({required: true});
 		self.usuario = ko.observable().extend({required: true});
+		self.perfil = ko.observable().extend({required: true});
 		self.password = ko.observable().extend({required: true});
 		self.legajo = ko.observable().extend({required: true});
 		self.repite = ko.observable();		

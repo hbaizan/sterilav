@@ -29,13 +29,13 @@ function listaUsuarios() {
 	if(mysql_num_rows($recordset)==0) {
 		$result = '{"status":"error","data":"No hay Usuarios."}';
 	} else {
-		$result = '{"status":'.mysql_num_rows($recordset).',"data":[';
+		$result = '{"status":"OK","data":[';
 		while($row = mysql_fetch_assoc($recordset)) {
 			$result .= '{"id":"'.$row['idUsuario'].'",';
 			$result .= '"nombre":"'.$row['nombre'].'",';
 			$result .= '"apellido":"'.$row['apellido'].'",';
 			$result .= '"legajo":"'.$row['legajo'].'",';
-			$result .= '"puesto":"'.$row['puesto'].'",';
+			$result .= '"perfil":"'.$row['perfil'].'",';
 			$result .= '"usuario":"'.$row['usuario'].'",';
 			$result .= '"password":"'.$row['password'].'"';
 			$result .= '},';
@@ -62,7 +62,7 @@ function getUsuario($id) {
 			$result .= '"nombre":"'.$row['nombre'].'",';
 			$result .= '"apellido":"'.$row['apellido'].'",';
 			$result .= '"legajo":"'.$row['legajo'].'",';
-			$result .= '"puesto":"'.$row['puesto'].'",';
+			$result .= '"perfil":"'.$row['perfil'].'",';
 			$result .= '"usuario":"'.$row['usuario'].'",';
 			$result .= '"password":"'.$row['password'].'"';
 			$result .= '},';
@@ -97,7 +97,11 @@ function validarUsuario($usuario,$password) {
 
 function putUsuario() {
 	global $conn, $tabla;
-	$legajo = ""; //$_POST['legajo'];
+	if(!isset($_POST['legajo']) || $_POST['legajo']=="") {
+		echo '{"status":"error","data":"El legajo no puede estar vacio"}';
+		exit();
+	}
+	$legajo = $_POST['legajo'];
 	if(!isset($_POST['nombre']) || $_POST['nombre']=="") {
 		echo '{"status":"error","data":"El nombre no puede estar vacio"}';
 		exit();
@@ -113,12 +117,17 @@ function putUsuario() {
 		exit();
 	}
 	$usuario = $_POST['usuario'];
+	if(!isset($_POST['perfil']) || $_POST['perfil']=="") {
+		echo '{"status":"error","data":"El perfil no puede estar vacio"}';
+		exit();
+	}
+	$perfil = $_POST['perfil'];
 	if(!isset($_POST['password']) || $_POST['password']=="") {
 		echo '{"status":"error","data":"La contraseña no puede estar vacia"}';
 		exit();
 	}
 	$password = $_POST['password'];
-	$query = "INSERT INTO ".$tabla." (legajo, nombre, apellido, usuario, puesto, password) VALUES ('$legajo', '$nombre','$apellido','$usuario',1,'$password')";
+	$query = "INSERT INTO ".$tabla." (legajo, nombre, apellido, usuario, perfil, password) VALUES ('$legajo', '$nombre','$apellido','$usuario',$perfil,'$password')";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		echo '{"status":"error","data":"'.mysql_error().'"}';
@@ -154,12 +163,17 @@ function updateUsuario() {
 		exit();
 	}
 	$usuario = $_POST['usuario'];
+	if(!isset($_POST['perfil']) || $_POST['perfil']=="") {
+		echo '{"status":"error","data":"El perfil no puede estar vacio"}';
+		exit();
+	}
+	$perfil = $_POST['perfil'];
 	if(!isset($_POST['password']) || $_POST['password']=="") {
 		echo '{"status":"error","data":"La contraseña no puede estar vacia"}';
 		exit();
 	}
 	$password = $_POST['password'];
-	$query = "UPDATE ".$tabla." SET legajo='$legajo', nombre='$nombre', apellido='$apellido', usuario='$usuario', puesto=1, password='$password' WHERE idUsuario = ".$id;
+	$query = "UPDATE ".$tabla." SET legajo='$legajo', nombre='$nombre', apellido='$apellido', usuario='$usuario', perfil=$perfil, password='$password' WHERE idUsuario = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		echo '{"status":"error","data":"'.mysql_error().'"}';
