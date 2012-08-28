@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 21, 2012 at 01:45 AM
+-- Generation Time: Aug 28, 2012 at 04:48 AM
 -- Server version: 5.5.25a
 -- PHP Version: 5.4.4
 
@@ -19,8 +19,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `sterilav`
 --
-CREATE DATABASE `sterilav` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `sterilav`;
 
 -- --------------------------------------------------------
 
@@ -89,6 +87,106 @@ CREATE TABLE IF NOT EXISTS `detalleventa` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `grupopantallas`
+--
+
+CREATE TABLE IF NOT EXISTS `grupopantallas` (
+  `idPantalla` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(20) NOT NULL,
+  PRIMARY KEY (`idPantalla`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+
+--
+-- Dumping data for table `grupopantallas`
+--
+
+INSERT INTO `grupopantallas` (`idPantalla`, `nombre`) VALUES
+(1, 'Usuarios'),
+(2, 'Clientes'),
+(3, 'Productos'),
+(4, 'Administracion');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pantallas`
+--
+
+CREATE TABLE IF NOT EXISTS `pantallas` (
+  `idPantalla` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(20) NOT NULL,
+  `aplicacion` varchar(50) NOT NULL,
+  PRIMARY KEY (`idPantalla`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+
+--
+-- Dumping data for table `pantallas`
+--
+
+INSERT INTO `pantallas` (`idPantalla`, `nombre`, `aplicacion`) VALUES
+(1, 'Usuarios', 'usuario'),
+(2, 'Lista de Usuarios', 'listaUsuarios'),
+(3, 'Remito', 'remito'),
+(4, 'Cliente', 'cliente'),
+(5, 'Lista de Clientes', 'listaclientes'),
+(6, 'Productos', 'producto'),
+(7, 'Lista de Productos', 'listaproductos');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `perfil`
+--
+
+CREATE TABLE IF NOT EXISTS `perfil` (
+  `idPerfil` int(11) NOT NULL AUTO_INCREMENT,
+  `descripcion` varchar(20) NOT NULL,
+  PRIMARY KEY (`idPerfil`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+
+--
+-- Dumping data for table `perfil`
+--
+
+INSERT INTO `perfil` (`idPerfil`, `descripcion`) VALUES
+(1, 'Administrador'),
+(2, 'Usuario'),
+(3, 'Contador'),
+(4, 'Cliente');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `perfilpermiso`
+--
+
+CREATE TABLE IF NOT EXISTS `perfilpermiso` (
+  `idPermiso` int(11) NOT NULL AUTO_INCREMENT,
+  `idPerfil` int(11) NOT NULL,
+  `idPantalla` int(11) NOT NULL,
+  `idGrupo` int(11) NOT NULL,
+  PRIMARY KEY (`idPermiso`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11 ;
+
+--
+-- Dumping data for table `perfilpermiso`
+--
+
+INSERT INTO `perfilpermiso` (`idPermiso`, `idPerfil`, `idPantalla`, `idGrupo`) VALUES
+(1, 2, 2, 1),
+(2, 1, 1, 1),
+(3, 2, 5, 2),
+(4, 2, 7, 3),
+(5, 1, 5, 2),
+(6, 1, 7, 3),
+(7, 1, 2, 1),
+(8, 1, 4, 2),
+(9, 1, 6, 3),
+(10, 1, 3, 4);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `remito`
 --
 
@@ -111,19 +209,20 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   `legajo` varchar(10) NOT NULL,
   `nombre` varchar(50) NOT NULL,
   `apellido` varchar(50) NOT NULL,
-  `puesto` int(11) NOT NULL,
+  `perfil` int(11) NOT NULL,
   `usuario` varchar(50) NOT NULL,
   `password` varchar(50) NOT NULL,
   PRIMARY KEY (`idUsuario`),
   UNIQUE KEY `usuario` (`usuario`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `usuario`
 --
 
-INSERT INTO `usuario` (`idUsuario`, `legajo`, `nombre`, `apellido`, `puesto`, `usuario`, `password`) VALUES
-(2, '0000000001', 'sterilav', 'admin', 1, 'sterilav', 'sterilav');
+INSERT INTO `usuario` (`idUsuario`, `legajo`, `nombre`, `apellido`, `perfil`, `usuario`, `password`) VALUES
+(2, '0000000001', 'sterilav', 'admin editado', 1, 'sterilav', 'sterilav'),
+(5, '0000000002', 'otro', 'otro', 2, 'otro', 'otro');
 
 -- --------------------------------------------------------
 
