@@ -17,6 +17,7 @@ function Sesion() {
 	var self = this;	
 	self.logout = function() {
 		amplify.store.sessionStorage("sterilav.usuarioLogueado", null);
+		amplify.store.sessionStorage("sterilav.perfilLogueado", null);	
 		window.document.location="./cliente/paginas/login.html";
 	};	
 }
@@ -46,7 +47,7 @@ function Menu() {
 		var falla = function(data) {
 		};
 		$.ajax({
-			url:"./servidor/perfil.php?op=listaPermisos&id=2",
+			url:"./servidor/maestros.php?op=listaPermisos&id="+amplify.store.sessionStorage("sterilav.perfilLogueado"),
 			async:false,
 			success:exito,
 			error:falla,

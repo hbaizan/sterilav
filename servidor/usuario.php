@@ -37,7 +37,11 @@ function listaUsuarios() {
 			$result .= '"legajo":"'.$row['legajo'].'",';
 			$result .= '"perfil":"'.$row['perfil'].'",';
 			$result .= '"usuario":"'.$row['usuario'].'",';
-			$result .= '"password":"'.$row['password'].'"';
+			$result .= '"password":"'.$row['password'].'",';
+			$result .= '"departamento":"'.$row['departamento'].'",';
+			$result .= '"iva":"'.$row['iva'].'",';
+			$result .= '"cuit":"'.$row['cuit'].'",';
+			$result .= '"patente":"'.$row['patente'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -61,10 +65,18 @@ function getUsuario($id) {
 			$result .= '{"id":"'.$row['idUsuario'].'",';
 			$result .= '"nombre":"'.$row['nombre'].'",';
 			$result .= '"apellido":"'.$row['apellido'].'",';
+			$result .= '"departamento":"'.$row['departamento'].'",';
+			$result .= '"iva":"'.$row['iva'].'",';
+			$result .= '"cuit":"'.$row['cuit'].'",';
+			$result .= '"patente":"'.$row['patente'].'",';
 			$result .= '"legajo":"'.$row['legajo'].'",';
 			$result .= '"perfil":"'.$row['perfil'].'",';
 			$result .= '"usuario":"'.$row['usuario'].'",';
-			$result .= '"password":"'.$row['password'].'"';
+			$result .= '"password":"'.$row['password'].'",';
+			$result .= '"departamento":"'.$row['departamento'].'",';
+			$result .= '"iva":"'.$row['iva'].'",';
+			$result .= '"cuit":"'.$row['cuit'].'",';
+			$result .= '"patente":"'.$row['patente'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -85,9 +97,9 @@ function validarUsuario($usuario,$password) {
 	} else {
 		if($row = mysql_fetch_assoc($recordset)) {
 			if($password==$row['password']) {
-				$result = '{"result":"OK","data":"usuario":"'.$usuario.'"}';
+				$result = '{"status":"OK","data":{"usuario":"'.$usuario.'","perfil":"'.$row['perfil'].'"}}';
 			} else {
-				$result = '{"result":"error","data":"Credenciales invalidas."}';
+				$result = '{"status":"error","data":"Credenciales invalidas."}';
 			}
 		}
 	}
@@ -97,37 +109,20 @@ function validarUsuario($usuario,$password) {
 
 function putUsuario() {
 	global $conn, $tabla;
-	if(!isset($_POST['legajo']) || $_POST['legajo']=="") {
-		echo '{"status":"error","data":"El legajo no puede estar vacio"}';
-		exit();
-	}
-	$legajo = $_POST['legajo'];
-	if(!isset($_POST['nombre']) || $_POST['nombre']=="") {
-		echo '{"status":"error","data":"El nombre no puede estar vacio"}';
-		exit();
-	}
-	$nombre = $_POST['nombre'];
-	if(!isset($_POST['apellido']) || $_POST['apellido']=="") {
-		echo '{"status":"error","data":"El apellido no puede estar vacio"}';
-		exit();
-	}
-	$apellido = $_POST['apellido'];
-	if(!isset($_POST['usuario']) || $_POST['usuario']=="") {
-		echo '{"status":"error","data":"El usuario no puede estar vacio"}';
-		exit();
-	}
-	$usuario = $_POST['usuario'];
-	if(!isset($_POST['perfil']) || $_POST['perfil']=="") {
-		echo '{"status":"error","data":"El perfil no puede estar vacio"}';
-		exit();
-	}
-	$perfil = $_POST['perfil'];
-	if(!isset($_POST['password']) || $_POST['password']=="") {
-		echo '{"status":"error","data":"La contraseña no puede estar vacia"}';
-		exit();
-	}
-	$password = $_POST['password'];
-	$query = "INSERT INTO ".$tabla." (legajo, nombre, apellido, usuario, perfil, password) VALUES ('$legajo', '$nombre','$apellido','$usuario',$perfil,'$password')";
+
+	$id = chequearCampo($_POST['id']);
+	$legajo = chequearCampo($_POST['legajo']);
+	$nombre = chequearCampo($_POST['nombre']);
+	$apellido = chequearCampo($_POST['apellido']);
+	$usuario = chequearCampo($_POST['usuario']);
+	$perfil = chequearCampo($_POST['perfil']);
+	$password = chequearCampo($_POST['password']);
+	$departamento = chequearCampo($_POST['departamento']);
+	$iva = chequearCampo($_POST['iva']);
+	$cuit = chequearCampo($_POST['cuit']);
+	$patente = chequearCampo($_POST['patente']);
+	
+	$query = "INSERT INTO ".$tabla." (legajo, nombre, apellido, usuario, perfil, password, departamento, iva, cuit, patente) VALUES ('$legajo', '$nombre','$apellido','$usuario',$perfil,'$password', $departamento, $iva, '$cuit', '$patente')";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		echo '{"status":"error","data":"'.mysql_error().'"}';
@@ -138,47 +133,32 @@ function putUsuario() {
 
 function updateUsuario() {
 	global $conn, $tabla;
-	if(!isset($_POST['id']) || $_POST['id']=="") {
-		echo '{"status":"error","data":"El id no puede estar vacio"}';
-		exit();
-	}
-	$id = $_POST['id'];
-	if(!isset($_POST['legajo']) || $_POST['legajo']=="") {
-		echo '{"status":"error","data":"El legajo no puede estar vacio"}';
-		exit();
-	}
-	$legajo = $_POST['legajo'];
-	if(!isset($_POST['nombre']) || $_POST['nombre']=="") {
-		echo '{"status":"error","data":"El nombre no puede estar vacio"}';
-		exit();
-	}
-	$nombre = $_POST['nombre'];
-	if(!isset($_POST['apellido']) || $_POST['apellido']=="") {
-		echo '{"status":"error","data":"El apellido no puede estar vacio"}';
-		exit();
-	}
-	$apellido = $_POST['apellido'];
-	if(!isset($_POST['usuario']) || $_POST['usuario']=="") {
-		echo '{"status":"error","data":"El usuario no puede estar vacio"}';
-		exit();
-	}
-	$usuario = $_POST['usuario'];
-	if(!isset($_POST['perfil']) || $_POST['perfil']=="") {
-		echo '{"status":"error","data":"El perfil no puede estar vacio"}';
-		exit();
-	}
-	$perfil = $_POST['perfil'];
-	if(!isset($_POST['password']) || $_POST['password']=="") {
-		echo '{"status":"error","data":"La contraseña no puede estar vacia"}';
-		exit();
-	}
-	$password = $_POST['password'];
-	$query = "UPDATE ".$tabla." SET legajo='$legajo', nombre='$nombre', apellido='$apellido', usuario='$usuario', perfil=$perfil, password='$password' WHERE idUsuario = ".$id;
+
+	$id = chequearCampo($_POST['id']);
+	$legajo = chequearCampo($_POST['legajo']);
+	$nombre = chequearCampo($_POST['nombre']);
+	$apellido = chequearCampo($_POST['apellido']);
+	$usuario = chequearCampo($_POST['usuario']);
+	$perfil = chequearCampo($_POST['perfil']);
+	$password = chequearCampo($_POST['password']);
+	$departamento = chequearCampo($_POST['departamento']);
+	$iva = chequearCampo($_POST['iva']);
+	$cuit = chequearCampo($_POST['cuit']);
+	$patente = chequearCampo($_POST['patente']);
+	$query = "UPDATE ".$tabla." SET legajo='$legajo', nombre='$nombre', apellido='$apellido', usuario='$usuario', perfil=$perfil, password='$password', departamento=$departamento, iva=$iva, cuit='$cuit', patente='$patente' WHERE idUsuario = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		echo '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
 		echo '{"status":"OK","data":"El usuario ha sido creado."}';
 	}
+}
+
+function chequearCampo($campo) {
+	if(!isset($campo) || $campo=="") {
+		echo '{"status":"error","data":"El campo '.$campo.' no puede estar vacio"}';
+		exit();
+	}
+	return $campo;
 }
 ?>

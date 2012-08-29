@@ -11,7 +11,8 @@ Pyramid.newDependency({
 	 'librerias/bootstrap.js',
 	 'librerias/bootstrap-tab.js',
 	 'librerias/bootstrap-collapse.js',
-	 'librerias/amplify.js'
+	 'librerias/amplify.js',
+	 'librerias/sterilav.js'
     ]
 });
 

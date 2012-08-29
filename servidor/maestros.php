@@ -1,11 +1,16 @@
 <?php require_once('./db.php');
 
 mysql_select_db($database_conn, $conn);
-$tabla = "perfil";
 
 switch($_GET['op']) {
 	case "listaPerfiles":
 		listaPerfiles();
+		break;
+	case "listaIvas":
+		listaIvas();
+		break;
+	case "listaDepartamentos":
+		listaDepartamentos();
 		break;
 	case "listaPermisos":
 		listaPermisos($_GET['id']);
@@ -16,8 +21,8 @@ switch($_GET['op']) {
 }
 
 function listaPerfiles() {
-	global $conn, $tabla;
-	$query = "SELECT * FROM ".$tabla;
+	global $conn;
+	$query = "SELECT * FROM perfil";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
 	if(mysql_num_rows($recordset)==0) {
@@ -26,6 +31,49 @@ function listaPerfiles() {
 		$result = '{"status":"OK","data":[';
 		while($row = mysql_fetch_assoc($recordset)) {
 			$result .= '{"id":"'.$row['idPerfil'].'",';
+			$result .= '"descripcion":"'.$row['descripcion'].'"';
+			$result .= '},';
+		}
+		$result = substr($result, 0, strlen($result)-1);
+		$result .= ']}';
+	}
+	
+	echo $result;
+}
+
+function listaIvas() {
+	global $conn;
+	$query = "SELECT * FROM iva";
+	$recordset = mysql_query($query, $conn) or die(mysql_error());
+	
+	if(mysql_num_rows($recordset)==0) {
+		$result = '{"status":"error","data":"No hay Ivas."}';
+	} else {
+		$result = '{"status":"OK","data":[';
+		while($row = mysql_fetch_assoc($recordset)) {
+			$result .= '{"id":"'.$row['idIva'].'",';
+			$result .= '"descripcion":"'.$row['descripcion'].'"';
+			$result .= '},';
+		}
+		$result = substr($result, 0, strlen($result)-1);
+		$result .= ']}';
+	}
+	
+	echo $result;
+}
+
+function listaDepartamentos() {
+	global $conn;
+	$query = "SELECT * FROM departamento";
+	$recordset = mysql_query($query, $conn) or die(mysql_error());
+	
+	if(mysql_num_rows($recordset)==0) {
+		$result = '{"status":"error","data":"No hay Departamentos."}';
+	} else {
+		$result = '{"status":"OK","data":[';
+		while($row = mysql_fetch_assoc($recordset)) {
+			$result .= '{"id":"'.$row['idDepartamento'].'",';
+			$result .= '"idProvincia":"'.$row['idProvincia'].'",';
 			$result .= '"descripcion":"'.$row['descripcion'].'"';
 			$result .= '},';
 		}
@@ -69,7 +117,7 @@ function listaPermisos($id) {
 
 function getPerfil($id) {
 	global $conn, $tabla;
-	$query = "SELECT * FROM ".$tabla." WHERE idPerfil = ".$id;
+	$query = "SELECT * FROM perfil WHERE idPerfil = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
