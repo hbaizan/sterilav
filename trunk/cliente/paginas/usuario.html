@@ -26,7 +26,35 @@
 				</div>
 			</div>
 			<div class="control-group">
-				<label class="control-label" for="inputUsuario">Perfil:</label>
+				<label class="control-label" for="selectDepartamento">Departamento:</label>
+				<div class="controls" data-bind="validationElement: departamento">
+					<select id="selectDepartamento" data-bind="options: $root.departamentos, optionsText: 'descripcion', optionsValue: 'id', value: departamento" class="input-large"></select>
+					<span class="help-block error" data-bind="validationMessage: departamento"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputCUIT">CUIT:</label>
+				<div class="controls" data-bind="validationElement: cuit">
+					<input type="text" id="inputCUIT" data-bind="value: cuit" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: cuit"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="selectIVA">IVA:</label>
+				<div class="controls" data-bind="validationElement: iva">
+					<select id="selectIva" data-bind="options: $root.ivas, optionsText: 'descripcion', optionsValue: 'id', value: iva" class="input-large"></select>
+					<span class="help-block error" data-bind="validationMessage: iva"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputPatente">Patente:</label>
+				<div class="controls" data-bind="validationElement: patente">
+					<input type="text" id="inputPatente" data-bind="value: patente" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: patente"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="selectPerfil">Perfil:</label>
 				<div class="controls" data-bind="validationElement: perfil">
 					<select id="selectPerfil" data-bind="options: $root.perfiles, optionsText: 'descripcion', optionsValue: 'id', value: perfil" class="input-large"></select>
 					<span class="help-block error" data-bind="validationMessage: perfil"></span>
@@ -88,27 +116,47 @@
 
 		self.usuarioNuevo = ko.validatedObservable(new CUsuario());		
 		self.perfiles = ko.observableArray();
+		self.ivas = ko.observableArray();
+		self.departamentos = ko.observableArray();
 
 		self.cargaPerfiles = function() {
 			var exitoPerfil = function(perfiles) {
 				if(perfiles.status != "OK") {
 				} else {
 					for(var i=0; i< perfiles.data.length; i++) {
-						//alert("agrego " + per);
 						self.perfiles().push({id:perfiles.data[i].id, descripcion:perfiles.data[i].descripcion});
 					}
 				}
 			};
 			var fallaPerfil = function(data) {
 			};
-			$.ajax({
-				url:"./servidor/perfil.php?op=listaPerfiles",
-				async:false,
-				success:exitoPerfil,
-				error:fallaPerfil,
-				type:"GET",
-				dataType:"json"
-			});
+			getDataSync("./servidor/maestros.php?op=listaPerfiles",exitoPerfil,fallaPerfil);
+		};
+		self.cargaIvas = function() {
+			var exitoIva = function(ivas) {
+				if(ivas.status != "OK") {
+				} else {
+					for(var i=0; i< ivas.data.length; i++) {
+						self.ivas().push({id:ivas.data[i].id, descripcion:ivas.data[i].descripcion});
+					}
+				}
+			};
+			var fallaIva = function(data) {
+			};
+			getDataSync("./servidor/maestros.php?op=listaIvas",exitoIva,fallaIva);
+		};
+		self.cargaDepartamentos = function() {
+			var exitoDepartamento = function(departamentos) {
+				if(departamentos.status != "OK") {
+				} else {
+					for(var i=0; i< departamentos.data.length; i++) {
+						self.departamentos().push({id:departamentos.data[i].id, descripcion:departamentos.data[i].descripcion});
+					}
+				}
+			};
+			var fallaDepartamento = function(data) {
+			};
+			getDataSync("./servidor/maestros.php?op=listaDepartamentos",exitoDepartamento,fallaDepartamento);
 		};
 				
 		self.cargar = function() {
@@ -121,17 +169,15 @@
 					self.usuarioNuevo().password(data.data.password);
 					self.usuarioNuevo().repite(data.data.password);
 					self.usuarioNuevo().legajo(data.data.legajo);
+					self.usuarioNuevo().departamento(data.data.departamento);
+					self.usuarioNuevo().iva(data.data.iva);
+					self.usuarioNuevo().cuit(data.data.cuit);
+					self.usuarioNuevo().patente(data.data.patente);
 				}
 			};
 			var falla = function(data) {
 			};
-			$.ajax({
-				url:"./servidor/usuario.php?op=getUsuario&id=" + $("#editId").val(),
-				success:exito,
-				error:falla,
-				type:"GET",
-				dataType:"json"
-			});
+			getData("./servidor/usuario.php?op=getUsuario&id=" + amplify.store.sessionStorage("sterilav.usuarioEditado"),exito,falla);
 		};
 		
 		self.registro = function() {
@@ -149,6 +195,7 @@
 					self.mostrarForm(false);
 					self.successMensaje("El usuario se actualizó correctamente.");
 					self.mostrarSuccess(true);
+					amplify.store.sessionStorage("sterilav.usuarioEditado", null);
 				}
 			};
 			var falla = function(data) {
@@ -160,28 +207,25 @@
 				self.mostrarFormError(true);				
 			};
 			var usuarioCreado = {
-				id: $("#editId").val(),
+				id: amplify.store.sessionStorage("sterilav.usuarioEditado"),
 				nombre: self.usuarioNuevo().nombre(),
 				apellido: self.usuarioNuevo().apellido(),
 				usuario: self.usuarioNuevo().usuario(),
 				perfil: self.usuarioNuevo().perfil(),
 				password: self.usuarioNuevo().password(),
-				legajo: self.usuarioNuevo().legajo()
+				legajo: self.usuarioNuevo().legajo(),
+				departamento: self.usuarioNuevo().departamento(),
+				iva: self.usuarioNuevo().iva(),
+				cuit: self.usuarioNuevo().cuit(),
+				patente: self.usuarioNuevo().patente()
 			};
 			var url = "";
-			if($("#editId").val()) {
+			if(amplify.store.sessionStorage("sterilav.usuarioEditado")) {
 				url = "./servidor/usuario.php?op=updateUsuario";
 			} else {
 				url = "./servidor/usuario.php?op=putUsuario";
 			}
-			$.ajax({
-				url: url,
-				data: usuarioCreado,
-				success:exito,
-				error:falla,
-				type:"POST",
-				dataType:"json"
-			});
+			postData(url,exito,falla,usuarioCreado);
 		};
 
 		self.ingreso = function() {
@@ -192,6 +236,11 @@
 		};
 		
 		self.cargaPerfiles();
+		self.cargaIvas();
+		self.cargaDepartamentos();
+		if(amplify.store.sessionStorage("sterilav.usuarioEditado")) {
+			self.cargar();
+		}
 	};
 
 	function CUsuario() {
@@ -204,6 +253,10 @@
 		self.perfil = ko.observable().extend({required: true});
 		self.password = ko.observable().extend({required: true});
 		self.legajo = ko.observable().extend({required: true});
+		self.departamento = ko.observable().extend({required: true});
+		self.iva = ko.observable().extend({required: true});
+		self.cuit = ko.observable().extend({required: true});
+		self.patente = ko.observable();
 		self.repite = ko.observable();		
 	};
 	

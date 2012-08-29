@@ -6,57 +6,91 @@
 		<script src="../librerias/bootstrap.js"></script>
 		<link rel="stylesheet" href="../estilos/bootstrap.css">
 	</head>
-</html>
+	<body>
 <style>
 .form-horizontal .form-actions {
 	text-align: right;
 }
 </style>
-<div id="loginForm" class="row">
-	<div class="span3">&nbsp;</div>
-	<div class="span5 well">
-		<form class="form-horizontal">
-			<legend>Ingreso de usuarios</legend>
-			<fieldset>
-				<div data-bind="validationElement: usuario" class="control-group">
-					<label class="control-label" for="inputUsuario">Usuario</label>
-					<div class="controls">
-						<input type="text" id="inputUsuario" data-bind="value: usuario" class="input-large">
-						<p class="help-inline" data-bind="validationMessage: usuario"></p>
-					</div>
-				</div>
-				<div data-bind="validationElement: password" class="control-group">
-					<label class="control-label" for="inputPassword">Contrase&ntilde;a</label>
-					<div class="controls">
-						<input type="password" id="inputPassword" data-bind="value: password" class="input-large">
-						<p class="help-inline" data-bind="validationMessage: password"></p>
-					</div>
-				</div>
-				<div class="form-actions">
-					<button id="login" class="btn btn-primary" data-bind="click: login">Entrar</button><br>
-					Olvid&oacute; su contrase&ntilde;a? <a href="#" data-bind="click: reset">Click aqu&iacute;</a><br>
-					Nuevo usuario? <a href="#" data-bind="click: registrar">Click aqu&iacute;</a>
-				</div>
-			</fieldset>
-		</form>
-	</div>
-	<div class="span3">&nbsp;</div>
-</div>
+		<br>
+		<div class="navbar" id="navBar">
+		  <div class="navbar-inner">
+			<div class="container">
+				<a href="#" class="brand">Sterilav</a>
+				<ul class="nav mainMenu">
+				</ul>
+			</div>
+		  </div>
+		</div>
+		<br>
+		<div id="loginForm" class="row">
+			<div class="span5 well offset5">
+				<form class="form-horizontal">
+					<legend>Ingreso de usuarios</legend>
+					<fieldset>
+						<div data-bind="validationElement: usuario" class="control-group">
+							<label class="control-label" for="inputUsuario">Usuario</label>
+							<div class="controls">
+								<input type="text" id="inputUsuario" data-bind="value: usuario" class="input-large">
+								<p class="help-inline" data-bind="validationMessage: usuario"></p>
+							</div>
+						</div>
+						<div data-bind="validationElement: password" class="control-group">
+							<label class="control-label" for="inputPassword">Contrase&ntilde;a</label>
+							<div class="controls">
+								<input type="password" id="inputPassword" data-bind="value: password" class="input-large">
+								<p class="help-inline" data-bind="validationMessage: password"></p>
+							</div>
+						</div>
+						<div class="alert alert-error" data-bind="visible: errorForm">
+							<span data-bind="text: errorMsg"></span>
+						</div>
+						<div class="form-actions">
+							<button id="login" class="btn btn-primary" data-bind="click: login">Entrar</button><br>
+							Olvid&oacute; su contrase&ntilde;a? <a href="#" data-bind="click: reset">Click aqu&iacute;</a><br>
+							Nuevo usuario? <a href="#" data-bind="click: registrar">Click aqu&iacute;</a>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>
 <script language="javascript">
    var credencialesModelo;
 
 	function Credenciales() {
 		var self = this;
 
+		self.errorForm = ko.observable(false);
+		self.errorMsg = ko.observable("");
+		
 		self.usuario = ko.observable().extend({required: true});
 		self.password = ko.observable().extend({required: true});
 
 		self.login = function() {
-			//Chequeo en la base de datos la contraseña
-			if(true) {
-				amplify.store.sessionStorage("sterilav.usuarioLogueado", self.usuario());
-				window.document.location="../../Index.html";				
-			}
+			var exito = function(data) {
+				if(data.status != "OK") {
+					self.errorForm(true);
+					self.errorMsg(data.data);
+				} else {
+					amplify.store.sessionStorage("sterilav.usuarioLogueado", self.usuario());
+					amplify.store.sessionStorage("sterilav.perfilLogueado", data.data.perfil);
+					window.document.location="../../Index.html";				
+				}
+			};
+			var falla = function(data) {
+				self.errorForm(true);
+				self.errorMsg(data.data);
+			};
+			$.ajax({
+				url:"../../servidor/usuario.php?op=validarUsuario&usuario="+self.usuario()+"&password="+self.password(),
+				async:false,
+				success:exito,
+				error:falla,
+				type:"GET",
+				dataType:"json"
+			});			
 		};
 
 		self.registrar = function() {

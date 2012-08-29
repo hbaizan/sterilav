@@ -96,10 +96,8 @@
 		};
 		
 		self.editar = function(usuario) {
-			$("#container").load("./cliente/paginas/usuario.html?id=" + usuario.id, function() {
-				$("#editId").val(usuario.id);
-				usuarioModelo.cargar();
-			});
+			amplify.store.sessionStorage("sterilav.usuarioEditado", usuario.id);		
+			$("#container").load("./cliente/paginas/usuario.html?id=" + usuario.id);
 		};
 		
 		self.cargar();
