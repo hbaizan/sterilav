@@ -1,29 +1,8 @@
-<?php require_once('./db.php');
-
-mysql_select_db($database_conn, $conn);
-$tabla = "usuario";
-
-switch($_GET['op']) {
-	case "listaUsuarios":
-		listaUsuarios();
-		break;
-	case "getUsuario":
-		getUsuario($_GET['id']);
-		break;
-	case "putUsuario":
-		putUsuario();
-		break;
-	case "updateUsuario":
-		updateUsuario();
-		break;
-	case "validarUsuario":
-		validarUsuario($_GET['usuario'],$_GET['password']);
-		break;	
-}
+<?php 
 
 function listaUsuarios() {
-	global $conn, $tabla;
-	$query = "SELECT * FROM ".$tabla;
+	global $conn;
+	$query = "SELECT * FROM usuario";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
 	if(mysql_num_rows($recordset)==0) {
@@ -48,12 +27,12 @@ function listaUsuarios() {
 		$result .= ']}';
 	}
 	
-	echo $result;
+	return $result;
 }
 
 function getUsuario($id) {
-	global $conn, $tabla;
-	$query = "SELECT * FROM ".$tabla." WHERE idUsuario = ".$id;
+	global $conn;
+	$query = "SELECT * FROM usuario WHERE idUsuario = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -83,12 +62,12 @@ function getUsuario($id) {
 		$result .= '}';
 	}
 	
-	echo $result;
+	return $result;
 }
 
 function validarUsuario($usuario,$password) {
-	global $conn, $tabla;
-	$query = "SELECT * FROM ".$tabla." WHERE usuario LIKE '".$usuario."'";
+	global $conn;
+	$query = "SELECT * FROM usuario WHERE usuario LIKE '".$usuario."'";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -104,13 +83,12 @@ function validarUsuario($usuario,$password) {
 		}
 	}
 	
-	echo $result;
+	return $result;
 }
 
 function putUsuario() {
-	global $conn, $tabla;
+	global $conn;
 
-	$id = chequearCampo($_POST['id']);
 	$legajo = chequearCampo($_POST['legajo']);
 	$nombre = chequearCampo($_POST['nombre']);
 	$apellido = chequearCampo($_POST['apellido']);
@@ -120,19 +98,19 @@ function putUsuario() {
 	$departamento = chequearCampo($_POST['departamento']);
 	$iva = chequearCampo($_POST['iva']);
 	$cuit = chequearCampo($_POST['cuit']);
-	$patente = chequearCampo($_POST['patente']);
+	$patente = (isset($_POST['patente']) && $_POST['patente']!= "") ? $_POST['patente'] : "";
 	
-	$query = "INSERT INTO ".$tabla." (legajo, nombre, apellido, usuario, perfil, password, departamento, iva, cuit, patente) VALUES ('$legajo', '$nombre','$apellido','$usuario',$perfil,'$password', $departamento, $iva, '$cuit', '$patente')";
+	$query = "INSERT INTO usuario (legajo, nombre, apellido, usuario, perfil, password, departamento, iva, cuit, patente) VALUES ('$legajo', '$nombre','$apellido','$usuario',$perfil,'$password', $departamento, $iva, '$cuit', '$patente')";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
-		echo '{"status":"error","data":"'.mysql_error().'"}';
+		return '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		echo '{"status":"OK","data":"El usuario ha sido creado."}';
+		return '{"status":"OK","data":"El usuario ha sido creado."}';
 	}
 }
 
 function updateUsuario() {
-	global $conn, $tabla;
+	global $conn;
 
 	$id = chequearCampo($_POST['id']);
 	$legajo = chequearCampo($_POST['legajo']);
@@ -144,21 +122,13 @@ function updateUsuario() {
 	$departamento = chequearCampo($_POST['departamento']);
 	$iva = chequearCampo($_POST['iva']);
 	$cuit = chequearCampo($_POST['cuit']);
-	$patente = chequearCampo($_POST['patente']);
-	$query = "UPDATE ".$tabla." SET legajo='$legajo', nombre='$nombre', apellido='$apellido', usuario='$usuario', perfil=$perfil, password='$password', departamento=$departamento, iva=$iva, cuit='$cuit', patente='$patente' WHERE idUsuario = ".$id;
+	$patente = $_POST['patente'];
+	$query = "UPDATE usuario SET legajo='$legajo', nombre='$nombre', apellido='$apellido', usuario='$usuario', perfil=$perfil, password='$password', departamento=$departamento, iva=$iva, cuit='$cuit', patente='$patente' WHERE idUsuario = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
-		echo '{"status":"error","data":"'.mysql_error().'"}';
+		return '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		echo '{"status":"OK","data":"El usuario ha sido creado."}';
+		return '{"status":"OK","data":"El usuario ha sido creado."}';
 	}
-}
-
-function chequearCampo($campo) {
-	if(!isset($campo) || $campo=="") {
-		echo '{"status":"error","data":"El campo '.$campo.' no puede estar vacio"}';
-		exit();
-	}
-	return $campo;
 }
 ?>
