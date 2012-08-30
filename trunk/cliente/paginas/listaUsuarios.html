@@ -14,7 +14,7 @@
 					<th>Usuario</th>
 					<th>Perfil</th>
 					<th>Legajo</th>
-					<th>Acciones</th>
+					<th data-bind="visible: isAdmin">Acciones</th>
 				</tr>
 			</thead>
 			<tbody data-bind="visible: cargando()">
@@ -35,13 +35,13 @@
 					<td data-bind="text: usuario"></td>
 					<td data-bind="text: perfil"></td>
 					<td data-bind="text: legajo"></td>
-					<td><a href="#" data-bind="click: $root.editar">Editar</a></td>
+					<td data-bind="visible: $parent.isAdmin"><a href="#" data-bind="click: $root.editar">Editar</a></td>
 				</tr>
 			</tbody>
 		</table>
 		<div class="form-actions">
 			<div class="form-buttons-right">		
-				<button id="nuevo" class="btn btn-primary" data-bind="click: nuevo, enable: !mostrarError()">Agregar</button>
+				<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
 				<button id="volver" class="btn" data-bind="click: volver">Volver</button>
 			</div>
 		</div>
@@ -55,6 +55,9 @@
 		self.cargando = ko.observable(true);
 		self.mostrarError = ko.observable(false);
 		self.mensajeError = ko.observable("Hubo un problema al buscar los usuarios.");
+		self.isAdmin = ko.computed(function() {
+			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
+		});
 
 		self.cargar = function() {
 			//Llamar a la base de datos
@@ -79,7 +82,7 @@
 				self.mostrarError(true);
 			};		
 			$.ajax({
-				url:"./servidor/usuario.php?op=listaUsuarios",
+				url:"./servidor/sterilav.php?op=listaUsuarios",
 				success:exito,
 				error:falla,
 				type:"GET",

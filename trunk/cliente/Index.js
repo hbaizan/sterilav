@@ -47,7 +47,7 @@ function Menu() {
 		var falla = function(data) {
 		};
 		$.ajax({
-			url:"./servidor/maestros.php?op=listaPermisos&id="+amplify.store.sessionStorage("sterilav.perfilLogueado"),
+			url:"./servidor/sterilav.php?op=listaPermisos&id="+amplify.store.sessionStorage("sterilav.perfilLogueado"),
 			async:false,
 			success:exito,
 			error:falla,
