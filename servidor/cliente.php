@@ -1,22 +1,8 @@
-<?php require_once('./db.php');
-
-mysql_select_db($database_conn, $conn);
-
-switch($_GET['op']) {
-	case "listaClientes":
-		listaClientes();
-		break;
-	case "getCliente":
-		getCliente($_GET['id']);
-		break;
-	case "putCliente":
-		putCliente($_POST['cliente']);
-		break;
-}
+<?php
 
 function listaClientes() {
 	global $conn;
-	$query = "SELECT * FROM aaa";
+	$query = "SELECT * FROM cliente";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
 	if(mysql_num_rows($recordset)==0) {
@@ -33,12 +19,12 @@ function listaClientes() {
 		$result .= ']}';
 	}
 	
-	echo $result;
+	return $result;
 }
 
 function getCliente($id) {
 	global $conn;
-	$query = "SELECT * FROM aaa WHERE id = ".$id;
+	$query = "SELECT * FROM cliente WHERE id = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -56,7 +42,7 @@ function getCliente($id) {
 		$result .= '}';
 	}
 	
-	echo $result;
+	return $result;
 }
 
 function putCliente($cliente) {
