@@ -1,7 +1,6 @@
 <div class="row" id="registroForm">
 	<div class="span5 well">
 		<h4 data-bind="text: title">Usuario</h4>	
-		<input type="hidden" id="editId" />
 		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
 		<fieldset data-bind="with: usuarioNuevo">
 			<div class="control-group">
@@ -130,7 +129,7 @@
 			};
 			var fallaPerfil = function(data) {
 			};
-			getDataSync("./servidor/maestros.php?op=listaPerfiles",exitoPerfil,fallaPerfil);
+			getDataSync("./servidor/sterilav.php?op=listaPerfiles",exitoPerfil,fallaPerfil);
 		};
 		self.cargaIvas = function() {
 			var exitoIva = function(ivas) {
@@ -143,7 +142,7 @@
 			};
 			var fallaIva = function(data) {
 			};
-			getDataSync("./servidor/maestros.php?op=listaIvas",exitoIva,fallaIva);
+			getDataSync("./servidor/sterilav.php?op=listaIvas",exitoIva,fallaIva);
 		};
 		self.cargaDepartamentos = function() {
 			var exitoDepartamento = function(departamentos) {
@@ -156,7 +155,7 @@
 			};
 			var fallaDepartamento = function(data) {
 			};
-			getDataSync("./servidor/maestros.php?op=listaDepartamentos",exitoDepartamento,fallaDepartamento);
+			getDataSync("./servidor/sterilav.php?op=listaDepartamentos",exitoDepartamento,fallaDepartamento);
 		};
 				
 		self.cargar = function() {
@@ -173,11 +172,12 @@
 					self.usuarioNuevo().iva(data.data.iva);
 					self.usuarioNuevo().cuit(data.data.cuit);
 					self.usuarioNuevo().patente(data.data.patente);
+					self.usuarioNuevo().perfil(data.data.perfil);
 				}
 			};
 			var falla = function(data) {
 			};
-			getData("./servidor/usuario.php?op=getUsuario&id=" + amplify.store.sessionStorage("sterilav.usuarioEditado"),exito,falla);
+			getData("./servidor/sterilav.php?op=getUsuario&id=" + amplify.store.sessionStorage("sterilav.usuarioEditado"),exito,falla);
 		};
 		
 		self.registro = function() {
@@ -221,9 +221,9 @@
 			};
 			var url = "";
 			if(amplify.store.sessionStorage("sterilav.usuarioEditado")) {
-				url = "./servidor/usuario.php?op=updateUsuario";
+				url = "./servidor/sterilav.php?op=updateUsuario";
 			} else {
-				url = "./servidor/usuario.php?op=putUsuario";
+				url = "./servidor/sterilav.php?op=putUsuario";
 			}
 			postData(url,exito,falla,usuarioCreado);
 		};
@@ -232,6 +232,7 @@
 			$("#container").load("./cliente/paginas/login.html");
 		};
 		self.volver = function() {
+			amplify.store.sessionStorage("sterilav.usuarioEditado", null);
 			window.location.href = "./index.html";
 		};
 		

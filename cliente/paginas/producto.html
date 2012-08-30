@@ -1,66 +1,168 @@
 <div class="row" id="productoForm">
 	<div class="span5 well">
-		<div id="resultado" class="alert alert-success" style="display:none;">
-			El producto se ha creado correctamente.
-		</div>
-		<form id="login-form" class="form-horizontal">
-		<legend>Nuevo producto </legend>
-		<fieldset>
+		<h4 data-bind="text: title">Producto</h4>	
+		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
+		<fieldset data-bind="with: productoNuevo">
 			<div class="control-group">
-				<label class="control-label" for="inputDescripcion">Descripci&oacute;n:</label>
-				<div class="controls">
+				<label class="control-label" for="inputDescripcion">Descripcion:</label>
+				<div class="controls" data-bind="validationElement: descripcion">
 					<input type="text" id="inputDescripcion" data-bind="value: descripcion" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: descripcion"></span>
 				</div>
 			</div>
 			<div class="control-group">
 				<label class="control-label" for="inputEstado">Estado:</label>
-				<div class="controls">
+				<div class="controls" data-bind="validationElement: estado">
 					<input type="text" id="inputEstado" data-bind="value: estado" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: estado"></span>
 				</div>
 			</div>
 			<div class="control-group">
 				<label class="control-label" for="inputCantidad">Cantidad:</label>
-				<div class="controls">
+				<div class="controls" data-bind="validationElement: cantidad">
 					<input type="text" id="inputCantidad" data-bind="value: cantidad" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: cantidad"></span>
 				</div>
 			</div>
 			<div class="control-group">
-				<label class="control-label" for="inputCodigo">C&oacute;digo:</label>
-				<div class="controls">
-					<input type="text" id="inputCodigo" data-bind="value: codigo" class="input-large">
+				<label class="control-label" for="selectGrupo">Grupo:</label>
+				<div class="controls" data-bind="validationElement: grupo">
+					<select id="selectDepartamento" data-bind="options: $root.grupos, optionsText: 'descripcion', optionsValue: 'id', value: grupo" class="input-large"></select>
+					<span class="help-block error" data-bind="validationMessage: grupo"></span>
 				</div>
 			</div>
+			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
+				<h4 class="alert-heading">Error en el formulario!</h4>
+				Hay valores invalidos en el formulario.
+			</div>
+			<div data-bind="visible: $root.mostrarFormError" class="alert alert-error">
+				<span data-bind="text: $root.formErrorMensaje"></span>
+			</div>			
 			<div class="form-actions">
-				<button id="registro" class="btn btn-primary" data-bind="click: registro">Salvar</button>
-				<button id="registro" class="btn" data-bind="click: volver">Cancelar</button>
+				<button id="registro" class="btn btn-primary" data-bind="click: $root.registro">Registrar</button>
+				<button id="registro" class="btn" data-bind="click: $root.volver">Cancelar</button>
 			</div>
 		</fieldset>
 		</form>
+		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
+			<span data-bind="text: successMensaje"></span>
+		</div>
+		<div data-bind="visible: mostrarError" class="alert alert-error">
+			<span data-bind="text: errorMensaje"></span>
+		</div>		
 	</div>
 </div>
 <script language="javascript">
 	function NuevoProducto() {
 		var self = this;
 
-		self.descripcion = ko.observable("");
-		self.estado = ko.observable("");
-		self.cantidad = ko.observable("");
-		self.codigo = ko.observable("");
+		self.title = ko.observable("Administrar Producto");
+		self.mostrarForm = ko.observable(true);
+		self.mostrarSuccess = ko.observable(false);
+		self.successMensaje = ko.observable("");
+		self.mostrarError = ko.observable(false);
+		self.errorMensaje = ko.observable("");
+		self.mostrarFormError = ko.observable(false);
+		self.formErrorMensaje = ko.observable("");
 
+		self.productoNuevo = ko.validatedObservable(new CProducto());		
+		self.grupos = ko.observableArray();
+
+		self.cargaGrupos = function() {
+			var exito = function(data) {
+				if(data.status != "OK") {
+				} else {
+					for(var i=0; i< data.data.length; i++) {
+						self.grupos().push({id:data.data[i].id, descripcion:data.data[i].descripcion});
+					}
+				}
+			};
+			var falla = function(data) {
+			};
+			getDataSync("./servidor/sterilav.php?op=listaGrupos",exito,falla);
+		};
+				
+		self.cargar = function() {
+			var exito = function(data) {
+				if(data.status != "OK") {
+				} else {
+					self.productoNuevo().descripcion(data.data.descripcion);
+					self.productoNuevo().estado(data.data.estado);
+					self.productoNuevo().cantidad(data.data.cantidad);
+					self.productoNuevo().grupo(data.data.grupo);
+				}
+			};
+			var falla = function(data) {
+			};
+			getData("./servidor/sterilav.php?op=getProducto&id=" + amplify.store.sessionStorage("sterilav.productoEditado"),exito,falla);
+		};
+		
 		self.registro = function() {
+			self.productoNuevo().errors.showAllMessages(true);
+			if (!self.productoNuevo().isValid()) {
+				return;
+			}
 			//Guardar en la base de datos
-			$("#login-form").hide();
-			$("#resultado").show();
+			self.mostrarFormError(false);
+			var exito = function(data) {
+				if(data.status != "OK") {
+					$("#errorMsg").show();
+					$("#errorMsg").append(data.data);
+				} else {
+					self.mostrarForm(false);
+					self.successMensaje("El producto se actualizó correctamente.");
+					self.mostrarSuccess(true);
+					amplify.store.sessionStorage("sterilav.productoEditado", null);
+				}
+			};
+			var falla = function(data) {
+				if(data.data) {
+					self.formErrorMensaje(data.data);
+				} else {
+					self.formErrorMensaje("Hubo un error tratando de actualizar el producto.");
+				}
+				self.mostrarFormError(true);				
+			};
+			var productoCreado = {
+				id: amplify.store.sessionStorage("sterilav.productoEditado"),
+				descripcion: self.productoNuevo().descripcion(),
+				estado: self.productoNuevo().estado(),
+				cantidad: self.productoNuevo().cantidad(),
+				grupo: self.productoNuevo().grupo()
+			};
+			var url = "";
+			if(amplify.store.sessionStorage("sterilav.productoEditado")) {
+				url = "./servidor/sterilav.php?op=updateProducto";
+			} else {
+				url = "./servidor/sterilav.php?op=putProducto";
+			}
+			postData(url,exito,falla,productoCreado);
 		};
 
 		self.ingreso = function() {
 			$("#container").load("./cliente/paginas/login.html");
 		};
 		self.volver = function() {
+			amplify.store.sessionStorage("sterilav.productoEditado", null);		
 			window.location.href = "./index.html";
 		};
+		
+		self.cargaGrupos();
+		if(amplify.store.sessionStorage("sterilav.productoEditado")) {
+			self.cargar();
+		}
 	};
 
+	function CProducto() {
+		var self = this;
+		
+		self.id = ko.observable();
+		self.descripcion = ko.observable().extend({required: true});
+		self.estado = ko.observable().extend({required: true});
+		self.cantidad = ko.observable().extend({required: true});
+		self.grupo = ko.observable().extend({required: true});
+	};
+	
 	var productoModelo = new NuevoProducto();
-	ko.applyBindings(productoModelo, document.getElementById("productoForm"));  
+	ko.applyBindings(productoModelo, document.getElementById("productoForm"));  	
 </script>

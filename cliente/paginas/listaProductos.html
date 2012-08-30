@@ -1,30 +1,46 @@
-<div class="row" id="listaProductoForm">
-	<div class="span5 well">
-		<div id="resultado" class="alert alert-error" style="display:none;">
-			No hay productos en el sistema.
-		</div>
+<div class="row">
+	<div class="well span6" id="listaProductoForm">
 		<h4>Listado de Productos</h4>
-		<table class="table table-striped table-bordered">
+		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
+			<h4 class="alert-heading">Problema al obtener los productos.</h4>
+			<span data-bind="html: mensajeError"></span>
+		</div>	
+		<table data-bind="visible: !mostrarError()" class="table table-striped table-bordered">
 			<thead>
 				<tr>
 					<th>ID</th>
 					<th>Descripcion</th>
 					<th>Estado</th>
 					<th>Cantidad</th>
-					<th>Codigo</th>
+					<th data-bind="visible: isAdmin">Acciones</th>
 				</tr>
 			</thead>
-			<tbody data-bind="foreach: productos">
+			<tbody data-bind="visible: cargando()">
+				<tr>
+					<td colspan="5">Cargando <img class="icon-refresh" /></td>
+				</tr>
+			</tbody>
+			<tbody data-bind="visible: productos().length == 0 && !cargando()">
+				<tr>
+					<td colspan="5">No hay productos en el sistema.</td>
+				</tr>
+			</tbody>		
+			<tbody data-bind="foreach: productos(), visible: productos().length > 0 && !cargando()">
 				<tr>
 					<td data-bind="text: id"></td>
 					<td data-bind="text: descripcion"></td>
 					<td data-bind="text: estado"></td>
 					<td data-bind="text: cantidad"></td>
-					<td data-bind="text: codigo"></td>
+					<td data-bind="visible: $parent.isAdmin"><a href="#" data-bind="click: $root.editar">Editar</a></td>
 				</tr>
 			</tbody>
 		</table>
-		<button id="nuevo" class="btn btn-primary" data-bind="click: nuevo">Agregar</button>
+		<div class="form-actions">
+			<div class="form-buttons-right">		
+				<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
+				<button id="volver" class="btn" data-bind="click: volver">Volver</button>
+			</div>
+		</div>
 	</div>
 </div>
 <script language="javascript">
@@ -32,10 +48,46 @@
 		var self = this;
 
 		self.productos = ko.observableArray();
+		self.cargando = ko.observable(true);
+		self.mostrarError = ko.observable(false);
+		self.mensajeError = ko.observable("Hubo un problema al buscar los productos.");
+		self.isAdmin = ko.computed(function() {
+			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
+		});
 
 		self.cargar = function() {
 			//Llamar a la base de datos
-			self.productos().push(new Producto());
+			var exito = function(data) {
+				if(data.status != "OK") {
+					self.mensajeError(data.data);
+					self.mostrarError(true);
+					return;
+				}
+				self.cargando(false);
+				for(i=0; i<data.data.length;i++) {
+					var newProducto = new Producto();
+					newProducto.id = data.data[i].id;
+					newProducto.descripcion = data.data[i].descripcion;
+					newProducto.estado = data.data[i].estado;
+					newProducto.cantidad = data.data[i].cantidad;
+					newProducto.grupo = data.data[i].grupo;
+					self.productos.push(newProducto);
+				}
+			};
+			var falla = function(data) {
+				self.cargando(false);
+				if (data) {
+					self.mensajeError(data.responseText);
+				}
+				self.mostrarError(true);
+			};		
+			$.ajax({
+				url:"./servidor/sterilav.php?op=listaProductos",
+				success:exito,
+				error:falla,
+				type:"GET",
+				dataType:"json"
+			});
 		};
 
 		self.volver = function() {
@@ -43,7 +95,12 @@
 		};
 		
 		self.nuevo = function() {
-			$("#container").load("./cliente/paginas/producto.html");
+			$("#container").load("./cliente/paginas/producto.html");		
+		};
+		
+		self.editar = function(producto) {
+			amplify.store.sessionStorage("sterilav.productoEditado", producto.id);
+			$("#container").load("./cliente/paginas/producto.html?id=" + producto.id);
 		};
 		
 		self.cargar();
@@ -51,14 +108,13 @@
 
 	function Producto() {
 		var self = this;
-
-		self.id = "id1";
-		self.descripcion = "descripcion1";
-		self.cantidad = "cantidad1";
-		self.estado = "estado1";
-		self.codigo = "codigo1";
+		self.id = "";
+		self.descripcion = "";
+		self.estado = "";
+		self.cantidad = 0;
+		self.grupo = 0;
 	};
 
 	var productoModelo = new ListaProducto();
-	ko.applyBindings(productoModelo, document.getElementById("listaProductoForm"));  
+	ko.applyBindings(productoModelo, document.getElementById("listaProductoForm"));
 </script>
