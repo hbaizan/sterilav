@@ -1,21 +1,4 @@
-<?php require_once('./db.php');
-
-mysql_select_db($database_conn, $conn);
-
-switch($_GET['op']) {
-	case "listaVehiculos":
-		echo listaVehiculos();
-		break;
-	case "getVehiculo":
-		echo getVehiculo($_GET['id']);
-		break;
-	case "putVehiculo":
-		echo putVehiculo();
-		break;
-	case "updateVehiculo":
-		echo updateVehiculo();
-		break;
-}
+<?php
 
 function listaVehiculos() {
 	global $conn;
@@ -27,8 +10,8 @@ function listaVehiculos() {
 	} else {
 		$result = '{"status":"OK","data":[';
 		while($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idVehiculo'].'",';
-			$result .= '"patente":"'.$row['patente'].'"';
+			$result .= '{"id":"'.$row['idvehiculo'].'",';
+			$result .= '"patente":"'.$row['vehiculo_patente'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -40,7 +23,7 @@ function listaVehiculos() {
 
 function getVehiculo($id) {
 	global $conn;
-	$query = "SELECT * FROM vehiculo WHERE idVehiculo = ".$id;
+	$query = "SELECT * FROM vehiculo WHERE idvehiculo = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -49,8 +32,8 @@ function getVehiculo($id) {
 	} else {
 		$result = '{"status":"OK","data":';
 		if($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idVehiculo'].'",';
-			$result .= '"patente":"'.$row['patente'].'"';
+			$result .= '{"id":"'.$row['idvehiculo'].'",';
+			$result .= '"patente":"'.$row['vehiculo_patente'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -63,43 +46,36 @@ function getVehiculo($id) {
 function putVehiculo() {
 	global $conn;
 
-	var response = "";
+	$response = "";
 	$patente = chequearCampo($_POST['patente']);
 	
-	$query = "INSERT INTO vehiculo (patente) VALUES ('$patente')";
+	$query = "INSERT INTO vehiculo_patente (patente) VALUES ('$patente')";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
-		response = '{"status":"error","data":"'.mysql_error().'"}';
+		$response = '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		response = '{"status":"OK","data":"El Vehiculo ha sido creado."}';
+		$response = '{"status":"OK","data":"El Vehiculo ha sido creado."}';
 	}
 
-	return response;
+	return $response;
 }
 
 function updateVehiculo() {
 	global $conn;
 
-	var response = "";
+	$response = "";
 	$id = chequearCampo($_POST['id']);
 	$cuit = chequearCampo($_POST['patente']);
 
-	$query = "UPDATE vehiculo SET patente='$patente' WHERE idVehiculo = ".$id;
+	$query = "UPDATE vehiculo SET vehiculo_patente='$patente' WHERE idvehiculo = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
-		response = '{"status":"error","data":"'.mysql_error().'"}';
+		$response = '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		response = '{"status":"OK","data":"El Vehiculo ha sido actualizada."}';
+		$response = '{"status":"OK","data":"El Vehiculo ha sido actualizada."}';
 	}
 
-	return response;
+	return $response;
 }
 
-function chequearCampo($campo) {
-	if(!isset($campo) || $campo=="") {
-		echo '{"status":"error","data":"El campo '.$campo.' no puede estar vacio"}';
-		exit();
-	}
-	return $campo;
-}
 ?>

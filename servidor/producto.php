@@ -7,11 +7,9 @@ function listaProductos() {
 	
 	$result = '{"status":"OK","data":[';
 	while($row = mysql_fetch_assoc($recordset)) {
-		$result .= '{"id":"'.$row['idProducto'].'",';
-		$result .= '"descripcion":"'.$row['descripcion'].'",';
-		$result .= '"estado":"'.$row['estado'].'",';
-		$result .= '"cantidad":"'.$row['cantidad'].'",';
-		$result .= '"grupo":"'.$row['idGrupo'].'"';
+		$result .= '{"id":"'.$row['idproducto'].'",';
+		$result .= '"descripcion":"'.$row['producto_nombre'].'",';
+		$result .= '"grupo":"'.$row['grupo_idgrupo'].'"';
 		$result .= '},';
 	}
 	if(mysql_num_rows($recordset)>0) {
@@ -24,7 +22,7 @@ function listaProductos() {
 
 function getProducto($id) {
 	global $conn;
-	$query = "SELECT * FROM producto WHERE idProducto = ".$id;
+	$query = "SELECT * FROM producto WHERE idproducto = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -33,11 +31,9 @@ function getProducto($id) {
 	} else {
 		$result = '{"status":"OK","data":';
 		if($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idProducto'].'",';
-			$result .= '"descripcion":"'.$row['descripcion'].'",';
-			$result .= '"estado":"'.$row['estado'].'",';
-			$result .= '"cantidad":"'.$row['cantidad'].'",';
-			$result .= '"grupo":"'.$row['idGrupo'].'"';
+			$result .= '{"id":"'.$row['idproducto'].'",';
+			$result .= '"descripcion":"'.$row['producto_nombre'].'",';
+			$result .= '"grupo":"'.$row['grupo_idgrupo'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -50,10 +46,8 @@ function getProducto($id) {
 function putProducto() {
 	global $conn;
 	$descripcion = chequearCampo($_POST['descripcion']);
-	$estado = chequearCampo($_POST['estado']);
-	$cantidad = chequearCampo($_POST['cantidad']);
 	$grupo = chequearCampo($_POST['grupo']);
-	$query = "INSERT INTO producto (descripcion, estado, cantidad, idGrupo) VALUES ('$descripcion', '$estado',$cantidad,$grupo)";
+	$query = "INSERT INTO producto (producto_nombre, grupo_idgrupo) VALUES ('$descripcion',$grupo)";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		return '{"status":"error","data":"'.mysql_error().'"}';
@@ -66,10 +60,8 @@ function updateProducto() {
 	global $conn;
 	$id = chequearCampo($_POST['id']);
 	$descripcion = chequearCampo($_POST['descripcion']);
-	$estado = chequearCampo($_POST['estado']);
-	$cantidad = chequearCampo($_POST['cantidad']);
 	$grupo = chequearCampo($_POST['grupo']);
-	$query = "UPDATE producto SET descripcion='$descripcion', estado='$estado', cantidad=$cantidad, idGrupo=$grupo WHERE idProducto = ".$id;
+	$query = "UPDATE producto SET producto_nombre='$descripcion', grupo_idgrupo=$grupo WHERE idproducto = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		return '{"status":"error","data":"'.mysql_error().'"}';

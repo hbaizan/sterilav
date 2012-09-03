@@ -7,8 +7,8 @@ function listaGrupos() {
 	
 	$result = '{"status":"OK","data":[';
 	while($row = mysql_fetch_assoc($recordset)) {
-		$result .= '{"id":"'.$row['idGrupo'].'",';
-		$result .= '"descripcion":"'.$row['descripcion'].'"';
+		$result .= '{"id":"'.$row['idgrupo'].'",';
+		$result .= '"descripcion":"'.$row['grupo_nombre'].'"';
 		$result .= '},';
 	}
 	if(mysql_num_rows($recordset)>0) {
@@ -21,7 +21,7 @@ function listaGrupos() {
 
 function getGrupo($id) {
 	global $conn, $tabla;
-	$query = "SELECT * FROM grupo WHERE idGrupo = ".$id;
+	$query = "SELECT * FROM grupo WHERE idgrupo = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -30,8 +30,8 @@ function getGrupo($id) {
 	} else {
 		$result = '{"status":"OK","data":';
 		if($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idGrupo'].'",';
-			$result .= '"descripcion":"'.$row['descripcion'].'"';
+			$result .= '{"id":"'.$row['idgrupo'].'",';
+			$result .= '"descripcion":"'.$row['grupo_nombre'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -39,5 +39,40 @@ function getGrupo($id) {
 	}
 	
 	return $result;
+}
+
+function putGrupo() {
+	global $conn;
+
+	$response = "";
+	$descripcion = chequearCampo($_POST['descripcion']);
+	
+	$query = "INSERT INTO grupo (grupo_nombre) VALUES ('$descripcion')";
+	$result = mysql_query($query, $conn);
+	if(!$result) {
+		$response = '{"status":"error","data":"'.mysql_error().'"}';
+	} else {
+		$response = '{"status":"OK","data":"El grupo ha sido creado."}';
+	}
+
+	return $response;
+}
+
+function updateGrupo() {
+	global $conn;
+
+	$response = "";
+	$id = chequearCampo($_POST['id']);
+	$descripcion = chequearCampo($_POST['descripcion']);
+
+	$query = "UPDATE grupo SET grupo_nombre='$descripcion' WHERE idgrupo = ".$id;
+	$result = mysql_query($query, $conn);
+	if(!$result) {
+		$response = '{"status":"error","data":"'.mysql_error().'"}';
+	} else {
+		$response = '{"status":"OK","data":"El grupo ha sido actualizado."}';
+	}
+
+	return $response;
 }
 ?>

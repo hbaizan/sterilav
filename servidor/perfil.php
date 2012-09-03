@@ -10,8 +10,8 @@ function listaPerfiles() {
 	} else {
 		$result = '{"status":"OK","data":[';
 		while($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idPerfil'].'",';
-			$result .= '"descripcion":"'.$row['descripcion'].'"';
+			$result .= '{"id":"'.$row['idperfil'].'",';
+			$result .= '"descripcion":"'.$row['perfil_nombre'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -23,19 +23,19 @@ function listaPerfiles() {
 
 function listaPermisos($id) {
 	global $conn, $tabla;
-	$query = "SELECT * FROM grupopantallas";
+	$query = "SELECT * FROM grupopantalla";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
 	if(mysql_num_rows($recordset)>0) {
 		$result = '{"status":"OK","data":[';
 		while($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"grupo":"'.$row['nombre'].'","pantallas":[';
-			$query2 = "SELECT * FROM perfilpermiso,pantallas WHERE perfilpermiso.idPantalla=pantallas.idPantalla AND idPerfil = ".$id. " AND idGrupo = ".$row['idPantalla'];
+			$result .= '{"grupo":"'.$row['nombre'].'","aplicaciones":[';
+			$query2 = "SELECT * FROM permiso,aplicacion WHERE aplicacion_idaplicacion=idaplicacion AND perfil_idperfil = ".$id. " AND grupo_idgrupopantalla = ".$row['idgrupopantalla'];
 			$recordset2 = mysql_query($query2, $conn) or die(mysql_error());
 			while($row2 = mysql_fetch_assoc($recordset2)) {
-				$result .= '{"id":"'.$row2['idPantalla'].'",';
-				$result .= '"pantalla":"'.$row2['nombre'].'",';
-				$result .= '"aplicacion":"'.$row2['aplicacion'].'"';
+				$result .= '{"id":"'.$row2['aplicacion_idaplicacion'].'",';
+				$result .= '"pantalla":"'.$row2['descripcion'].'",';
+				$result .= '"aplicacion":"'.$row2['link_aplicacion'].'"';
 				$result .= '},';
 			}
 			if(mysql_num_rows($recordset2)>0) {
@@ -54,7 +54,7 @@ function listaPermisos($id) {
 
 function getPerfil($id) {
 	global $conn, $tabla;
-	$query = "SELECT * FROM perfil WHERE idPerfil = ".$id;
+	$query = "SELECT * FROM perfil WHERE idperfil = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -63,8 +63,8 @@ function getPerfil($id) {
 	} else {
 		$result = '{"status":"OK","data":';
 		if($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idPerfil'].'",';
-			$result .= '"descripcion":"'.$row['descripcion'].'"';
+			$result .= '{"id":"'.$row['idperfil'].'",';
+			$result .= '"descripcion":"'.$row['perfil_nombre'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
