@@ -95,6 +95,7 @@
 		};
 		
 		self.nuevo = function() {
+			amplify.store.sessionStorage("sterilav.productoEditado", null);
 			$("#container").load("./cliente/paginas/producto.html");		
 		};
 		

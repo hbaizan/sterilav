@@ -1,8 +1,8 @@
 <div class="row">
-	<div class="well span6" id="listaUsuarioForm">
-		<h4>Listado de Personas</h4>
+	<div class="well span6" id="listaDepositoForm">
+		<h4>Listado de Depositos</h4>
 		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
-			<h4 class="alert-heading">Problema al obtener las Personas.</h4>
+			<h4 class="alert-heading">Problema al obtener los Depositos.</h4>
 			<span data-bind="html: mensajeError"></span>
 		</div>	
 		<table data-bind="visible: !mostrarError()" class="table table-striped table-bordered">
@@ -10,9 +10,9 @@
 				<tr>
 					<th>ID</th>
 					<th>Nombre</th>
-					<th>Apellido</th>
-					<th>Usuario</th>
-					<th>Perfil</th>
+					<th>Capita</th>
+					<th>Faltante</th>
+					<th>Empresa</th>
 					<th data-bind="visible: isAdmin">Acciones</th>
 				</tr>
 			</thead>
@@ -21,18 +21,18 @@
 					<td colspan="5">Cargando <img class="icon-refresh" /></td>
 				</tr>
 			</tbody>
-			<tbody data-bind="visible: usuarios().length == 0 && !cargando()">
+			<tbody data-bind="visible: depositos().length == 0 && !cargando()">
 				<tr>
-					<td colspan="5">No hay Personas en el sistema.</td>
+					<td colspan="5">No hay Depositos en el sistema.</td>
 				</tr>
 			</tbody>		
-			<tbody data-bind="foreach: usuarios(), visible: usuarios().length > 0 && !cargando()">
+			<tbody data-bind="foreach: depositos(), visible: depositos().length > 0 && !cargando()">
 				<tr>
 					<td data-bind="text: id"></td>
 					<td data-bind="text: nombre"></td>
-					<td data-bind="text: apellido"></td>
-					<td data-bind="text: usuario"></td>
-					<td data-bind="text: perfil"></td>
+					<td data-bind="text: capita"></td>
+					<td data-bind="text: faltante"></td>
+					<td data-bind="text: empresa"></td>
 					<td data-bind="visible: $parent.isAdmin"><a href="#" data-bind="click: $root.editar">Editar</a></td>
 				</tr>
 			</tbody>
@@ -46,13 +46,13 @@
 	</div>
 </div>
 <script language="javascript">
-	function ListaUsuario() {
+	function ListaDeposito() {
 		var self = this;
 
-		self.usuarios = ko.observableArray();
+		self.depositos = ko.observableArray();
 		self.cargando = ko.observable(true);
 		self.mostrarError = ko.observable(false);
-		self.mensajeError = ko.observable("Hubo un problema al buscar las Personas.");
+		self.mensajeError = ko.observable("Hubo un problema al buscar los Depositos.");
 		self.isAdmin = ko.computed(function() {
 			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
 		});
@@ -62,13 +62,13 @@
 			var exito = function(data) {
 				self.cargando(false);
 				for(i=0; i<data.data.length;i++) {
-					var newUsuario = new Usuario();
-					newUsuario.id = data.data[i].id;
-					newUsuario.nombre = data.data[i].nombre;
-					newUsuario.apellido = data.data[i].apellido;
-					newUsuario.usuario = data.data[i].usuario;
-					newUsuario.perfil = data.data[i].perfil;
-					self.usuarios.push(newUsuario);
+					var newDeposito = new Deposito();
+					newDeposito.id = data.data[i].id;
+					newDeposito.nombre = data.data[i].nombre;
+					newDeposito.faltante = data.data[i].faltante;
+					newDeposito.capita = data.data[i].capita;
+					newDeposito.empresa = data.data[i].empresa;
+					self.depositos.push(newDeposito);
 				}
 			};
 			var falla = function(data) {
@@ -79,7 +79,7 @@
 				self.mostrarError(true);
 			};		
 			$.ajax({
-				url:"./servidor/sterilav.php?op=listaUsuarios",
+				url:"./servidor/sterilav.php?op=listaDepositos",
 				success:exito,
 				error:falla,
 				type:"GET",
@@ -92,27 +92,27 @@
 		};
 		
 		self.nuevo = function() {
-			amplify.store.sessionStorage("sterilav.usuarioEditado", null);
-			$("#container").load("./cliente/paginas/usuario.html");		
+			amplify.store.sessionStorage("sterilav.depositoEditado", null);		
+			$("#container").load("./cliente/paginas/deposito.html");		
 		};
 		
-		self.editar = function(usuario) {
-			amplify.store.sessionStorage("sterilav.usuarioEditado", usuario.id);
-			$("#container").load("./cliente/paginas/usuario.html?id=" + usuario.id);
+		self.editar = function(deposito) {
+			amplify.store.sessionStorage("sterilav.depositoEditado", deposito.id);		
+			$("#container").load("./cliente/paginas/deposito.html?id=" + deposito.id);
 		};
 		
 		self.cargar();
 	};
 
-	function Usuario() {
+	function Deposito() {
 		var self = this;
 		self.id = "";
 		self.nombre = "";
-		self.apellido = "";
-		self.usuario = "";
-		self.perfil = "";
+		self.faltante = "";
+		self.capita = "";
+		self.empresa = "";
 	};
 
-	var usuarioModelo = new ListaUsuario();
-	ko.applyBindings(usuarioModelo, document.getElementById("listaUsuarioForm"));  
+	var depositoModelo = new ListaDeposito();
+	ko.applyBindings(depositoModelo, document.getElementById("listaDepositoForm"));  
 </script>

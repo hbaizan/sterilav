@@ -18,13 +18,6 @@
 				</div>
 			</div>
 			<div class="control-group">
-				<label class="control-label" for="inputLegajo">Legajo:</label>
-				<div class="controls" data-bind="validationElement: legajo">
-					<input type="text" id="inputLegajo" data-bind="value: legajo" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: legajo"></span>
-				</div>
-			</div>
-			<div class="control-group">
 				<label class="control-label" for="selectDepartamento">Departamento:</label>
 				<div class="controls" data-bind="validationElement: departamento">
 					<select id="selectDepartamento" data-bind="options: $root.departamentos, optionsText: 'descripcion', optionsValue: 'id', value: departamento" class="input-large"></select>
@@ -32,24 +25,10 @@
 				</div>
 			</div>
 			<div class="control-group">
-				<label class="control-label" for="inputCUIT">CUIT:</label>
-				<div class="controls" data-bind="validationElement: cuit">
-					<input type="text" id="inputCUIT" data-bind="value: cuit" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: cuit"></span>
-				</div>
-			</div>
-			<div class="control-group">
 				<label class="control-label" for="selectIVA">IVA:</label>
 				<div class="controls" data-bind="validationElement: iva">
 					<select id="selectIva" data-bind="options: $root.ivas, optionsText: 'descripcion', optionsValue: 'id', value: iva" class="input-large"></select>
 					<span class="help-block error" data-bind="validationMessage: iva"></span>
-				</div>
-			</div>
-			<div class="control-group">
-				<label class="control-label" for="inputPatente">Patente:</label>
-				<div class="controls" data-bind="validationElement: patente">
-					<input type="text" id="inputPatente" data-bind="value: patente" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: patente"></span>
 				</div>
 			</div>
 			<div class="control-group">
@@ -80,14 +59,14 @@
 				</div>
 			</div>
 			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
-				<h4 class="alert-heading">Fix the form!</h4>
-				There are some invalid values in the form. Please correct them before saving.
+				<h4 class="alert-heading">Error en el formulario!</h4>
+				Hay valores invalidos en el formulario.
 			</div>
 			<div data-bind="visible: $root.mostrarFormError" class="alert alert-error">
 				<span data-bind="text: $root.formErrorMensaje"></span>
 			</div>			
 			<div class="form-actions">
-				<button id="registro" class="btn btn-primary" data-bind="click: $root.registro">Registrar</button>
+				<button id="registro" class="btn btn-primary" data-bind="click: $root.registro">Salvar</button>
 				<button id="registro" class="btn" data-bind="click: $root.volver">Cancelar</button>
 			</div>
 		</fieldset>
@@ -167,11 +146,8 @@
 					self.usuarioNuevo().usuario(data.data.usuario);
 					self.usuarioNuevo().password(data.data.password);
 					self.usuarioNuevo().repite(data.data.password);
-					self.usuarioNuevo().legajo(data.data.legajo);
 					self.usuarioNuevo().departamento(data.data.departamento);
 					self.usuarioNuevo().iva(data.data.iva);
-					self.usuarioNuevo().cuit(data.data.cuit);
-					self.usuarioNuevo().patente(data.data.patente);
 					self.usuarioNuevo().perfil(data.data.perfil);
 				}
 			};
@@ -213,11 +189,8 @@
 				usuario: self.usuarioNuevo().usuario(),
 				perfil: self.usuarioNuevo().perfil(),
 				password: self.usuarioNuevo().password(),
-				legajo: self.usuarioNuevo().legajo(),
 				departamento: self.usuarioNuevo().departamento(),
-				iva: self.usuarioNuevo().iva(),
-				cuit: self.usuarioNuevo().cuit(),
-				patente: self.usuarioNuevo().patente()
+				iva: self.usuarioNuevo().iva()
 			};
 			var url = "";
 			if(amplify.store.sessionStorage("sterilav.usuarioEditado")) {
@@ -253,11 +226,8 @@
 		self.usuario = ko.observable().extend({required: true});
 		self.perfil = ko.observable().extend({required: true});
 		self.password = ko.observable().extend({required: true});
-		self.legajo = ko.observable().extend({required: true});
 		self.departamento = ko.observable().extend({required: true});
 		self.iva = ko.observable().extend({required: true});
-		self.cuit = ko.observable().extend({required: true});
-		self.patente = ko.observable();
 		self.repite = ko.observable();		
 	};
 	

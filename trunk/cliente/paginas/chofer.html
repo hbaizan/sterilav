@@ -1,0 +1,132 @@
+<div class="row" id="choferForm">
+	<div class="span5 well">
+		<h4 data-bind="text: title">Chofer</h4>	
+		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
+		<fieldset data-bind="with: choferNuevo">
+			<div class="control-group">
+				<label class="control-label" for="inputNombre">Nombre:</label>
+				<div class="controls" data-bind="validationElement: nombre">
+					<input type="text" id="inputNombre" data-bind="value: nombre" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: nombre"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputApellido">Apellido:</label>
+				<div class="controls" data-bind="validationElement: apellido">
+					<input type="text" id="inputApellido" data-bind="value: apellido" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: apellido"></span>
+				</div>
+			</div>
+			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
+				<h4 class="alert-heading">Error en el formulario!</h4>
+				Hay valores invalidos en el formulario.
+			</div>
+			<div data-bind="visible: $root.mostrarFormError" class="alert alert-error">
+				<span data-bind="text: $root.formErrorMensaje"></span>
+			</div>			
+			<div class="form-actions">
+				<button id="registro" class="btn btn-primary" data-bind="click: $root.registro">Salvar</button>
+				<button id="registro" class="btn" data-bind="click: $root.volver">Cancelar</button>
+			</div>
+		</fieldset>
+		</form>
+		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
+			<span data-bind="text: successMensaje"></span>
+		</div>
+		<div data-bind="visible: mostrarError" class="alert alert-error">
+			<span data-bind="text: errorMensaje"></span>
+		</div>		
+	</div>
+</div>
+<script language="javascript">
+	function NuevoChofer() {
+		var self = this;
+
+		self.title = ko.observable("Administrar Chofer");
+		self.mostrarForm = ko.observable(true);
+		self.mostrarSuccess = ko.observable(false);
+		self.successMensaje = ko.observable("");
+		self.mostrarError = ko.observable(false);
+		self.errorMensaje = ko.observable("");
+		self.mostrarFormError = ko.observable(false);
+		self.formErrorMensaje = ko.observable("");
+
+		self.choferNuevo = ko.validatedObservable(new CChofer());		
+				
+		self.cargar = function() {
+			var exito = function(data) {
+				if(data.status != "OK") {
+				} else {
+					self.choferNuevo().nombre(data.data.nombre);
+					self.choferNuevo().apellido(data.data.apellido);
+				}
+			};
+			var falla = function(data) {
+			};
+			getData("./servidor/sterilav.php?op=getChofer&id=" + amplify.store.sessionStorage("sterilav.choferEditado"),exito,falla);
+		};
+		
+		self.registro = function() {
+			self.choferNuevo().errors.showAllMessages(true);
+			if (!self.choferNuevo().isValid()) {
+				return;
+			}
+			//Guardar en la base de datos
+			self.mostrarFormError(false);
+			var exito = function(data) {
+				if(data.status != "OK") {
+					$("#errorMsg").show();
+					$("#errorMsg").append(data.data);
+				} else {
+					self.mostrarForm(false);
+					self.successMensaje("El chofer se actualizó correctamente.");
+					self.mostrarSuccess(true);
+					amplify.store.sessionStorage("sterilav.choferEditado", null);
+				}
+			};
+			var falla = function(data) {
+				if(data.data) {
+					self.formErrorMensaje(data.data);
+				} else {
+					self.formErrorMensaje("Hubo un error tratando de actualizar el chofer.");
+				}
+				self.mostrarFormError(true);				
+			};
+			var choferCreado = {
+				id: amplify.store.sessionStorage("sterilav.choferEditado"),
+				nombre: self.choferNuevo().nombre(),
+				apellido: self.choferNuevo().apellido()
+			};
+			var url = "";
+			if(amplify.store.sessionStorage("sterilav.choferEditado")) {
+				url = "./servidor/sterilav.php?op=updateChofer";
+			} else {
+				url = "./servidor/sterilav.php?op=putChofer";
+			}
+			postData(url,exito,falla,choferCreado);
+		};
+
+		self.ingreso = function() {
+			$("#container").load("./cliente/paginas/login.html");
+		};
+		self.volver = function() {
+			amplify.store.sessionStorage("sterilav.choferEditado", null);
+			window.location.href = "./index.html";
+		};
+		
+		if(amplify.store.sessionStorage("sterilav.choferEditado")) {
+			self.cargar();
+		}
+	};
+
+	function CChofer() {
+		var self = this;
+		
+		self.id = ko.observable();
+		self.nombre = ko.observable().extend({required: true});
+		self.apellido = ko.observable().extend({required: true});
+	};
+	
+	var choferModelo = new NuevoChofer();
+	ko.applyBindings(choferModelo, document.getElementById("choferForm"));  	
+</script>
