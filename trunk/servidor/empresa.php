@@ -1,47 +1,28 @@
-<?php require_once('./db.php');
-
-mysql_select_db($database_conn, $conn);
-
-switch($_GET['op']) {
-	case "listaEmpresas":
-		echo listaEmpresas();
-		break;
-	case "getEmpresa":
-		echo getEmpresa($_GET['id']);
-		break;
-	case "putEmpresa":
-		echo putEmpresa();
-		break;
-	case "updateEmpresa":
-		echo updateEmpresa();
-		break;
-}
+<?php
 
 function listaEmpresas() {
 	global $conn;
 	$query = "SELECT * FROM empresa";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
-	if(mysql_num_rows($recordset)==0) {
-		$result = '{"status":"error","data":"No hay Empresas."}';
-	} else {
-		$result = '{"status":"OK","data":[';
-		while($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idEmpresa'].'",';
-			$result .= '"razonSocial":"'.$row['razonSocial'].'",';
-			$result .= '"cuit":"'.$row['cuit'].'"';
-			$result .= '},';
-		}
-		$result = substr($result, 0, strlen($result)-1);
-		$result .= ']}';
+	$result = '{"status":"OK","data":[';
+	while($row = mysql_fetch_assoc($recordset)) {
+		$result .= '{"id":"'.$row['idempresa'].'",';
+		$result .= '"razonSocial":"'.$row['empresa_razon_social'].'",';
+		$result .= '"cuit":"'.$row['empresa_cuit'].'"';
+		$result .= '},';
 	}
+	if(mysql_num_rows($recordset)>0) {
+		$result = substr($result, 0, strlen($result)-1);
+	}
+	$result .= ']}';
 	
 	return $result;
 }
 
 function getEmpresa($id) {
 	global $conn;
-	$query = "SELECT * FROM empresa WHERE idEmpresa = ".$id;
+	$query = "SELECT * FROM empresa WHERE idempresa = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -50,9 +31,9 @@ function getEmpresa($id) {
 	} else {
 		$result = '{"status":"OK","data":';
 		if($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idEmpresa'].'",';
-			$result .= '"razonSocial":"'.$row['razonSocial'].'",';
-			$result .= '"cuit":"'.$row['cuit'].'"';
+			$result .= '{"id":"'.$row['idempresa'].'",';
+			$result .= '"razonSocial":"'.$row['empresa_razon_social'].'",';
+			$result .= '"cuit":"'.$row['empresa_cuit'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -65,45 +46,38 @@ function getEmpresa($id) {
 function putEmpresa() {
 	global $conn;
 
-	var response = "";
+	$response = "";
 	$razonSocial = chequearCampo($_POST['razonSocial']);
 	$cuit = chequearCampo($_POST['cuit']);
 	
-	$query = "INSERT INTO empresa (razonSocial,cuit) VALUES ('$razonSocial','$cuit')";
+	$query = "INSERT INTO empresa (empresa_razon_social,empresa_cuit) VALUES ('$razonSocial','$cuit')";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
-		response = '{"status":"error","data":"'.mysql_error().'"}';
+		$response = '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		response = '{"status":"OK","data":"La empresa ha sido creada."}';
+		$response = '{"status":"OK","data":"La empresa ha sido creada."}';
 	}
 
-	return response;
+	return $response;
 }
 
 function updateEmpresa() {
 	global $conn;
 
-	var response = "";
+	$response = "";
 	$id = chequearCampo($_POST['id']);
 	$razonSocial = chequearCampo($_POST['razonSocial']);
 	$cuit = chequearCampo($_POST['cuit']);
 
-	$query = "UPDATE empresa SET razonSocial='$razonSocial',cuit='$cuit' WHERE idEmpresa = ".$id;
+	$query = "UPDATE empresa SET empresa_razon_social='$razonSocial',empresa_cuit='$cuit' WHERE idempresa = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
-		response = '{"status":"error","data":"'.mysql_error().'"}';
+		$response = '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		response = '{"status":"OK","data":"La empresa ha sido actualizada."}';
+		$response = '{"status":"OK","data":"La empresa ha sido actualizada."}';
 	}
 
-	return response;
+	return $response;
 }
 
-function chequearCampo($campo) {
-	if(!isset($campo) || $campo=="") {
-		echo '{"status":"error","data":"El campo '.$campo.' no puede estar vacio"}';
-		exit();
-	}
-	return $campo;
-}
 ?>

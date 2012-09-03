@@ -1,21 +1,4 @@
-<?php require_once('./db.php');
-
-mysql_select_db($database_conn, $conn);
-
-switch($_GET['op']) {
-	case "listaChoferes":
-		echo listaChoferes();
-		break;
-	case "getChofer":
-		echo getChofer($_GET['id']);
-		break;
-	case "putChofer":
-		echo putChofer();
-		break;
-	case "updateChofer":
-		echo updateChofer();
-		break;
-}
+<?php
 
 function listaChoferes() {
 	global $conn;
@@ -27,9 +10,9 @@ function listaChoferes() {
 	} else {
 		$result = '{"status":"OK","data":[';
 		while($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idChofer'].'",';
-			$result .= '"nombre":"'.$row['nombre'].'",';
-			$result .= '"apellido":"'.$row['apellido'].'"';
+			$result .= '{"id":"'.$row['idchofer'].'",';
+			$result .= '"nombre":"'.$row['chofer_nombre'].'",';
+			$result .= '"apellido":"'.$row['chofer_apellido'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -41,7 +24,7 @@ function listaChoferes() {
 
 function getChofer($id) {
 	global $conn;
-	$query = "SELECT * FROM chofer WHERE idChofer = ".$id;
+	$query = "SELECT * FROM chofer WHERE idchofer = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -50,9 +33,9 @@ function getChofer($id) {
 	} else {
 		$result = '{"status":"OK","data":';
 		if($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idChofer'].'",';
-			$result .= '"nombre":"'.$row['nombre'].'",';
-			$result .= '"apellido":"'.$row['apellido'].'"';
+			$result .= '{"id":"'.$row['idchofer'].'",';
+			$result .= '"nombre":"'.$row['chofer_nombre'].'",';
+			$result .= '"apellido":"'.$row['chofer_apellido'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -65,45 +48,38 @@ function getChofer($id) {
 function putChofer() {
 	global $conn;
 
-	var response = "";
+	$response = "";
 	$nombre = chequearCampo($_POST['nombre']);
 	$apellido = chequearCampo($_POST['apellido']);
 	
-	$query = "INSERT INTO chofer (nombre,apellido) VALUES ('$nombre','$apellido')";
+	$query = "INSERT INTO chofer (chofer_nombre,chofer_apellido) VALUES ('$nombre','$apellido')";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
-		response = '{"status":"error","data":"'.mysql_error().'"}';
+		$response = '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		response = '{"status":"OK","data":"El chofer ha sido creado."}';
+		$response = '{"status":"OK","data":"El chofer ha sido creado."}';
 	}
 
-	return response;
+	return $response;
 }
 
 function updateChofer() {
 	global $conn;
 
-	var response = "";
+	$response = "";
 	$id = chequearCampo($_POST['id']);
 	$nombre = chequearCampo($_POST['nombre']);
 	$apellido = chequearCampo($_POST['apellido']);
 
-	$query = "UPDATE chofer SET nombre='$nombre',apellido='$apellido' WHERE idChofer = ".$id;
+	$query = "UPDATE chofer SET chofer_nombre='$nombre',chofer_apellido='$apellido' WHERE idchofer = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
-		response = '{"status":"error","data":"'.mysql_error().'"}';
+		$response = '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		response = '{"status":"OK","data":"El chofer ha sido actualizado."}';
+		$response = '{"status":"OK","data":"El chofer ha sido actualizado."}';
 	}
 
-	return response;
+	return $response;
 }
 
-function chequearCampo($campo) {
-	if(!isset($campo) || $campo=="") {
-		echo '{"status":"error","data":"El campo '.$campo.' no puede estar vacio"}';
-		exit();
-	}
-	return $campo;
-}
 ?>

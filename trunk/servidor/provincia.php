@@ -1,21 +1,4 @@
-<?php require_once('./db.php');
-
-mysql_select_db($database_conn, $conn);
-
-switch($_GET['op']) {
-	case "listaProvincias":
-		echo listaProvincias();
-		break;
-	case "getProvincia":
-		echo getProvincia($_GET['id']);
-		break;
-	case "putProvincia":
-		echo putProvincia();
-		break;
-	case "updateProvincia":
-		echo updateProvincia();
-		break;
-}
+<?php
 
 function listaProvincias() {
 	global $conn;
@@ -27,8 +10,8 @@ function listaProvincias() {
 	} else {
 		$result = '{"status":"OK","data":[';
 		while($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idProvincia'].'",';
-			$result .= '"descripcion":"'.$row['descripcion'].'"';
+			$result .= '{"id":"'.$row['idprovincia'].'",';
+			$result .= '"descripcion":"'.$row['nombre'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -40,7 +23,7 @@ function listaProvincias() {
 
 function getProvincia($id) {
 	global $conn;
-	$query = "SELECT * FROM provincia WHERE idProvincia = ".$id;
+	$query = "SELECT * FROM provincia WHERE idprovincia = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -49,8 +32,8 @@ function getProvincia($id) {
 	} else {
 		$result = '{"status":"OK","data":';
 		if($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idProvincia'].'",';
-			$result .= '"descripcion":"'.$row['descripcion'].'"';
+			$result .= '{"id":"'.$row['idprovincia'].'",';
+			$result .= '"descripcion":"'.$row['nombre'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -63,43 +46,36 @@ function getProvincia($id) {
 function putProvincia() {
 	global $conn;
 
-	var response = "";
+	$response = "";
 	$descripcion = chequearCampo($_POST['descripcion']);
 	
-	$query = "INSERT INTO provincia (descripcion) VALUES ('$descripcion')";
+	$query = "INSERT INTO provincia (nombre) VALUES ('$descripcion')";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
-		response = '{"status":"error","data":"'.mysql_error().'"}';
+		$response = '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		response = '{"status":"OK","data":"La provincia ha sido creada."}';
+		$response = '{"status":"OK","data":"La provincia ha sido creada."}';
 	}
 
-	return response;
+	return $response;
 }
 
 function updateProvincia() {
 	global $conn;
 
-	var response = "";
+	$response = "";
 	$id = chequearCampo($_POST['id']);
 	$descripcion = chequearCampo($_POST['descripcion']);
 
-	$query = "UPDATE provincia SET descripcion='$descripcion' WHERE idProvincia = ".$id;
+	$query = "UPDATE provincia SET nombre='$descripcion' WHERE idprovincia = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
-		response = '{"status":"error","data":"'.mysql_error().'"}';
+		$response = '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		response = '{"status":"OK","data":"La provincia ha sido actualizada."}';
+		$response = '{"status":"OK","data":"La provincia ha sido actualizada."}';
 	}
 
-	return response;
+	return $response;
 }
 
-function chequearCampo($campo) {
-	if(!isset($campo) || $campo=="") {
-		echo '{"status":"error","data":"El campo '.$campo.' no puede estar vacio"}';
-		exit();
-	}
-	return $campo;
-}
 ?>

@@ -10,9 +10,9 @@ function listaDepartamentos() {
 	} else {
 		$result = '{"status":"OK","data":[';
 		while($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idDepartamento'].'",';
-			$result .= '"idProvincia":"'.$row['idProvincia'].'",';
-			$result .= '"descripcion":"'.$row['descripcion'].'"';
+			$result .= '{"id":"'.$row['iddepartamento'].'",';
+			$result .= '"idProvincia":"'.$row['provincia_idprovincia'].'",';
+			$result .= '"descripcion":"'.$row['departamento_nombre'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -24,7 +24,7 @@ function listaDepartamentos() {
 
 function getDepartamento($id) {
 	global $conn, $tabla;
-	$query = "SELECT * FROM departamento WHERE idDepartamento = ".$id;
+	$query = "SELECT * FROM departamento WHERE iddepartamento = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -33,8 +33,9 @@ function getDepartamento($id) {
 	} else {
 		$result = '{"status":"OK","data":';
 		if($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idDepartamento'].'",';
-			$result .= '"descripcion":"'.$row['descripcion'].'"';
+			$result .= '{"id":"'.$row['iddepartamento'].'",';
+			$result .= '"descripcion":"'.$row['departamento_nombre'].'"';
+			$result .= '"provincia":"'.$row['provincia_idprovincia'].'"';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
