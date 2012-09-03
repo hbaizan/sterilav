@@ -1,0 +1,203 @@
+<div class="row" id="depositoForm">
+	<div class="span5 well">
+		<h4 data-bind="text: title">Deposito</h4>	
+		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
+		<fieldset data-bind="with: depositoNuevo">
+			<div class="control-group">
+				<label class="control-label" for="inputNombre">Nombre:</label>
+				<div class="controls" data-bind="validationElement: nombre">
+					<input type="text" id="inputNombre" data-bind="value: nombre" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: nombre"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputDomicilio">Domicilio:</label>
+				<div class="controls" data-bind="validationElement: domicilio">
+					<input type="text" id="inputDomicilio" data-bind="value: domicilio" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: domicilio"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="selectDepartamento">Departamento:</label>
+				<div class="controls" data-bind="validationElement: departamento">
+					<select id="selectDepartamento" data-bind="options: $root.departamentos, optionsText: 'descripcion', optionsValue: 'id', value: departamento" class="input-large"></select>
+					<span class="help-block error" data-bind="validationMessage: departamento"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="selectEmpresa">Empresa:</label>
+				<div class="controls" data-bind="validationElement: empresa">
+					<select id="selectEmpresa" data-bind="options: $root.empresas, optionsText: 'descripcion', optionsValue: 'id', value: empresa" class="input-large"></select>
+					<span class="help-block error" data-bind="validationMessage: empresa"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputFaltante">Faltante:</label>
+				<div class="controls" data-bind="validationElement: faltante">
+					<input type="text" id="inputFaltante" data-bind="value: faltante" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: faltante"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputCapita">Capita:</label>
+				<div class="controls" data-bind="validationElement: capita">
+					<input type="text" id="inputCapita" data-bind="value: capita" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: capita"></span>
+				</div>
+			</div>
+			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
+				<h4 class="alert-heading">Error en el formulario!</h4>
+				Hay valores invalidos en el formulario.
+			</div>
+			<div data-bind="visible: $root.mostrarFormError" class="alert alert-error">
+				<span data-bind="text: $root.formErrorMensaje"></span>
+			</div>			
+			<div class="form-actions">
+				<button id="registro" class="btn btn-primary" data-bind="click: $root.registro">Salvar</button>
+				<button id="registro" class="btn" data-bind="click: $root.volver">Cancelar</button>
+			</div>
+		</fieldset>
+		</form>
+		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
+			<span data-bind="text: successMensaje"></span>
+		</div>
+		<div data-bind="visible: mostrarError" class="alert alert-error">
+			<span data-bind="text: errorMensaje"></span>
+		</div>		
+	</div>
+</div>
+<script language="javascript">
+	function NuevoDeposito() {
+		var self = this;
+
+		self.title = ko.observable("Administrar Deposito");
+		self.mostrarForm = ko.observable(true);
+		self.mostrarSuccess = ko.observable(false);
+		self.successMensaje = ko.observable("");
+		self.mostrarError = ko.observable(false);
+		self.errorMensaje = ko.observable("");
+		self.mostrarFormError = ko.observable(false);
+		self.formErrorMensaje = ko.observable("");
+
+		self.depositoNuevo = ko.validatedObservable(new CDeposito());		
+		self.departamentos = ko.observableArray();
+		self.empresas = ko.observableArray();
+
+		self.cargaDepartamentos = function() {
+			var exitoDepartamento = function(departamentos) {
+				if(departamentos.status != "OK") {
+				} else {
+					for(var i=0; i< departamentos.data.length; i++) {
+						self.departamentos().push({id:departamentos.data[i].id, descripcion:departamentos.data[i].descripcion});
+					}
+				}
+			};
+			var fallaDepartamento = function(data) {
+			};
+			getDataSync("./servidor/sterilav.php?op=listaDepartamentos",exitoDepartamento,fallaDepartamento);
+		};
+		self.cargaEmpresas = function() {
+			var exitoEmpresa = function(empresas) {
+				if(empresas.status != "OK") {
+				} else {
+					for(var i=0; i< empresas.data.length; i++) {
+						self.empresas().push({id:empresas.data[i].id, descripcion:empresas.data[i].razonSocial});
+					}
+				}
+			};
+			var fallaEmpresa = function(data) {
+			};
+			getDataSync("./servidor/sterilav.php?op=listaEmpresas",exitoEmpresa,fallaEmpresa);
+		};
+				
+		self.cargar = function() {
+			var exito = function(data) {
+				if(data.status != "OK") {
+				} else {
+					self.depositoNuevo().nombre(data.data.nombre);
+					self.depositoNuevo().domicilio(data.data.domicilio);
+					self.depositoNuevo().faltante(data.data.faltante);
+					self.depositoNuevo().capita(data.data.capita);
+					self.depositoNuevo().departamento(data.data.departamento);
+					self.depositoNuevo().empresa(data.data.empresa);
+				}
+			};
+			var falla = function(data) {
+			};
+			getData("./servidor/sterilav.php?op=getDeposito&id=" + amplify.store.sessionStorage("sterilav.depositoEditado"),exito,falla);
+		};
+		
+		self.registro = function() {
+			self.depositoNuevo().errors.showAllMessages(true);
+			if (!self.depositoNuevo().isValid()) {
+				return;
+			}
+			//Guardar en la base de datos
+			self.mostrarFormError(false);
+			var exito = function(data) {
+				if(data.status != "OK") {
+					$("#errorMsg").show();
+					$("#errorMsg").append(data.data);
+				} else {
+					self.mostrarForm(false);
+					self.successMensaje("El deposito se actualizó correctamente.");
+					self.mostrarSuccess(true);
+					amplify.store.sessionStorage("sterilav.depositoEditado", null);
+				}
+			};
+			var falla = function(data) {
+				if(data.data) {
+					self.formErrorMensaje(data.data);
+				} else {
+					self.formErrorMensaje("Hubo un error tratando de actualizar el deposito.");
+				}
+				self.mostrarFormError(true);				
+			};
+			var depositoCreado = {
+				id: amplify.store.sessionStorage("sterilav.depositoEditado"),
+				nombre: self.depositoNuevo().nombre(),
+				domicilio: self.depositoNuevo().domicilio(),
+				faltante: self.depositoNuevo().faltante(),
+				capita: self.depositoNuevo().capita(),
+				departamento: self.depositoNuevo().departamento(),
+				empresa: self.depositoNuevo().empresa()
+			};
+			var url = "";
+			if(amplify.store.sessionStorage("sterilav.depositoEditado")) {
+				url = "./servidor/sterilav.php?op=updateDeposito";
+			} else {
+				url = "./servidor/sterilav.php?op=putDeposito";
+			}
+			postData(url,exito,falla,depositoCreado);
+		};
+
+		self.ingreso = function() {
+			$("#container").load("./cliente/paginas/login.html");
+		};
+		self.volver = function() {
+			amplify.store.sessionStorage("sterilav.depositoEditado", null);
+			window.location.href = "./index.html";
+		};
+		
+		self.cargaDepartamentos();
+		self.cargaEmpresas();
+		if(amplify.store.sessionStorage("sterilav.depositoEditado")) {
+			self.cargar();
+		}
+	};
+
+	function CDeposito() {
+		var self = this;
+		
+		self.id = ko.observable();
+		self.nombre = ko.observable().extend({required: true});
+		self.domicilio = ko.observable().extend({required: true});
+		self.faltante = ko.observable().extend({required: true});
+		self.capita = ko.observable().extend({required: true});
+		self.departamento = ko.observable().extend({required: true});
+		self.empresa = ko.observable().extend({required: true});		
+	};
+	
+	var depositoModelo = new NuevoDeposito();
+	ko.applyBindings(depositoModelo, document.getElementById("depositoForm"));  	
+</script>

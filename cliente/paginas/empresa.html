@@ -1,0 +1,134 @@
+<div class="row" id="empresaForm">
+	<div class="span5 well">
+		<h4 data-bind="text: title">Empresa</h4>	
+		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
+		<fieldset data-bind="with: empresaNuevo">
+			<div class="control-group">
+				<label class="control-label" for="inputRazonSocial">Razon Social:</label>
+				<div class="controls" data-bind="validationElement: razonSocial">
+					<input type="text" id="inputRazonSocial" data-bind="value: razonSocial" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: razonSocial"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="inputCUIT">CUIT:</label>
+				<div class="controls" data-bind="validationElement: cuit">
+					<input type="text" id="inputCUIT" data-bind="value: cuit" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: cuit"></span>
+				</div>
+			</div>
+			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
+				<h4 class="alert-heading">Error en el formulario!</h4>
+				Hay valores invalidos en el formulario.
+			</div>
+			<div data-bind="visible: $root.mostrarFormError" class="alert alert-error">
+				<span data-bind="text: $root.formErrorMensaje"></span>
+			</div>			
+			<div class="form-actions">
+				<button id="registro" class="btn btn-primary" data-bind="click: $root.registro">Salvar</button>
+				<button id="registro" class="btn" data-bind="click: $root.volver">Cancelar</button>
+			</div>
+		</fieldset>
+		</form>
+		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
+			<span data-bind="text: successMensaje"></span>
+		</div>
+		<div data-bind="visible: mostrarError" class="alert alert-error">
+			<span data-bind="text: errorMensaje"></span>
+		</div>		
+	</div>
+</div>
+<script language="javascript">
+	function NuevoEmpresa() {
+		var self = this;
+
+		self.title = ko.observable("Administrar Empresa");
+		self.mostrarForm = ko.observable(true);
+		self.mostrarSuccess = ko.observable(false);
+		self.successMensaje = ko.observable("");
+		self.mostrarError = ko.observable(false);
+		self.errorMensaje = ko.observable("");
+		self.mostrarFormError = ko.observable(false);
+		self.formErrorMensaje = ko.observable("");
+
+		self.empresaNuevo = ko.validatedObservable(new CEmpresa());		
+		self.perfiles = ko.observableArray();
+		self.ivas = ko.observableArray();
+				
+		self.cargar = function() {
+			var exito = function(data) {
+				if(data.status != "OK") {
+				} else {
+					self.empresaNuevo().razonSocial(data.data.razonSocial);
+					self.empresaNuevo().cuit(data.data.cuit);
+				}
+			};
+			var falla = function(data) {
+			};
+			getData("./servidor/sterilav.php?op=getEmpresa&id=" + amplify.store.sessionStorage("sterilav.empresaEditado"),exito,falla);
+		};
+		
+		self.registro = function() {
+			self.empresaNuevo().errors.showAllMessages(true);
+			if (!self.empresaNuevo().isValid()) {
+				return;
+			}
+			//Guardar en la base de datos
+			self.mostrarFormError(false);
+			var exito = function(data) {
+				if(data.status != "OK") {
+					$("#errorMsg").show();
+					$("#errorMsg").append(data.data);
+				} else {
+					self.mostrarForm(false);
+					self.successMensaje("La empresa se actualizó correctamente.");
+					self.mostrarSuccess(true);
+					amplify.store.sessionStorage("sterilav.empresaEditado", null);
+				}
+			};
+			var falla = function(data) {
+				if(data.data) {
+					self.formErrorMensaje(data.data);
+				} else {
+					self.formErrorMensaje("Hubo un error tratando de actualizar la empresa.");
+				}
+				self.mostrarFormError(true);				
+			};
+			var empresaCreado = {
+				id: amplify.store.sessionStorage("sterilav.empresaEditado"),
+				razonSocial: self.empresaNuevo().razonSocial(),
+				cuit: self.empresaNuevo().cuit()
+			};
+			var url = "";
+			if(amplify.store.sessionStorage("sterilav.empresaEditado")) {
+				url = "./servidor/sterilav.php?op=updateEmpresa";
+			} else {
+				url = "./servidor/sterilav.php?op=putEmpresa";
+			}
+			postData(url,exito,falla,empresaCreado);
+		};
+
+		self.ingreso = function() {
+			$("#container").load("./cliente/paginas/login.html");
+		};
+		self.volver = function() {
+			amplify.store.sessionStorage("sterilav.empresaEditado", null);
+			window.location.href = "./index.html";
+		};
+		
+		if(amplify.store.sessionStorage("sterilav.empresaEditado")) {
+			self.cargar();
+		}
+	};
+
+	function CEmpresa() {
+		var self = this;
+		
+		self.id = ko.observable();
+		self.razonSocial = ko.observable().extend({required: true});
+		self.cuit = ko.observable().extend({required: true});
+	};
+	
+	var empresaModelo = new NuevoEmpresa();
+	ko.applyBindings(empresaModelo, document.getElementById("empresaForm"));  	
+</script>

@@ -34,10 +34,10 @@ function Menu() {
 				for(var i=0; i< data.data.length; i++) {
 					var newGrupo = new Grupo();
 					newGrupo.nombre(data.data[i].grupo);
-					for(var j=0; j< data.data[i].pantallas.length; j++) {
+					for(var j=0; j< data.data[i].aplicaciones.length; j++) {
 						var newPantalla = new Pantalla();
-						newPantalla.pantalla = data.data[i].pantallas[j].pantalla;
-						newPantalla.aplicacion = data.data[i].pantallas[j].aplicacion;
+						newPantalla.pantalla = data.data[i].aplicaciones[j].pantalla;
+						newPantalla.aplicacion = data.data[i].aplicaciones[j].aplicacion;
 						newGrupo.pantallas().push(newPantalla);
 					}
 					self.permisos().push(newGrupo);

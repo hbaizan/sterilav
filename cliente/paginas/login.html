@@ -84,7 +84,7 @@
 				self.errorMsg(data.data);
 			};
 			$.ajax({
-				url:"../../servidor/usuario.php?op=validarUsuario&usuario="+self.usuario()+"&password="+self.password(),
+				url:"../../servidor/sterilav.php?op=validarUsuario&usuario="+self.usuario()+"&password="+self.password(),
 				async:false,
 				success:exito,
 				error:falla,

@@ -1,0 +1,122 @@
+<div class="row" id="grupoForm">
+	<div class="span5 well">
+		<h4 data-bind="text: title">Grupo</h4>	
+		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
+		<fieldset data-bind="with: grupoNuevo">
+			<div class="control-group">
+				<label class="control-label" for="inputDescripcion">Descripcion:</label>
+				<div class="controls" data-bind="validationElement: descripcion">
+					<input type="text" id="inputDescripcion" data-bind="value: descripcion" class="input-large">
+					<span class="help-block error" data-bind="validationMessage: descripcion"></span>
+				</div>
+			</div>
+			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
+				<h4 class="alert-heading">Error en el formulario!</h4>
+				Hay valores invalidos en el formulario.
+			</div>
+			<div data-bind="visible: $root.mostrarFormError" class="alert alert-error">
+				<span data-bind="text: $root.formErrorMensaje"></span>
+			</div>			
+			<div class="form-actions">
+				<button id="registro" class="btn btn-primary" data-bind="click: $root.registro">Salvar</button>
+				<button id="registro" class="btn" data-bind="click: $root.volver">Cancelar</button>
+			</div>
+		</fieldset>
+		</form>
+		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
+			<span data-bind="text: successMensaje"></span>
+		</div>
+		<div data-bind="visible: mostrarError" class="alert alert-error">
+			<span data-bind="text: errorMensaje"></span>
+		</div>		
+	</div>
+</div>
+<script language="javascript">
+	function NuevoGrupo() {
+		var self = this;
+
+		self.title = ko.observable("Administrar Grupo");
+		self.mostrarForm = ko.observable(true);
+		self.mostrarSuccess = ko.observable(false);
+		self.successMensaje = ko.observable("");
+		self.mostrarError = ko.observable(false);
+		self.errorMensaje = ko.observable("");
+		self.mostrarFormError = ko.observable(false);
+		self.formErrorMensaje = ko.observable("");
+
+		self.grupoNuevo = ko.validatedObservable(new CGrupo());		
+				
+		self.cargar = function() {
+			var exito = function(data) {
+				if(data.status != "OK") {
+				} else {
+					self.grupoNuevo().descripcion(data.data.descripcion);
+				}
+			};
+			var falla = function(data) {
+			};
+			getData("./servidor/sterilav.php?op=getGrupo&id=" + amplify.store.sessionStorage("sterilav.grupoEditado"),exito,falla);
+		};
+		
+		self.registro = function() {
+			self.grupoNuevo().errors.showAllMessages(true);
+			if (!self.grupoNuevo().isValid()) {
+				return;
+			}
+			//Guardar en la base de datos
+			self.mostrarFormError(false);
+			var exito = function(data) {
+				if(data.status != "OK") {
+					$("#errorMsg").show();
+					$("#errorMsg").append(data.data);
+				} else {
+					self.mostrarForm(false);
+					self.successMensaje("El grupo se actualizó correctamente.");
+					self.mostrarSuccess(true);
+					amplify.store.sessionStorage("sterilav.grupoEditado", null);
+				}
+			};
+			var falla = function(data) {
+				if(data.data) {
+					self.formErrorMensaje(data.data);
+				} else {
+					self.formErrorMensaje("Hubo un error tratando de actualizar el grupo.");
+				}
+				self.mostrarFormError(true);				
+			};
+			var grupoCreado = {
+				id: amplify.store.sessionStorage("sterilav.grupoEditado"),
+				descripcion: self.grupoNuevo().descripcion()
+			};
+			var url = "";
+			if(amplify.store.sessionStorage("sterilav.grupoEditado")) {
+				url = "./servidor/sterilav.php?op=updateGrupo";
+			} else {
+				url = "./servidor/sterilav.php?op=putGrupo";
+			}
+			postData(url,exito,falla,grupoCreado);
+		};
+
+		self.ingreso = function() {
+			$("#container").load("./cliente/paginas/login.html");
+		};
+		self.volver = function() {
+			amplify.store.sessionStorage("sterilav.grupoEditado", null);
+			window.location.href = "./index.html";
+		};
+		
+		if(amplify.store.sessionStorage("sterilav.grupoEditado")) {
+			self.cargar();
+		}
+	};
+
+	function CGrupo() {
+		var self = this;
+		
+		self.id = ko.observable();
+		self.descripcion = ko.observable().extend({required: true});
+	};
+	
+	var grupoModelo = new NuevoGrupo();
+	ko.applyBindings(grupoModelo, document.getElementById("grupoForm"));  	
+</script>
