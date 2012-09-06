@@ -1,0 +1,110 @@
+<div class="row">
+	<div class="well span6" id="listaRemitoForm">
+		<h4>Listado de Remitos</h4>
+		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
+			<h4 class="alert-heading">Problema al obtener los Remitos.</h4>
+			<span data-bind="html: mensajeError"></span>
+		</div>	
+		<table data-bind="visible: !mostrarError()" class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Fecha</th>
+					<th>Deposito</th>
+					<th data-bind="visible: isAdmin">Acciones</th>
+				</tr>
+			</thead>
+			<tbody data-bind="visible: cargando()">
+				<tr>
+					<td colspan="5">Cargando <img class="icon-refresh" /></td>
+				</tr>
+			</tbody>
+			<tbody data-bind="visible: remitos().length == 0 && !cargando()">
+				<tr>
+					<td colspan="5">No hay Remitos en el sistema.</td>
+				</tr>
+			</tbody>		
+			<tbody data-bind="foreach: remitos(), visible: remitos().length > 0 && !cargando()">
+				<tr>
+					<td data-bind="text: id"></td>
+					<td data-bind="text: fecha"></td>
+					<td data-bind="text: deposito"></td>
+					<td data-bind="visible: $parent.isAdmin"><a href="#" data-bind="click: $root.editar">Editar</a></td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="form-actions">
+			<div class="form-buttons-right">		
+				<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
+				<button id="volver" class="btn" data-bind="click: volver">Volver</button>
+			</div>
+		</div>
+	</div>
+</div>
+<script language="javascript">
+	function ListaRemito() {
+		var self = this;
+
+		self.remitos = ko.observableArray();
+		self.cargando = ko.observable(true);
+		self.mostrarError = ko.observable(false);
+		self.mensajeError = ko.observable("Hubo un problema al buscar los Remitos.");
+		self.isAdmin = ko.computed(function() {
+			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
+		});
+
+		self.cargar = function() {
+			//Llamar a la base de datos
+			var exito = function(data) {
+				self.cargando(false);
+				for(i=0; i<data.data.length;i++) {
+					var newRemito = new Remito();
+					newRemito.id = data.data[i].id;
+					newRemito.fecha = data.data[i].fecha;
+					newRemito.deposito = data.data[i].deposito;
+					self.remitos.push(newRemito);
+				}
+			};
+			var falla = function(data) {
+				self.cargando(false);
+				if (data) {
+					self.mensajeError(data.responseText);
+				}
+				self.mostrarError(true);
+			};		
+			$.ajax({
+				url:"./servidor/sterilav.php?op=listaRemitos",
+				success:exito,
+				error:falla,
+				type:"GET",
+				dataType:"json"
+			});
+		};
+
+		self.volver = function() {
+			window.location.href = "./index.html";
+		};
+		
+		self.nuevo = function() {
+			amplify.store.sessionStorage("sterilav.remitoEditado", null);		
+			$("#container").load("./cliente/paginas/remito.html");		
+		};
+		
+		self.editar = function(remito) {
+			amplify.store.sessionStorage("sterilav.remitoEditado", remito.id);		
+			$("#container").load("./cliente/paginas/remito.html?id=" + remito.id);
+		};
+		
+		self.cargar();
+	};
+
+	function Remito() {
+		var self = this;
+		self.id = "";
+		self.fecha = "";
+		self.deposito = "";
+	};
+
+	var remitoModelo = new ListaRemito();
+	ko.applyBindings(remitoModelo, document.getElementById("listaRemitoForm"));  
+</script>

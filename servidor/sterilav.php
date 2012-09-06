@@ -1,20 +1,33 @@
 <?php require_once('./db.php');
 require_once('./grupo.php');
 require_once('./perfil.php');
-require_once('./cliente.php');
 require_once('./producto.php');
 require_once('./usuario.php');
 require_once('./iva.php');
 require_once('./departamento.php');
 require_once('./provincia.php');
 require_once('./chofer.php');
+require_once('./deposito.php');
 require_once('./empresa.php');
 require_once('./vehiculo.php');
-require_once('./deposito.php');
+require_once('./remito.php');
 
 mysql_select_db($database_conn, $conn);
 
+if(!isset($_GET['op'])) {
+	echo "Operacion no permitida";
+	exit;
+}
 switch($_GET['op']) {
+	case "listaRemitos":
+		echo listaRemitos();
+		break;
+	case "putRemito":
+		echo putRemito();
+		break;
+	case "updateRemito":
+		echo updateRemito();
+		break;
 	case "listaGrupos":
 		echo listaGrupos();
 		break;
@@ -22,7 +35,7 @@ switch($_GET['op']) {
 		echo getGrupo($_GET['id']);
 		break;
 	case "putGrupo":
-		echo putGrupo($_GET['id']);
+		echo putGrupo();
 		break;
 	case "updateGrupo":
 		echo updateGrupo();
@@ -35,15 +48,6 @@ switch($_GET['op']) {
 		break;
 	case "getPerfil":
 		echo getPerfil($_GET['id']);
-		break;
-	case "listaClientes":
-		echo listaClientes();
-		break;
-	case "getCliente":
-		echo getCliente($_GET['id']);
-		break;
-	case "putCliente":
-		echo putCliente($_POST['cliente']);
 		break;
 	case "listaProductos":
 		echo listaProductos();
