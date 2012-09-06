@@ -86,7 +86,7 @@ function putUsuario() {
 	$departamento = chequearCampo($_POST['departamento']);
 	$iva = chequearCampo($_POST['iva']);
 	
-	$query = "INSERT INTO usuario (nombre, apellido, usuario, perfil_idperfil, clave, departamento_iddepartamento, iva_idiva) VALUES ('$nombre','$apellido','$usuario',$perfil,'$password', $departamento, $iva)";
+	$query = "INSERT INTO persona (nombre, apellido, usuario, perfil_idperfil, clave, departamento_iddepartamento, iva_idiva) VALUES ('$nombre','$apellido','$usuario',$perfil,'$password', $departamento, $iva)";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		return '{"status":"error","data":"'.mysql_error().'"}';
@@ -106,7 +106,7 @@ function updateUsuario() {
 	$password = chequearCampo($_POST['password']);
 	$departamento = chequearCampo($_POST['departamento']);
 	$iva = chequearCampo($_POST['iva']);
-	$query = "UPDATE usuario SET nombre='$nombre', apellido='$apellido', usuario='$usuario', perfil_idperfil=$perfil, clave='$password', departamento_iddepartamento=$departamento, iva_idiva=$iva WHERE idpersona = ".$id;
+	$query = "UPDATE persona SET nombre='$nombre', apellido='$apellido', usuario='$usuario', perfil_idperfil=$perfil, clave='$password', departamento_iddepartamento=$departamento, iva_idiva=$iva WHERE idpersona = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		return '{"status":"error","data":"'.mysql_error().'"}';

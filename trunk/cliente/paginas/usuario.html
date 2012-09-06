@@ -165,6 +165,7 @@
 			self.mostrarFormError(false);
 			var exito = function(data) {
 				if(data.status != "OK") {
+					$("#errorMsg").empty();
 					$("#errorMsg").show();
 					$("#errorMsg").append(data.data);
 				} else {
@@ -206,7 +207,7 @@
 		};
 		self.volver = function() {
 			amplify.store.sessionStorage("sterilav.usuarioEditado", null);
-			window.location.href = "./index.html";
+			window.location.href = "./Index.html";
 		};
 		
 		self.cargaPerfiles();

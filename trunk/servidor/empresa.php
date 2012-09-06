@@ -7,9 +7,14 @@ function listaEmpresas() {
 	
 	$result = '{"status":"OK","data":[';
 	while($row = mysql_fetch_assoc($recordset)) {
+		//$query2 = "SELECT * FROM deposito WHERE empresa_idempresa = ".$recordset['idempresa'];
+		//$recordset2 = mysql_query($query2, $conn) or die(mysql_error());
+
 		$result .= '{"id":"'.$row['idempresa'].'",';
 		$result .= '"razonSocial":"'.$row['empresa_razon_social'].'",';
-		$result .= '"cuit":"'.$row['empresa_cuit'].'"';
+		$result .= '"cuit":"'.$row['empresa_cuit'].'",';
+		$result .= '"depositos":'.listaDepositosPorEmpresa($row['idempresa']).'';
+		
 		$result .= '},';
 	}
 	if(mysql_num_rows($recordset)>0) {

@@ -1,7 +1,7 @@
 <?php
 
 function listaDepositos() {
-	global $conn, $tabla;
+	global $conn;
 	$query = "SELECT * FROM deposito,empresa WHERE empresa_idempresa=idempresa";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
@@ -21,6 +21,30 @@ function listaDepositos() {
 		$result = substr($result, 0, strlen($result)-1);
 	}
 	$result .= ']}';
+	
+	return $result;
+}
+
+function listaDepositosPorEmpresa($idempresa) {
+	global $conn;
+	$query = "SELECT * FROM deposito,departamento WHERE departamento_iddepartamento=iddepartamento AND empresa_idempresa=".$idempresa;
+	$recordset = mysql_query($query, $conn) or die(mysql_error());
+	
+	$result = '[';
+	while($row = mysql_fetch_assoc($recordset)) {
+		$result .= '{"id":"'.$row['iddeposito'].'",';
+		$result .= '"nombre":"'.$row['deposito_nombre'].'",';
+		$result .= '"domicilio":"'.$row['deposito_domicilio'].'",';
+		$result .= '"faltante":"'.$row['deposito_tiene_faltante'].'",';
+		$result .= '"capita":"'.$row['deposito_capita'].'",';
+		$result .= '"iddepartamento":"'.$row['departamento_iddepartamento'].'",';
+		$result .= '"departamento":"'.$row['departamento_nombre'].'"';
+		$result .= '},';
+	}
+	if(mysql_num_rows($recordset)>0) {
+		$result = substr($result, 0, strlen($result)-1);
+	}
+	$result .= ']';
 	
 	return $result;
 }
