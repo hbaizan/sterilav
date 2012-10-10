@@ -88,7 +88,7 @@ function putRemito() {
 }
 
 function updateRemito() {
-	/*global $conn;
+	global $conn;
 
 	$response = "";
 	$id = chequearCampo($_POST['id']);
@@ -107,7 +107,7 @@ function updateRemito() {
 		$response = '{"status":"OK","data":"El deposito ha sido actualizado."}';
 	}
 
-	return $response;*/
+	return $response;
 	return '{"status":"error","data":"operacion no soportada"}';
 }
 
