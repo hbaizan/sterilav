@@ -87,28 +87,60 @@ function putRemito() {
 	return $response;
 }
 
-  /*function updateRemito() {
+  function updateRemito() {
 	global $conn;
 
 	$response = "";
-	$id = chequearCampo($_POST['id']);
-	$nombre = chequearCampo($_POST['nombre']);
+	
+  $id = chequearCampo($_POST['id']);
+  
+  //información para el remito
+  $nombre = chequearCampo($_POST['nombre']);
 	$domicilio = chequearCampo($_POST['domicilio']);
 	$departamento = chequearCampo($_POST['departamento']);
 	$empresa = chequearCampo($_POST['empresa']);
 	$faltante = chequearCampo($_POST['faltante']);
 	$capita = chequearCampo($_POST['capita']);
-
+  
+  //información para remito TENGO QUE CARGAR LOS NOMBRES DE LOS CAMPOS QUE ESTAN EN REMITO.HTML DEL LADO DEL CLIENTE
+  $idpersona = chequearCampo($_POST['nombre']);
+	$iddeposito = chequearCampo($_POST['domicilio']);
+	$idchofer = chequearCampo($_POST['departamento']);
+	$idremitotipo = chequearCampo($_POST['empresa']);
+	$idvehiculo = chequearCampo($_POST['faltante']);
+	$rfecha = chequearCampo($_POST['capita']); 
+  $rhoraentrega = chequearCampo($_POST['capita']); 
+  $rhoraretiro = chequearCampo($_POST['capita']); 
+  $robservaciones = chequearCampo($_POST['capita']); 
+  
+  //update de remito_has_producto
+  $idremito = chequearCampo($_POST['nombre']);
+	$idproducto = chequearCampo($_POST['domicilio']);
+	$cantidadreal = chequearCampo($_POST['departamento']);
+	$cantidadfaltante = chequearCampo($_POST['empresa']);  
+  
+  // actualización de deposito  
 	$query = "UPDATE deposito SET deposito_nombre='$nombre', departamento_iddepartamento=$departamento, deposito_domicilio='$domicilio', empresa_idempresa='$empresa', deposito_tiene_faltante=$faltante, deposito_capita=$capita WHERE iddeposito = ".$id;
 	$result = mysql_query($query, $conn);
-	if(!$result) {
+    
+   //actualizacion del remito 
+  $queryrem = "UPDATE remito SET persona_idpersona=$idpersona, deposito_iddeposito=$iddeposito, chofer_idchofer=$idchofer, remito_tipo_idremito_tipo=$iremitotipo, vehiculo_idvehiculo=$idvehiculo, remito_fecha=$rfecha , remito_hora_entrega=$rhoraentrega, remito_hora_retiro=$rhoraretiro WHERE iddeposito = deposito_iddeposito";   
+  $resultrem = mysql_query($queryrem, $conn); 
+   
+    //actualizacion del remito_has_producto rhp
+  $queryrhp = "UPDATE remito_has_producto SET remito_idremito=$idremito, producto_idproducto=$idproducto, cantidad_real=$cantidadreal, cantidad_faltante=$cantidadfaltante WHERE idremito = idremito";   
+  $resultrhp = mysql_query($queryrhp, $conn); 
+
+
+
+   if(!$result and !$resultrem and !$resultrhp ) {
 		$response = '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		$response = '{"status":"OK","data":"El deposito ha sido actualizado."}';
+		$response = '{"status":"OK","data":"El remito ha sido actualizado."}';
 	}
 
 	return $response;
 	return '{"status":"error","data":"operacion no soportada"}';
-  }*/
+  }
 
 ?>
