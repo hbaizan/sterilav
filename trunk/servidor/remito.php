@@ -87,7 +87,7 @@ function putRemito() {
 	return $response;
 }
 
-function updateRemito() {
+  /*function updateRemito() {
 	global $conn;
 
 	$response = "";
@@ -109,6 +109,6 @@ function updateRemito() {
 
 	return $response;
 	return '{"status":"error","data":"operacion no soportada"}';
-}
+  }*/
 
 ?>
