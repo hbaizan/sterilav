@@ -1,22 +1,30 @@
 <div class="row" id="empresaForm">
 	<div class="span5 well">
-		<h4 data-bind="text: title">Empresa</h4>	
+		<h4 data-bind="text: title">Empresa</h4>
+		<hr>
 		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
 		<fieldset data-bind="with: empresaNuevo">
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: razonSocial">
 				<label class="control-label" for="inputRazonSocial">Razon Social:</label>
-				<div class="controls" data-bind="validationElement: razonSocial">
+				<div class="controls">
 					<input type="text" id="inputRazonSocial" data-bind="value: razonSocial" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: razonSocial"></span>
+					<span class="help-inline error" data-bind="validationMessage: razonSocial"></span>
 				</div>
 			</div>
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: cuit">
 				<label class="control-label" for="inputCUIT">CUIT:</label>
-				<div class="controls" data-bind="validationElement: cuit">
+				<div class="controls">
 					<input type="text" id="inputCUIT" data-bind="value: cuit" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: cuit"></span>
+					<span class="help-inline error" data-bind="validationMessage: cuit"></span>
 				</div>
 			</div>
+			<div class="control-group" data-bind="validationElement: iva">
+				<label class="control-label" for="selectIVA">IVA:</label>
+				<div class="controls">
+					<select id="selectIva" data-bind="options: $root.ivas, optionsText: 'descripcion', optionsValue: 'id', value: iva" class="input-large"></select>
+					<span class="help-inline error" data-bind="validationMessage: iva"></span>
+				</div>
+			</div>			
 			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
 				<h4 class="alert-heading">Error en el formulario!</h4>
 				Hay valores invalidos en el formulario.
@@ -31,7 +39,7 @@
 		</fieldset>
 		</form>
 		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
-			<span data-bind="text: successMensaje"></span>
+			<span data-bind="html: successMensaje"></span>
 		</div>
 		<div data-bind="visible: mostrarError" class="alert alert-error">
 			<span data-bind="text: errorMensaje"></span>
@@ -61,6 +69,7 @@
 				} else {
 					self.empresaNuevo().razonSocial(data.data.razonSocial);
 					self.empresaNuevo().cuit(data.data.cuit);
+					self.empresaNuevo().iva(data.data.iva);
 				}
 			};
 			var falla = function(data) {
@@ -81,7 +90,7 @@
 					$("#errorMsg").append(data.data);
 				} else {
 					self.mostrarForm(false);
-					self.successMensaje("La empresa se actualizó correctamente.");
+					self.successMensaje(data.data + "<br><a href='#' onclick='abrir();'>Volver</a>");
 					self.mostrarSuccess(true);
 					amplify.store.sessionStorage("sterilav.empresaEditado", null);
 				}
@@ -97,7 +106,8 @@
 			var empresaCreado = {
 				id: amplify.store.sessionStorage("sterilav.empresaEditado"),
 				razonSocial: self.empresaNuevo().razonSocial(),
-				cuit: self.empresaNuevo().cuit()
+				cuit: self.empresaNuevo().cuit(),
+				iva: self.empresaNuevo().iva()
 			};
 			var url = "";
 			if(amplify.store.sessionStorage("sterilav.empresaEditado")) {
@@ -113,12 +123,27 @@
 		};
 		self.volver = function() {
 			amplify.store.sessionStorage("sterilav.empresaEditado", null);
-			window.location.href = "./index.html";
+			window.location.href = "./Index.html";
 		};
 		
 		if(amplify.store.sessionStorage("sterilav.empresaEditado")) {
 			self.cargar();
 		}
+		self.cargaIvas = function() {
+			var exitoIva = function(ivas) {
+				if(ivas.status != "OK") {
+				} else {
+					for(var i=0; i< ivas.data.length; i++) {
+						self.ivas().push({id:ivas.data[i].id, descripcion:ivas.data[i].descripcion});
+					}
+				}
+			};
+			var fallaIva = function(data) {
+			};
+			getDataSync("./servidor/sterilav.php?op=listaIvas",exitoIva,fallaIva);
+		};
+		self.cargaIvas();
+		
 	};
 
 	function CEmpresa() {
@@ -127,7 +152,12 @@
 		self.id = ko.observable();
 		self.razonSocial = ko.observable().extend({required: true});
 		self.cuit = ko.observable().extend({required: true});
+		self.iva = ko.observable().extend({required: true});
 	};
+
+	function abrir() {
+		$("#container").load("./cliente/paginas/listaEmpresas.html");
+	}
 	
 	var empresaModelo = new NuevoEmpresa();
 	ko.applyBindings(empresaModelo, document.getElementById("empresaForm"));  	

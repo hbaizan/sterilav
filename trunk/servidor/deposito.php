@@ -2,7 +2,7 @@
 
 function listaDepositos() {
 	global $conn;
-	$query = "SELECT * FROM deposito,empresa WHERE empresa_idempresa=idempresa";
+	$query = "SELECT * FROM deposito,empresa WHERE empresa_idempresa=idempresa AND NOT deposito_inactivo=2";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
 	$result = '{"status":"OK","data":[';
@@ -10,11 +10,16 @@ function listaDepositos() {
 		$result .= '{"id":"'.$row['iddeposito'].'",';
 		$result .= '"nombre":"'.$row['deposito_nombre'].'",';
 		$result .= '"domicilio":"'.$row['deposito_domicilio'].'",';
-		$result .= '"faltante":"'.$row['deposito_tiene_faltante'].'",';
-		$result .= '"capita":"'.$row['deposito_capita'].'",';
 		$result .= '"departamento":"'.$row['departamento_iddepartamento'].'",';
 		$result .= '"idempresa":"'.$row['empresa_idempresa'].'",';
-		$result .= '"empresa":"'.$row['empresa_razon_social'].'"';
+		$result .= '"empresa":"'.$row['empresa_razon_social'].'",';
+		$result .= '"activo":"'.$row['deposito_inactivo'].'",';
+		$remito = json_decode(depositoTieneRemito($row['iddeposito']));
+		if($remito->data) {
+			$result .= '"remito":true';
+		} else {
+			$result .= '"remito":false';
+		}		
 		$result .= '},';
 	}
 	if(mysql_num_rows($recordset)>0) {
@@ -27,7 +32,7 @@ function listaDepositos() {
 
 function listaDepositosPorEmpresa($idempresa) {
 	global $conn;
-	$query = "SELECT * FROM deposito,departamento WHERE departamento_iddepartamento=iddepartamento AND empresa_idempresa=".$idempresa;
+	$query = "SELECT * FROM deposito,departamento,empresa WHERE empresa_idempresa=idempresa AND departamento_iddepartamento=iddepartamento AND deposito_inactivo=0 AND empresa_idempresa=".$idempresa;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
 	$result = '[';
@@ -35,10 +40,17 @@ function listaDepositosPorEmpresa($idempresa) {
 		$result .= '{"id":"'.$row['iddeposito'].'",';
 		$result .= '"nombre":"'.$row['deposito_nombre'].'",';
 		$result .= '"domicilio":"'.$row['deposito_domicilio'].'",';
-		$result .= '"faltante":"'.$row['deposito_tiene_faltante'].'",';
-		$result .= '"capita":"'.$row['deposito_capita'].'",';
 		$result .= '"iddepartamento":"'.$row['departamento_iddepartamento'].'",';
-		$result .= '"departamento":"'.$row['departamento_nombre'].'"';
+		$result .= '"departamento":"'.$row['departamento_nombre'].'",';
+		$result .= '"idempresa":"'.$row['empresa_idempresa'].'",';
+		$result .= '"empresa":"'.$row['empresa_razon_social'].'",';
+		$result .= '"activo":"'.$row['deposito_inactivo'].'",';
+		$remito = json_decode(depositoTieneRemito($row['iddeposito']));
+		if($remito->data) {
+			$result .= '"remito":true';
+		} else {
+			$result .= '"remito":false';
+		}		
 		$result .= '},';
 	}
 	if(mysql_num_rows($recordset)>0) {
@@ -51,7 +63,7 @@ function listaDepositosPorEmpresa($idempresa) {
 
 function getDeposito($id) {
 	global $conn;
-	$query = "SELECT * FROM deposito WHERE idDeposito = ".$id;
+	$query = "SELECT * FROM deposito,departamento WHERE iddepartamento=departamento_iddepartamento AND NOT deposito_inactivo=2 AND idDeposito = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -63,10 +75,17 @@ function getDeposito($id) {
 			$result .= '{"id":"'.$row['iddeposito'].'",';
 			$result .= '"nombre":"'.$row['deposito_nombre'].'",';
 			$result .= '"domicilio":"'.$row['deposito_domicilio'].'",';
-			$result .= '"faltante":"'.$row['deposito_tiene_faltante'].'",';
-			$result .= '"capita":"'.$row['deposito_capita'].'",';
-			$result .= '"departamento":"'.$row['departamento_iddepartamento'].'",';
-			$result .= '"empresa":"'.$row['empresa_idempresa'].'"';
+			$result .= '"iddepartamento":"'.$row['departamento_iddepartamento'].'",';
+			$result .= '"departamento":"'.$row['departamento_nombre'].'",';
+			$result .= '"empresa":"'.$row['empresa_idempresa'].'",';
+			$result .= '"activo":"'.$row['deposito_inactivo'].'",';
+			$result .= '"productos":'.listaProductosPorDeposito($row['iddeposito']).',';
+			$remito = json_decode(depositoTieneRemito($row['iddeposito']));
+			if($remito->data) {
+				$result .= '"remito":true';
+			} else {
+				$result .= '"remito":false';
+			}		
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -83,39 +102,94 @@ function putDeposito() {
 	$domicilio = chequearCampo($_POST['domicilio']);
 	$departamento = chequearCampo($_POST['departamento']);
 	$empresa = chequearCampo($_POST['empresa']);
-	$faltante = chequearCampo($_POST['faltante']);
-	$capita = chequearCampo($_POST['capita']);
+	if(!isset($_POST['productos']) || count($_POST['productos'])==0) {
+		return '{"status":"error","data":"El deposito debe tener al menos un producto asociado"}';			
+	}
+	$productos = chequearCampo($_POST['productos']);
 	
-	$query = "INSERT INTO deposito (deposito_nombre, deposito_domicilio, departamento_iddepartamento, empresa_idempresa, deposito_tiene_faltante, deposito_capita) VALUES ('$nombre','$domicilio', $departamento, $empresa, $faltante, $capita)";
+	$query = "INSERT INTO deposito (deposito_nombre, deposito_domicilio, departamento_iddepartamento, empresa_idempresa) VALUES ('$nombre','$domicilio', $departamento, $empresa)";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		return '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		return '{"status":"OK","data":"El deposito ha sido creado."}';
+		$id = mysql_insert_id();
+		for($i=0; $i<count($_POST['productos']); $i++) {
+			$linea = $_POST['productos'][$i];
+			$query2 = "INSERT INTO producto_has_deposito (producto_idproducto, deposito_iddeposito, cantidad_tope, deposito_capita, stock_inicial)";
+			$query2 .= "VALUES (".$linea["codigo"].", $id, ".$linea["faltante"].", ".$linea["capita"].", ".$linea["stock"].")";
+			$result2 = mysql_query($query2, $conn);
+			if(!$result2) {
+				return '{"status":"error","data":"'.mysql_error().'"}';
+			}
+		}
+		return '{"status":"OK","data":"El Deposito ha sido creado."}';
 	}
 }
 
 function updateDeposito() {
 	global $conn;
 
-	$response = "";
 	$id = chequearCampo($_POST['id']);
 	$nombre = chequearCampo($_POST['nombre']);
 	$domicilio = chequearCampo($_POST['domicilio']);
 	$departamento = chequearCampo($_POST['departamento']);
 	$empresa = chequearCampo($_POST['empresa']);
-	$faltante = chequearCampo($_POST['faltante']);
-	$capita = chequearCampo($_POST['capita']);
+	$inactivo = $_POST['activo'];
 
-	$query = "UPDATE deposito SET deposito_nombre='$nombre', departamento_iddepartamento=$departamento, deposito_domicilio='$domicilio', empresa_idempresa='$empresa', deposito_tiene_faltante=$faltante, deposito_capita=$capita WHERE iddeposito = ".$id;
+	$query = "UPDATE deposito SET deposito_nombre='$nombre', departamento_iddepartamento=$departamento, deposito_domicilio='$domicilio', empresa_idempresa='$empresa', deposito_inactivo=$inactivo WHERE iddeposito = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
-		$response = '{"status":"error","data":"'.mysql_error().'"}';
+		return '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		$response = '{"status":"OK","data":"El deposito ha sido actualizado."}';
+		$query2 = "DELETE FROM producto_has_deposito WHERE deposito_iddeposito=$id";
+		$result2 = mysql_query($query2, $conn);
+		if(!$result2) {
+			return '{"status":"error","data":"'.mysql_error().'"}';
+		}		
+		for($i=0; $i<count($_POST['productos']); $i++) {
+			$linea = $_POST['productos'][$i];
+			$query2 = "INSERT INTO producto_has_deposito (producto_idproducto, deposito_iddeposito, cantidad_tope, deposito_capita, stock_inicial)";
+			$query2 .= "VALUES (".$linea["codigo"].", $id, ".$linea["faltante"].", ".$linea["capita"].", ".$linea["stock"].")";
+			$result2 = mysql_query($query2, $conn);
+			if(!$result2) {
+				return '{"status":"error","data":"'.mysql_error().'"}';
+			}
+		}
+		return '{"status":"OK","data":"El Deposito ha sido actualizado."}';
 	}
+}
 
-	return $response;
+function borrarDeposito($id) {
+	global $conn;
+
+	$remito = json_decode(depositoTieneRemito($id));
+	if($remito->data) {
+		return '{"status":"error","data":"El Deposito tiene remitos asociados y no puede ser eliminado."}';
+		exit;
+	}
+	$query = "UPDATE deposito SET deposito_inactivo=2 WHERE iddeposito = ".$id;
+	$result = mysql_query($query, $conn);
+	if(!$result) {
+		return '{"status":"error","data":"'.mysql_error().'"}';
+	} else {
+		return '{"status":"OK","data":"El Deposito ha sido eliminado."}';
+	}
+}
+
+function depositoTieneRemito($id) {
+	global $conn;
+	
+	$query = "SELECT * FROM remito WHERE deposito_iddeposito=".$id;
+	$recordset = mysql_query($query, $conn);
+	if(!$recordset) {
+		return '{"status":"error","data":"'.mysql_error().'"}';
+	} else {
+		if(mysql_num_rows($recordset)==0) {
+			return '{"status":"OK","data":false}';
+		} else {
+			return '{"status":"OK","data":true}';
+		}
+	}
 }
 
 ?>

@@ -1,61 +1,68 @@
 <div class="row" id="registroForm">
 	<div class="span5 well">
-		<h4 data-bind="text: title">Usuario</h4>	
+		<h4 data-bind="text: title">Persona</h4>
+		<hr>
 		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
 		<fieldset data-bind="with: usuarioNuevo">
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: nombre">
 				<label class="control-label" for="inputNombre">Nombre:</label>
-				<div class="controls" data-bind="validationElement: nombre">
+				<div class="controls">
 					<input type="text" id="inputNombre" data-bind="value: nombre" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: nombre"></span>
+					<span class="help-inline error" data-bind="validationMessage: nombre"></span>
 				</div>
 			</div>
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: apellido">
 				<label class="control-label" for="inputApellido">Apellido:</label>
-				<div class="controls" data-bind="validationElement: apellido">
+				<div class="controls">
 					<input type="text" id="inputApellido" data-bind="value: apellido" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: apellido"></span>
+					<span class="help-inline error" data-bind="validationMessage: apellido"></span>
 				</div>
 			</div>
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: $root.provincia">
+				<label class="control-label" for="selectProvincia">Provincia:</label>
+				<div class="controls">
+					<select id="selectProvincia" data-bind="options: $root.provincias, optionsText: 'descripcion', value: $root.provincia" class="input-large"></select>
+					<span class="help-inline error" data-bind="validationMessage: $root.provincia"></span>
+				</div>
+			</div>
+			<div class="control-group" data-bind="validationElement: departamento">
 				<label class="control-label" for="selectDepartamento">Departamento:</label>
-				<div class="controls" data-bind="validationElement: departamento">
-					<select id="selectDepartamento" data-bind="options: $root.departamentos, optionsText: 'descripcion', optionsValue: 'id', value: departamento" class="input-large"></select>
-					<span class="help-block error" data-bind="validationMessage: departamento"></span>
+				<div class="controls">
+					<select id="selectDepartamento" data-bind="options: $root.provincia().departamentos, optionsText: 'descripcion', optionsValue: 'id', value: departamento" class="input-large"></select>
+					<span class="help-inline error" data-bind="validationMessage: departamento"></span>
 				</div>
 			</div>
-			<div class="control-group">
-				<label class="control-label" for="selectIVA">IVA:</label>
-				<div class="controls" data-bind="validationElement: iva">
-					<select id="selectIva" data-bind="options: $root.ivas, optionsText: 'descripcion', optionsValue: 'id', value: iva" class="input-large"></select>
-					<span class="help-block error" data-bind="validationMessage: iva"></span>
-				</div>
-			</div>
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: perfil">
 				<label class="control-label" for="selectPerfil">Perfil:</label>
-				<div class="controls" data-bind="validationElement: perfil">
+				<div class="controls">
 					<select id="selectPerfil" data-bind="options: $root.perfiles, optionsText: 'descripcion', optionsValue: 'id', value: perfil" class="input-large"></select>
-					<span class="help-block error" data-bind="validationMessage: perfil"></span>
+					<span class="help-inline error" data-bind="validationMessage: perfil"></span>
 				</div>
 			</div>
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: usuario">
 				<label class="control-label" for="inputUsuario">Usuario:</label>
-				<div class="controls" data-bind="validationElement: usuario">
+				<div class="controls">
 					<input type="text" id="inputUsuario" data-bind="value: usuario" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: usuario"></span>
+					<span class="help-inline error" data-bind="validationMessage: usuario"></span>
 				</div>
 			</div>
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: password">
 				<label class="control-label" for="inputPassword">Contrase&ntilde;a:</label>
-				<div class="controls" data-bind="validationElement: password">
+				<div class="controls">
 					<input type="password" id="inputPassword" data-bind="value: password" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: password"></span>
+					<span class="help-inline error" data-bind="validationMessage: password"></span>
 				</div>
 			</div>
 			<div class="control-group">
 				<label class="control-label" for="inputRepite">Repita la contrase&ntilde;a:</label>
 				<div class="controls">
 					<input type="password" id="inputRepite" data-bind="value: repite" class="input-large">
+				</div>
+			</div>
+			<div class="control-group" data-bind="visible: remito">
+				<label class="control-label" for="inputInactivo">Inactivo:</label>
+				<div class="controls">
+					<input type="checkbox" id="inputInactivo" class="input-large" data-bind="checked: activo">
 				</div>
 			</div>
 			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
@@ -72,7 +79,7 @@
 		</fieldset>
 		</form>
 		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
-			<span data-bind="text: successMensaje"></span>
+			<span data-bind="html: successMensaje"></span>
 		</div>
 		<div data-bind="visible: mostrarError" class="alert alert-error">
 			<span data-bind="text: errorMensaje"></span>
@@ -94,8 +101,8 @@
 
 		self.usuarioNuevo = ko.validatedObservable(new CUsuario());		
 		self.perfiles = ko.observableArray();
-		self.ivas = ko.observableArray();
-		self.departamentos = ko.observableArray();
+		self.provincias = ko.observableArray();
+		self.provincia = ko.observable().extend({required: true});
 
 		self.cargaPerfiles = function() {
 			var exitoPerfil = function(perfiles) {
@@ -110,31 +117,18 @@
 			};
 			getDataSync("./servidor/sterilav.php?op=listaPerfiles",exitoPerfil,fallaPerfil);
 		};
-		self.cargaIvas = function() {
-			var exitoIva = function(ivas) {
-				if(ivas.status != "OK") {
+		self.cargaProvincias = function() {
+			var exitoProvincia = function(provincias) {
+				if(provincias.status != "OK") {
 				} else {
-					for(var i=0; i< ivas.data.length; i++) {
-						self.ivas().push({id:ivas.data[i].id, descripcion:ivas.data[i].descripcion});
+					for(var i=0; i< provincias.data.length; i++) {
+						self.provincias().push(provincias.data[i]);
 					}
 				}
 			};
-			var fallaIva = function(data) {
+			var fallaProvincia = function(data) {
 			};
-			getDataSync("./servidor/sterilav.php?op=listaIvas",exitoIva,fallaIva);
-		};
-		self.cargaDepartamentos = function() {
-			var exitoDepartamento = function(departamentos) {
-				if(departamentos.status != "OK") {
-				} else {
-					for(var i=0; i< departamentos.data.length; i++) {
-						self.departamentos().push({id:departamentos.data[i].id, descripcion:departamentos.data[i].descripcion});
-					}
-				}
-			};
-			var fallaDepartamento = function(data) {
-			};
-			getDataSync("./servidor/sterilav.php?op=listaDepartamentos",exitoDepartamento,fallaDepartamento);
+			getDataSync("./servidor/sterilav.php?op=listaProvincias",exitoProvincia,fallaProvincia);
 		};
 				
 		self.cargar = function() {
@@ -147,8 +141,9 @@
 					self.usuarioNuevo().password(data.data.password);
 					self.usuarioNuevo().repite(data.data.password);
 					self.usuarioNuevo().departamento(data.data.departamento);
-					self.usuarioNuevo().iva(data.data.iva);
 					self.usuarioNuevo().perfil(data.data.perfil);
+					self.usuarioNuevo().remito(data.data.remito);
+					self.usuarioNuevo().activo((data.data.activo==1) ? true : false);
 				}
 			};
 			var falla = function(data) {
@@ -170,7 +165,7 @@
 					$("#errorMsg").append(data.data);
 				} else {
 					self.mostrarForm(false);
-					self.successMensaje("El usuario se actualizó correctamente.");
+					self.successMensaje(data.data + "<br><a href='#' onclick='abrir();'>Volver</a>");
 					self.mostrarSuccess(true);
 					amplify.store.sessionStorage("sterilav.usuarioEditado", null);
 				}
@@ -183,6 +178,7 @@
 				}
 				self.mostrarFormError(true);				
 			};
+			var isactivo = self.usuarioNuevo().activo() ? 1 : 0;
 			var usuarioCreado = {
 				id: amplify.store.sessionStorage("sterilav.usuarioEditado"),
 				nombre: self.usuarioNuevo().nombre(),
@@ -191,7 +187,8 @@
 				perfil: self.usuarioNuevo().perfil(),
 				password: self.usuarioNuevo().password(),
 				departamento: self.usuarioNuevo().departamento(),
-				iva: self.usuarioNuevo().iva()
+				remito: self.usuarioNuevo().remito(),
+				activo: isactivo
 			};
 			var url = "";
 			if(amplify.store.sessionStorage("sterilav.usuarioEditado")) {
@@ -211,8 +208,7 @@
 		};
 		
 		self.cargaPerfiles();
-		self.cargaIvas();
-		self.cargaDepartamentos();
+		self.cargaProvincias();
 		if(amplify.store.sessionStorage("sterilav.usuarioEditado")) {
 			self.cargar();
 		}
@@ -228,10 +224,15 @@
 		self.perfil = ko.observable().extend({required: true});
 		self.password = ko.observable().extend({required: true});
 		self.departamento = ko.observable().extend({required: true});
-		self.iva = ko.observable().extend({required: true});
+		self.remito = ko.observable(false).extend({required: true});
+		self.activo = ko.observable(false).extend({required: true});
 		self.repite = ko.observable();		
 	};
-	
+
+	function abrir() {
+		$("#container").load("./cliente/paginas/listaUsuarios.html");
+	}
+		
 	var usuarioModelo = new NuevoUsuario();
 	ko.applyBindings(usuarioModelo, document.getElementById("registroForm"));  	
 </script>

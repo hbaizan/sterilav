@@ -4,15 +4,18 @@ Pyramid.rootPath = './cliente/';
 Pyramid.newDependency({
     name: 'standard',
     files: [
-    'librerias/jquery-1.7.2.min.js',
-	 'librerias/knockout-2.1.0.js',
-	 'librerias/knockout.simpleGrid.js',	 
-	 'librerias/knockout.validation.v0.9.js',
-	 'librerias/bootstrap.js',
-	 'librerias/bootstrap-tab.js',
-	 'librerias/bootstrap-collapse.js',
-	 'librerias/amplify.js',
-	 'librerias/sterilav.js'
+    'librerias/jquery-1.8.2.js',
+	'librerias/jquery-ui.js',
+	'librerias/knockout-2.1.0.js',
+	'librerias/knockout.simpleGrid.js',	 
+	'librerias/knockout.validation.v0.9.js',
+	'librerias/bootstrap.js',
+	'librerias/bootstrap-tab.js',
+	'librerias/bootstrap-collapse.js',
+	'librerias/bootstrap-tooltip.js',
+	'librerias/amplify.js',
+	'librerias/sterilav.js',
+	'librerias/jquery.PrintArea.js'
     ]
 });
 
@@ -27,9 +30,12 @@ files: [
 Pyramid.newDependency({
 name:'main',
 files: [
-	'objetos/movies.js',
-	'objetos/actors.js',
-	'Index.js'
+	'Index.js',
+	'clases/deposito.js',
+	'clases/empresa.js',	
+	'clases/chofer.js',
+	'clases/remito.js',	
+	'clases/usuario.js'	
    ],
     dependencies: ['standard','lookAndFeel']
 });

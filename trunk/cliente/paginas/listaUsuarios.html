@@ -1,6 +1,7 @@
 <div class="row">
 	<div class="well span6" id="listaUsuarioForm">
 		<h4>Listado de Personas</h4>
+		<hr>
 		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
 			<h4 class="alert-heading">Problema al obtener las Personas.</h4>
 			<span data-bind="html: mensajeError"></span>
@@ -13,16 +14,17 @@
 					<th>Apellido</th>
 					<th>Usuario</th>
 					<th>Perfil</th>
+					<th>Estado</th>
 					<th data-bind="visible: isAdmin">Acciones</th>
 				</tr>
 			</thead>
 			<tbody data-bind="visible: cargando()">
 				<tr>
-					<td colspan="5">Cargando <img class="icon-refresh" /></td>
+					<td colspan="5">Cargando <i class="icon-refresh"></i></td>
 				</tr>
 			</tbody>
 			<tbody data-bind="visible: usuarios().length == 0 && !cargando()">
-				<tr>
+				<tr class="alert alert-info">
 					<td colspan="5">No hay Personas en el sistema.</td>
 				</tr>
 			</tbody>		
@@ -33,15 +35,23 @@
 					<td data-bind="text: apellido"></td>
 					<td data-bind="text: usuario"></td>
 					<td data-bind="text: perfil"></td>
-					<td data-bind="visible: $parent.isAdmin"><a href="#" data-bind="click: $root.editar">Editar</a></td>
+					<td data-bind="text: (activo==='0') ? 'ACTIVO' : 'INACTIVO'"></td>
+					<td data-bind="visible: $parent.isAdmin">
+						<a href="#" data-bind="click: $root.editar" title="Editar"><i class="icon-edit"></i></a> 
+						<a href="#" data-bind="click: $root.borrar" title="Borrar"><i class="icon-remove"></i></a>
+					</td>
 				</tr>
 			</tbody>
 		</table>
-		<div class="form-actions">
-			<div class="form-buttons-right">		
-				<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
-				<button id="volver" class="btn" data-bind="click: volver">Volver</button>
-			</div>
+		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
+			<span data-bind="text: mensajeSuccess"></span>
+		</div>
+		<div data-bind="visible: mostrarFormError" class="alert alert-error">
+			<span data-bind="text: mensajeFormError"></span>
+		</div>		
+		<div class="form-actions" style="text-align:right ">
+			<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
+			<button id="volver" class="btn" data-bind="click: volver">Volver</button>
 		</div>
 	</div>
 </div>
@@ -52,13 +62,17 @@
 		self.usuarios = ko.observableArray();
 		self.cargando = ko.observable(true);
 		self.mostrarError = ko.observable(false);
-		self.mensajeError = ko.observable("Hubo un problema al buscar las Personas.");
+		self.mensajeError = ko.observable("");
+		self.mostrarFormError = ko.observable(false);
+		self.mensajeFormError = ko.observable("");
+		self.mostrarSuccess = ko.observable(false);
+		self.mensajeSuccess = ko.observable("");
 		self.isAdmin = ko.computed(function() {
 			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
 		});
 
 		self.cargar = function() {
-			//Llamar a la base de datos
+			self.usuarios.removeAll();
 			var exito = function(data) {
 				self.cargando(false);
 				for(i=0; i<data.data.length;i++) {
@@ -68,6 +82,7 @@
 					newUsuario.apellido = data.data[i].apellido;
 					newUsuario.usuario = data.data[i].usuario;
 					newUsuario.perfil = data.data[i].perfil;
+					newUsuario.activo = data.data[i].activo;
 					self.usuarios.push(newUsuario);
 				}
 			};
@@ -88,7 +103,7 @@
 		};
 
 		self.volver = function() {
-			window.location.href = "./index.html";
+			window.location.href = "./Index.html";
 		};
 		
 		self.nuevo = function() {
@@ -100,7 +115,33 @@
 			amplify.store.sessionStorage("sterilav.usuarioEditado", usuario.id);
 			$("#container").load("./cliente/paginas/usuario.html?id=" + usuario.id);
 		};
-		
+
+		self.borrar = function(usuario) {
+			self.mostrarFormError(false);
+			self.mostrarSuccess(false);
+			var exito = function(data) {
+				if(data.status != "OK") {
+					self.mensajeFormError(data.data);
+					self.mostrarFormError(true);
+				} else {
+					self.mensajeSuccess(data.data);
+					self.mostrarSuccess(true);
+					self.cargar();
+				}			
+			};
+			var falla = function(data) {
+				self.mensajeFormError(data.data);
+				self.mostrarFormError(true);
+			};		
+			$.ajax({
+				url:"./servidor/sterilav.php?op=borrarUsuario&id="+usuario.id,
+				success:exito,
+				error:falla,
+				type:"GET",
+				dataType:"json"
+			});
+		};		
+
 		self.cargar();
 	};
 
@@ -111,6 +152,7 @@
 		self.apellido = "";
 		self.usuario = "";
 		self.perfil = "";
+		self.activo = 0;
 	};
 
 	var usuarioModelo = new ListaUsuario();

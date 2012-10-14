@@ -1,6 +1,7 @@
 <div class="row">
 	<div class="well span6" id="listaRemitoForm">
 		<h4>Listado de Remitos</h4>
+		<hr>
 		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
 			<h4 class="alert-heading">Problema al obtener los Remitos.</h4>
 			<span data-bind="html: mensajeError"></span>
@@ -11,16 +12,17 @@
 					<th>ID</th>
 					<th>Fecha</th>
 					<th>Deposito</th>
+					<th>Tipo</th>
 					<th data-bind="visible: isAdmin">Acciones</th>
 				</tr>
 			</thead>
 			<tbody data-bind="visible: cargando()">
 				<tr>
-					<td colspan="5">Cargando <img class="icon-refresh" /></td>
+					<td colspan="5">Cargando <i class="icon-refresh"></i></td>
 				</tr>
 			</tbody>
 			<tbody data-bind="visible: remitos().length == 0 && !cargando()">
-				<tr>
+				<tr class="alert alert-info">
 					<td colspan="5">No hay Remitos en el sistema.</td>
 				</tr>
 			</tbody>		
@@ -29,7 +31,10 @@
 					<td data-bind="text: id"></td>
 					<td data-bind="text: fecha"></td>
 					<td data-bind="text: deposito"></td>
-					<td data-bind="visible: $parent.isAdmin"><a href="#" data-bind="click: $root.editar">Editar</a></td>
+					<td data-bind="text: tipo"></td>
+					<td data-bind="visible: $parent.isAdmin">
+						<a href="#" data-bind="click: $root.editar" title="Editar"><i class="icon-edit"></i></a> 
+					</td>
 				</tr>
 			</tbody>
 		</table>
@@ -62,6 +67,8 @@
 					newRemito.id = data.data[i].id;
 					newRemito.fecha = data.data[i].fecha;
 					newRemito.deposito = data.data[i].deposito;
+					newRemito.tipo = data.data[i].tipo;
+					newRemito.idtipo = data.data[i].idtipo;
 					self.remitos.push(newRemito);
 				}
 			};
@@ -82,17 +89,17 @@
 		};
 
 		self.volver = function() {
-			window.location.href = "./index.html";
+			window.location.href = "./Index.html";
 		};
 		
 		self.nuevo = function() {
 			amplify.store.sessionStorage("sterilav.remitoEditado", null);		
-			$("#container").load("./cliente/paginas/remito.html");		
+			$("#container").load("./cliente/paginas/remitoEntrada.html");		
 		};
 		
 		self.editar = function(remito) {
-			amplify.store.sessionStorage("sterilav.remitoEditado", remito.id);		
-			$("#container").load("./cliente/paginas/remito.html?id=" + remito.id);
+			amplify.store.sessionStorage("sterilav.remitoEditado", remito.id);
+			$("#container").load("./cliente/paginas/remitoEntrada.html?id=" + remito.id);
 		};
 		
 		self.cargar();
@@ -103,6 +110,8 @@
 		self.id = "";
 		self.fecha = "";
 		self.deposito = "";
+		self.tipo = "";
+		self.idtipo = 1;
 	};
 
 	var remitoModelo = new ListaRemito();

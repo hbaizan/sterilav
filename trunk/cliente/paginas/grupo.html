@@ -1,13 +1,14 @@
 <div class="row" id="grupoForm">
 	<div class="span5 well">
-		<h4 data-bind="text: title">Grupo</h4>	
+		<h4 data-bind="text: title">Grupo</h4>
+		<hr>
 		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
 		<fieldset data-bind="with: grupoNuevo">
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: descripcion">
 				<label class="control-label" for="inputDescripcion">Descripcion:</label>
-				<div class="controls" data-bind="validationElement: descripcion">
+				<div class="controls">
 					<input type="text" id="inputDescripcion" data-bind="value: descripcion" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: descripcion"></span>
+					<span class="help-inline error" data-bind="validationMessage: descripcion"></span>
 				</div>
 			</div>
 			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
@@ -24,7 +25,7 @@
 		</fieldset>
 		</form>
 		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
-			<span data-bind="text: successMensaje"></span>
+			<span data-bind="html: successMensaje"></span>
 		</div>
 		<div data-bind="visible: mostrarError" class="alert alert-error">
 			<span data-bind="text: errorMensaje"></span>
@@ -71,7 +72,7 @@
 					$("#errorMsg").append(data.data);
 				} else {
 					self.mostrarForm(false);
-					self.successMensaje("El grupo se actualizó correctamente.");
+					self.successMensaje(data.data + "<br><a href='#' onclick='abrir();'>Volver</a>");
 					self.mostrarSuccess(true);
 					amplify.store.sessionStorage("sterilav.grupoEditado", null);
 				}
@@ -102,7 +103,7 @@
 		};
 		self.volver = function() {
 			amplify.store.sessionStorage("sterilav.grupoEditado", null);
-			window.location.href = "./index.html";
+			window.location.href = "./Index.html";
 		};
 		
 		if(amplify.store.sessionStorage("sterilav.grupoEditado")) {
@@ -116,6 +117,10 @@
 		self.id = ko.observable();
 		self.descripcion = ko.observable().extend({required: true});
 	};
+
+	function abrir() {
+		$("#container").load("./cliente/paginas/listaGrupos.html");
+	}
 	
 	var grupoModelo = new NuevoGrupo();
 	ko.applyBindings(grupoModelo, document.getElementById("grupoForm"));  	

@@ -2,22 +2,20 @@
 
 function listaChoferes() {
 	global $conn;
-	$query = "SELECT * FROM chofer";
+	$query = "SELECT * FROM chofer WHERE NOT chofer_inactivo = 2";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
-	if(mysql_num_rows($recordset)==0) {
-		$result = '{"status":"error","data":"No hay Choferes."}';
-	} else {
-		$result = '{"status":"OK","data":[';
-		while($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idchofer'].'",';
-			$result .= '"nombre":"'.$row['chofer_nombre'].'",';
-			$result .= '"apellido":"'.$row['chofer_apellido'].'"';
-			$result .= '},';
-		}
-		$result = substr($result, 0, strlen($result)-1);
-		$result .= ']}';
+	$result = '{"status":"OK","data":[';
+	while($row = mysql_fetch_assoc($recordset)) {
+		$result .= '{"id":"'.$row['idchofer'].'",';
+		$result .= '"nombre":"'.$row['chofer_nombre'].'",';
+		$result .= '"apellido":"'.$row['chofer_apellido'].'"';
+		$result .= '},';
 	}
+	if(mysql_num_rows($recordset)>0) {
+		$result = substr($result, 0, strlen($result)-1);
+	}
+	$result .= ']}';
 	
 	return $result;
 }
@@ -80,6 +78,38 @@ function updateChofer() {
 	}
 
 	return $response;
+}
+
+function borrarChofer($id) {
+	global $conn;
+
+	if(choferTieneRemito($id)) {
+		return '{"status":"error","data":"El Chofer tiene remitos asociados y no puede ser eliminado."}';
+		exit;
+	}
+	$query = "UPDATE chofer SET chofer_inactivo=2 WHERE idchofer = ".$id;
+	$result = mysql_query($query, $conn);
+	if(!$result) {
+		return '{"status":"error","data":"'.mysql_error().'"}';
+	} else {
+		return '{"status":"OK","data":"El Chofer ha sido eliminado."}';
+	}
+}
+
+function choferTieneRemito($id) {
+	global $conn;
+	
+	$query = "SELECT * FROM remito WHERE chofer_idchofer=".$id;
+	$recordset = mysql_query($query, $conn);
+	if(!$recordset) {
+		return '{"status":"error","data":"'.mysql_error().'"}';
+	} else {
+		if(mysql_num_rows($recordset)==0) {
+			return '{"status":"OK","data":false}';
+		} else {
+			return '{"status":"OK","data":true}';
+		}
+	}
 }
 
 ?>

@@ -1,34 +1,27 @@
 <div class="row" id="productoForm">
 	<div class="span5 well">
-		<h4 data-bind="text: title">Producto</h4>	
+		<h4 data-bind="text: title">Producto</h4>
+		<hr>
 		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
 		<fieldset data-bind="with: productoNuevo">
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: descripcion">
 				<label class="control-label" for="inputDescripcion">Descripcion:</label>
-				<div class="controls" data-bind="validationElement: descripcion">
+				<div class="controls">
 					<input type="text" id="inputDescripcion" data-bind="value: descripcion" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: descripcion"></span>
-				</div>
-			</div>
-			<div class="control-group">
-				<label class="control-label" for="inputEstado">Estado:</label>
-				<div class="controls" data-bind="validationElement: estado">
-					<input type="text" id="inputEstado" data-bind="value: estado" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: estado"></span>
-				</div>
-			</div>
-			<div class="control-group">
-				<label class="control-label" for="inputCantidad">Cantidad:</label>
-				<div class="controls" data-bind="validationElement: cantidad">
-					<input type="text" id="inputCantidad" data-bind="value: cantidad" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: cantidad"></span>
+					<span class="help-inline error" data-bind="validationMessage: descripcion"></span>
 				</div>
 			</div>
 			<div class="control-group">
 				<label class="control-label" for="selectGrupo">Grupo:</label>
-				<div class="controls" data-bind="validationElement: grupo">
-					<select id="selectDepartamento" data-bind="options: $root.grupos, optionsText: 'descripcion', optionsValue: 'id', value: grupo" class="input-large"></select>
-					<span class="help-block error" data-bind="validationMessage: grupo"></span>
+				<div class="controls">
+					<select id="selectGrupo" data-bind="options: $root.grupos, optionsText: 'descripcion', optionsValue: 'id', value: $root.grupo" class="input-large"></select>
+				</div>
+			</div>
+			<div class="control-group" data-bind="validationElement: subgrupo">
+				<label class="control-label" for="selectSubgrupo">Subgrupo:</label>
+				<div class="controls">
+					<select id="selectSubgrupo" data-bind="options: $root.subgruposFiltrados, optionsText: 'descripcion', optionsValue: 'id', value: subgrupo" class="input-large"></select>
+					<span class="help-inline error" data-bind="validationMessage: subgrupo"></span>
 				</div>
 			</div>
 			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
@@ -45,7 +38,7 @@
 		</fieldset>
 		</form>
 		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
-			<span data-bind="text: successMensaje"></span>
+			<span data-bind="html: successMensaje"></span>
 		</div>
 		<div data-bind="visible: mostrarError" class="alert alert-error">
 			<span data-bind="text: errorMensaje"></span>
@@ -67,29 +60,24 @@
 
 		self.productoNuevo = ko.validatedObservable(new CProducto());		
 		self.grupos = ko.observableArray();
-
-		self.cargaGrupos = function() {
-			var exito = function(data) {
-				if(data.status != "OK") {
-				} else {
-					for(var i=0; i< data.data.length; i++) {
-						self.grupos().push({id:data.data[i].id, descripcion:data.data[i].descripcion});
-					}
-				}
-			};
-			var falla = function(data) {
-			};
-			getDataSync("./servidor/sterilav.php?op=listaGrupos",exito,falla);
-		};
+		self.grupo = ko.observable();
+		self.subgrupos = ko.observableArray();
+		sterilav.cargaListas(self.subgrupos(), "Subgrupos");
+		sterilav.cargaListas(self.grupos(), "Grupos");
+		self.grupo(self.grupos()[0].id);
+		self.subgruposFiltrados = ko.computed(function() {
+ 			return ko.utils.arrayFilter(self.subgrupos(), function(item) {
+            	return item.idgrupo == self.grupo();
+        	});		
+		}, this);
 				
 		self.cargar = function() {
 			var exito = function(data) {
 				if(data.status != "OK") {
 				} else {
 					self.productoNuevo().descripcion(data.data.descripcion);
-					self.productoNuevo().estado(data.data.estado);
-					self.productoNuevo().cantidad(data.data.cantidad);
-					self.productoNuevo().grupo(data.data.grupo);
+					self.productoNuevo().subgrupo(data.data.subgrupo);
+					self.grupo(data.data.grupo);
 				}
 			};
 			var falla = function(data) {
@@ -110,7 +98,7 @@
 					$("#errorMsg").append(data.data);
 				} else {
 					self.mostrarForm(false);
-					self.successMensaje("El producto se actualizó correctamente.");
+					self.successMensaje(data.data + "<br><a href='#' onclick='abrir();'>Volver</a>");
 					self.mostrarSuccess(true);
 					amplify.store.sessionStorage("sterilav.productoEditado", null);
 				}
@@ -126,9 +114,7 @@
 			var productoCreado = {
 				id: amplify.store.sessionStorage("sterilav.productoEditado"),
 				descripcion: self.productoNuevo().descripcion(),
-				estado: self.productoNuevo().estado(),
-				cantidad: self.productoNuevo().cantidad(),
-				grupo: self.productoNuevo().grupo()
+				subgrupo: self.productoNuevo().subgrupo()
 			};
 			var url = "";
 			if(amplify.store.sessionStorage("sterilav.productoEditado")) {
@@ -144,10 +130,9 @@
 		};
 		self.volver = function() {
 			amplify.store.sessionStorage("sterilav.productoEditado", null);		
-			window.location.href = "./index.html";
+			window.location.href = "./Index.html";
 		};
 		
-		self.cargaGrupos();
 		if(amplify.store.sessionStorage("sterilav.productoEditado")) {
 			self.cargar();
 		}
@@ -158,10 +143,12 @@
 		
 		self.id = ko.observable();
 		self.descripcion = ko.observable().extend({required: true});
-		self.estado = ko.observable().extend({required: true});
-		self.cantidad = ko.observable().extend({required: true});
-		self.grupo = ko.observable().extend({required: true});
+		self.subgrupo = ko.observable().extend({required: true});
 	};
+
+	function abrir() {
+		$("#container").load("./cliente/paginas/listaProductos.html");
+	}
 	
 	var productoModelo = new NuevoProducto();
 	ko.applyBindings(productoModelo, document.getElementById("productoForm"));  	

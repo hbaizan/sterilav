@@ -1,50 +1,88 @@
 <div class="row" id="depositoForm">
-	<div class="span5 well">
-		<h4 data-bind="text: title">Deposito</h4>	
+	<div class="span6 well">
+		<h4 data-bind="text: title">Deposito</h4>
+		<hr>
 		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
 		<fieldset data-bind="with: depositoNuevo">
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: nombre">
 				<label class="control-label" for="inputNombre">Nombre:</label>
-				<div class="controls" data-bind="validationElement: nombre">
+				<div class="controls">
 					<input type="text" id="inputNombre" data-bind="value: nombre" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: nombre"></span>
+					<span class="help-inline error" data-bind="validationMessage: nombre"></span>
 				</div>
 			</div>
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: domicilio">
 				<label class="control-label" for="inputDomicilio">Domicilio:</label>
-				<div class="controls" data-bind="validationElement: domicilio">
+				<div class="controls">
 					<input type="text" id="inputDomicilio" data-bind="value: domicilio" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: domicilio"></span>
+					<span class="help-inline error" data-bind="validationMessage: domicilio"></span>
 				</div>
 			</div>
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: departamento">
 				<label class="control-label" for="selectDepartamento">Departamento:</label>
-				<div class="controls" data-bind="validationElement: departamento">
+				<div class="controls">
 					<select id="selectDepartamento" data-bind="options: $root.departamentos, optionsText: 'descripcion', optionsValue: 'id', value: departamento" class="input-large"></select>
-					<span class="help-block error" data-bind="validationMessage: departamento"></span>
+					<span class="help-inline error" data-bind="validationMessage: departamento"></span>
 				</div>
 			</div>
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: empresa">
 				<label class="control-label" for="selectEmpresa">Empresa:</label>
-				<div class="controls" data-bind="validationElement: empresa">
-					<select id="selectEmpresa" data-bind="options: $root.empresas, optionsText: 'descripcion', optionsValue: 'id', value: empresa" class="input-large"></select>
-					<span class="help-block error" data-bind="validationMessage: empresa"></span>
+				<div class="controls">
+					<select id="selectEmpresa" data-bind="options: $root.empresas, optionsText: 'razonSocial', optionsValue: 'id', value: empresa" class="input-large"></select>
+					<span class="help-inline error" data-bind="validationMessage: empresa"></span>
 				</div>
 			</div>
-			<div class="control-group">
-				<label class="control-label" for="inputFaltante">Faltante:</label>
-				<div class="controls" data-bind="validationElement: faltante">
-					<input type="text" id="inputFaltante" data-bind="value: faltante" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: faltante"></span>
+			<div class="control-group" data-bind="visible: remito">
+				<label class="control-label" for="inputInactivo">Inactivo:</label>
+				<div class="controls">
+					<input type="checkbox" id="inputInactivo" class="input-large" data-bind="checked: activo">
 				</div>
 			</div>
-			<div class="control-group">
-				<label class="control-label" for="inputCapita">Capita:</label>
-				<div class="controls" data-bind="validationElement: capita">
-					<input type="text" id="inputCapita" data-bind="value: capita" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: capita"></span>
-				</div>
-			</div>
+			<hr>
+			<table>
+				<thead>
+					<tr>
+						<th>Producto</th>
+						<th>Faltante</th>
+						<th>Capita</th>
+						<th>Stock Inicial</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><select id="selectProducto" data-bind="options: $root.productos, optionsText: 'descripcion', value: $root.productoSel" class="input-medium"></select></td>
+						<td><input type="text" id="inputFaltante" data-bind="" class="input-small"></td>
+						<td><input type="text" id="inputCapita" data-bind="" class="input-small"></td>
+						<td><input type="text" id="inputStock" data-bind="" class="input-small"></td>
+						<td><button id="buttonProducto" data-bind="click: $root.agregarProducto" class="btn">Agregar</button></td>
+					</tr>
+				</tbody>
+				<tbody class="table table-striped table-bordered" data-bind="foreach: productos, visible: productos().length > 0">
+					<tr>
+						<td data-bind="text: descripcion"></td>
+						<td>
+							<input type="text" data-bind="value: faltante, attr: {id: 'editFaltante' + $data.codigo}" style="display:none;" class="input-small">
+							<span data-bind="text: faltante, attr: {id: 'showFaltante' + $data.codigo}"></span>
+						</td>
+						<td>
+							<input type="text" data-bind="value: capita, attr: {id: 'editCapita' + $data.codigo}" style="display:none;" class="input-small">
+							<span data-bind="text: capita, attr: {id: 'showCapita' + $data.codigo}"></span>
+						</td>
+						<td>
+							<input type="text" data-bind="value: stock, attr: {id: 'editStock' + $data.codigo}" style="display:none;" class="input-small">
+							<span data-bind="text: stock, attr: {id: 'showStock' + $data.codigo}"></span>
+						</td>
+						<td>
+							<a href="#" data-bind="click: $root.editarProducto, attr: {id: 'editProd' + $data.codigo}"><i class="icon-edit"></i></a> 
+							<a href="#" data-bind="click: $root.borrarProducto, attr: {id: 'delProd' + $data.codigo}"><i class="icon-remove"></i></a> 
+							<a href="#" data-bind="click: $root.aceptarProducto, attr: {id: 'saveProd' + $data.codigo}" style="display:none;"><i class="icon-ok"></i></a>
+						</td>
+					</tr>
+				</tbody>
+				<tbody data-bind="visible: productos().length == 0">
+					<tr class="alert alert-info"><td colspan="5">El Deposito no tiene productos.</span></td></tr>
+				</tbody>
+			</table>
 			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
 				<h4 class="alert-heading">Error en el formulario!</h4>
 				Hay valores invalidos en el formulario.
@@ -52,14 +90,14 @@
 			<div data-bind="visible: $root.mostrarFormError" class="alert alert-error">
 				<span data-bind="text: $root.formErrorMensaje"></span>
 			</div>			
-			<div class="form-actions">
+			<div class="form-actions" style="text-align:right ">
 				<button id="registro" class="btn btn-primary" data-bind="click: $root.registro">Salvar</button>
 				<button id="registro" class="btn" data-bind="click: $root.volver">Cancelar</button>
 			</div>
 		</fieldset>
 		</form>
 		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
-			<span data-bind="text: successMensaje"></span>
+			<span data-bind="html: successMensaje"></span>
 		</div>
 		<div data-bind="visible: mostrarError" class="alert alert-error">
 			<span data-bind="text: errorMensaje"></span>
@@ -82,44 +120,114 @@
 		self.depositoNuevo = ko.validatedObservable(new CDeposito());		
 		self.departamentos = ko.observableArray();
 		self.empresas = ko.observableArray();
+		self.productos = ko.observableArray();
+		self.productoSel = ko.observable(null);
+		sterilav.cargaListas(self.productos(), "Productos");
+		sterilav.cargaListas(self.departamentos(), "Departamentos");
+		sterilav.cargaListas(self.empresas(), "Empresas");
 
-		self.cargaDepartamentos = function() {
-			var exitoDepartamento = function(departamentos) {
-				if(departamentos.status != "OK") {
-				} else {
-					for(var i=0; i< departamentos.data.length; i++) {
-						self.departamentos().push({id:departamentos.data[i].id, descripcion:departamentos.data[i].descripcion});
-					}
-				}
-			};
-			var fallaDepartamento = function(data) {
-			};
-			getDataSync("./servidor/sterilav.php?op=listaDepartamentos",exitoDepartamento,fallaDepartamento);
+		self.agregarProducto = function() {
+			$("#inputCapita").parent().removeClass("control-group error");
+			$("#inputCapita").next().remove();
+			$("#inputCapita").removeClass("error");
+			$("#inputFaltante").parent().removeClass("control-group error");
+			$("#inputFaltante").next().remove();
+			$("#inputStock").removeClass("error");
+			$("#inputStock").parent().removeClass("control-group error");
+			$("#inputStock").next().remove();
+			$("#inputStock").removeClass("error");
+			var error = false;
+			
+			if(isNaN($.trim($("#inputFaltante").val())) || !$.trim($("#inputFaltante").val())) {
+				$("#inputFaltante").parent().addClass("control-group error");
+				$("#inputFaltante").parent().append("<span class='help-block error'>Debe ser un numero</span>");
+				$("#inputFaltante").addClass("error");
+				error = true;
+			}
+			if(isNaN($.trim($("#inputCapita").val())) || !$.trim($("#inputCapita").val())) {
+				$("#inputCapita").parent().addClass("control-group error");
+				$("#inputCapita").parent().append("<span class='help-block error'>Debe ser un numero</span>");
+				$("#inputCapita").addClass("error");
+				error = true;
+			}
+			if(isNaN($.trim($("#inputStock").val())) || !$.trim($("#inputStock").val())) {
+				$("#inputStock").parent().addClass("control-group error");
+				$("#inputStock").parent().append("<span class='help-block error'>Debe ser un numero</span>");
+				$("#inputStock").addClass("error");
+				error = true;
+			}
+			
+			if(error) {
+				return;
+			}
+			
+			var linea = {};
+			linea.codigo = self.productoSel().id;
+			linea.descripcion = self.productoSel().descripcion;
+			linea.capita = $.trim($("#inputCapita").val());
+			linea.faltante = $.trim($("#inputFaltante").val());
+			linea.stock = $.trim($("#inputStock").val());
+			self.depositoNuevo().productos.push(linea);
+			self.productos.remove(self.productoSel());
+			
+			$("#inputFaltante").val("");
+			$("#inputCapita").val("");
+			$("#inputStock").val("");
 		};
-		self.cargaEmpresas = function() {
-			var exitoEmpresa = function(empresas) {
-				if(empresas.status != "OK") {
-				} else {
-					for(var i=0; i< empresas.data.length; i++) {
-						self.empresas().push({id:empresas.data[i].id, descripcion:empresas.data[i].razonSocial});
-					}
-				}
-			};
-			var fallaEmpresa = function(data) {
-			};
-			getDataSync("./servidor/sterilav.php?op=listaEmpresas",exitoEmpresa,fallaEmpresa);
+
+		self.editarProducto = function(prod) {
+			$("#saveProd" + prod.codigo).show();
+			$("#editFaltante" + prod.codigo).show();
+			$("#editCapita" + prod.codigo).show();
+			$("#editStock" + prod.codigo).show();
+			$("#showFaltante" + prod.codigo).hide();
+			$("#showCapita" + prod.codigo).hide();
+			$("#showStock" + prod.codigo).hide();
+			$("#delProd" + prod.codigo).hide();
+			$("#editProd" + prod.codigo).hide();
 		};
-				
+
+		self.borrarProducto = function(prod) {
+			self.depositoNuevo().productos.remove(prod);
+			self.productos.push(prod);
+		};
+						
+		self.aceptarProducto = function(prod) {
+			var indexof = self.depositoNuevo().productos.indexOf(prod);
+			console.log(prod);
+			$("#saveProd" + prod.codigo).hide();
+			$("#editFaltante" + prod.codigo).hide();
+			$("#editCapita" + prod.codigo).hide();
+			$("#editStock" + prod.codigo).hide();
+			$("#showFaltante" + prod.codigo).show();
+			$("#showCapita" + prod.codigo).show();
+			$("#showStock" + prod.codigo).show();
+			$("#delProd" + prod.codigo).show();
+			$("#editProd" + prod.codigo).show();
+
+			$("#showFaltante" + prod.codigo).text(prod.faltante);
+			$("#showCapita" + prod.codigo).text(prod.capita);
+			$("#showStock" + prod.codigo).text(prod.stock);
+		};
+		
 		self.cargar = function() {
 			var exito = function(data) {
 				if(data.status != "OK") {
 				} else {
 					self.depositoNuevo().nombre(data.data.nombre);
 					self.depositoNuevo().domicilio(data.data.domicilio);
-					self.depositoNuevo().faltante(data.data.faltante);
-					self.depositoNuevo().capita(data.data.capita);
 					self.depositoNuevo().departamento(data.data.departamento);
 					self.depositoNuevo().empresa(data.data.empresa);
+					self.depositoNuevo().remito(data.data.remito);
+					self.depositoNuevo().activo((data.data.activo==1) ? true : false);
+					self.depositoNuevo().productos(data.data.productos);
+					for(var i=0; i<self.depositoNuevo().productos().length; i++) {
+						for(var j=0; j<self.productos().length; j++) {
+							if(self.productos()[j].id == self.depositoNuevo().productos()[i].codigo) {
+								self.productos.remove(self.productos()[j]);
+							}
+						}
+					}
 				}
 			};
 			var falla = function(data) {
@@ -136,11 +244,11 @@
 			self.mostrarFormError(false);
 			var exito = function(data) {
 				if(data.status != "OK") {
-					$("#errorMsg").show();
-					$("#errorMsg").append(data.data);
+					self.formErrorMensaje(data.data);
+					self.mostrarFormError(true);
 				} else {
 					self.mostrarForm(false);
-					self.successMensaje("El deposito se actualizó correctamente.");
+					self.successMensaje(data.data + "<br><a href='#' onclick='abrir();'>Volver</a>");
 					self.mostrarSuccess(true);
 					amplify.store.sessionStorage("sterilav.depositoEditado", null);
 				}
@@ -153,14 +261,16 @@
 				}
 				self.mostrarFormError(true);				
 			};
+			var isactivo = self.depositoNuevo().activo() ? 1 : 0;			
 			var depositoCreado = {
 				id: amplify.store.sessionStorage("sterilav.depositoEditado"),
 				nombre: self.depositoNuevo().nombre(),
 				domicilio: self.depositoNuevo().domicilio(),
-				faltante: self.depositoNuevo().faltante(),
-				capita: self.depositoNuevo().capita(),
 				departamento: self.depositoNuevo().departamento(),
-				empresa: self.depositoNuevo().empresa()
+				empresa: self.depositoNuevo().empresa(),
+				remito: self.depositoNuevo().remito(),
+				activo: isactivo,
+				productos: self.depositoNuevo().productos()
 			};
 			var url = "";
 			if(amplify.store.sessionStorage("sterilav.depositoEditado")) {
@@ -176,11 +286,9 @@
 		};
 		self.volver = function() {
 			amplify.store.sessionStorage("sterilav.depositoEditado", null);
-			window.location.href = "./index.html";
+			window.location.href = "./Index.html";
 		};
 		
-		self.cargaDepartamentos();
-		self.cargaEmpresas();
 		if(amplify.store.sessionStorage("sterilav.depositoEditado")) {
 			self.cargar();
 		}
@@ -192,11 +300,16 @@
 		self.id = ko.observable();
 		self.nombre = ko.observable().extend({required: true});
 		self.domicilio = ko.observable().extend({required: true});
-		self.faltante = ko.observable().extend({required: true});
-		self.capita = ko.observable().extend({required: true});
 		self.departamento = ko.observable().extend({required: true});
-		self.empresa = ko.observable().extend({required: true});		
+		self.empresa = ko.observable().extend({required: true});
+		self.remito = ko.observable(false).extend({required: true});
+		self.activo = ko.observable(false).extend({required: true});		
+		self.productos = ko.observableArray();		
 	};
+
+	function abrir() {
+		$("#container").load("./cliente/paginas/listaDepositos.html");
+	}
 	
 	var depositoModelo = new NuevoDeposito();
 	ko.applyBindings(depositoModelo, document.getElementById("depositoForm"));  	
