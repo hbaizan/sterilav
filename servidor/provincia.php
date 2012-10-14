@@ -11,7 +11,8 @@ function listaProvincias() {
 		$result = '{"status":"OK","data":[';
 		while($row = mysql_fetch_assoc($recordset)) {
 			$result .= '{"id":"'.$row['idprovincia'].'",';
-			$result .= '"descripcion":"'.$row['nombre'].'"';
+			$result .= '"descripcion":"'.$row['nombre'].'",';
+			$result .= '"departamentos":'.listaDepartamentosPorProvincia($row['idprovincia']).'';
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);

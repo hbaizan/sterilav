@@ -5,18 +5,16 @@ function listaVehiculos() {
 	$query = "SELECT * FROM vehiculo";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
-	if(mysql_num_rows($recordset)==0) {
-		$result = '{"status":"error","data":"No hay Vehiculos."}';
-	} else {
-		$result = '{"status":"OK","data":[';
-		while($row = mysql_fetch_assoc($recordset)) {
-			$result .= '{"id":"'.$row['idvehiculo'].'",';
-			$result .= '"patente":"'.$row['vehiculo_patente'].'"';
-			$result .= '},';
-		}
-		$result = substr($result, 0, strlen($result)-1);
-		$result .= ']}';
+	$result = '{"status":"OK","data":[';
+	while($row = mysql_fetch_assoc($recordset)) {
+		$result .= '{"id":"'.$row['idvehiculo'].'",';
+		$result .= '"patente":"'.$row['vehiculo_patente'].'"';
+		$result .= '},';
 	}
+	if(mysql_num_rows($recordset)>0) {
+		$result = substr($result, 0, strlen($result)-1);
+	}
+	$result .= ']}';
 	
 	return $result;
 }
@@ -49,7 +47,7 @@ function putVehiculo() {
 	$response = "";
 	$patente = chequearCampo($_POST['patente']);
 	
-	$query = "INSERT INTO vehiculo_patente (patente) VALUES ('$patente')";
+	$query = "INSERT INTO vehiculo (vehiculo_patente) VALUES ('$patente')";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		$response = '{"status":"error","data":"'.mysql_error().'"}';
@@ -65,14 +63,14 @@ function updateVehiculo() {
 
 	$response = "";
 	$id = chequearCampo($_POST['id']);
-	$cuit = chequearCampo($_POST['patente']);
+	$patente = chequearCampo($_POST['patente']);
 
 	$query = "UPDATE vehiculo SET vehiculo_patente='$patente' WHERE idvehiculo = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		$response = '{"status":"error","data":"'.mysql_error().'"}';
 	} else {
-		$response = '{"status":"OK","data":"El Vehiculo ha sido actualizada."}';
+		$response = '{"status":"OK","data":"El Vehiculo ha sido actualizado."}';
 	}
 
 	return $response;

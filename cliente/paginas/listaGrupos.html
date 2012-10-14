@@ -1,6 +1,7 @@
 <div class="row">
 	<div class="well span6" id="listaGrupoForm">
 		<h4>Listado de Grupos</h4>
+		<hr>
 		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
 			<h4 class="alert-heading">Problema al obtener los Grupos.</h4>
 			<span data-bind="html: mensajeError"></span>
@@ -15,11 +16,11 @@
 			</thead>
 			<tbody data-bind="visible: cargando()">
 				<tr>
-					<td colspan="5">Cargando <img class="icon-refresh" /></td>
+					<td colspan="5">Cargando <i class="icon-refresh"></i></td>
 				</tr>
 			</tbody>
 			<tbody data-bind="visible: grupos().length == 0 && !cargando()">
-				<tr>
+				<tr class="alert alert-info">
 					<td colspan="5">No hay Grupos en el sistema.</td>
 				</tr>
 			</tbody>		
@@ -27,15 +28,15 @@
 				<tr>
 					<td data-bind="text: id"></td>
 					<td data-bind="text: descripcion"></td>
-					<td data-bind="visible: $parent.isAdmin"><a href="#" data-bind="click: $root.editar">Editar</a></td>
+					<td data-bind="visible: $parent.isAdmin">
+						<a href="#" data-bind="click: $root.editar" title="Editar"><i class="icon-edit"></i></a> 
+					</td>
 				</tr>
 			</tbody>
 		</table>
-		<div class="form-actions">
-			<div class="form-buttons-right">		
-				<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
-				<button id="volver" class="btn" data-bind="click: volver">Volver</button>
-			</div>
+		<div class="form-actions" style="text-align:right ">
+			<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
+			<button id="volver" class="btn" data-bind="click: volver">Volver</button>
 		</div>
 	</div>
 </div>
@@ -79,7 +80,7 @@
 		};
 
 		self.volver = function() {
-			window.location.href = "./index.html";
+			window.location.href = "./Index.html";
 		};
 		
 		self.nuevo = function() {

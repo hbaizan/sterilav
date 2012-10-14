@@ -1,6 +1,7 @@
 <div class="row">
 	<div class="well span6" id="listaChoferForm">
 		<h4>Listado de Choferes</h4>
+		<hr>
 		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
 			<h4 class="alert-heading">Problema al obtener los Choferes.</h4>
 			<span data-bind="html: mensajeError"></span>
@@ -16,11 +17,11 @@
 			</thead>
 			<tbody data-bind="visible: cargando()">
 				<tr>
-					<td colspan="5">Cargando <img class="icon-refresh" /></td>
+					<td colspan="5">Cargando <i class="icon-refresh"></i></td>
 				</tr>
 			</tbody>
 			<tbody data-bind="visible: choferes().length == 0 && !cargando()">
-				<tr>
+				<tr class="alert alert-info">
 					<td colspan="5">No hay Choferes en el sistema.</td>
 				</tr>
 			</tbody>		
@@ -29,15 +30,22 @@
 					<td data-bind="text: id"></td>
 					<td data-bind="text: nombre"></td>
 					<td data-bind="text: apellido"></td>
-					<td data-bind="visible: $parent.isAdmin"><a href="#" data-bind="click: $root.editar">Editar</a></td>
+					<td data-bind="visible: $parent.isAdmin">
+						<a href="#" data-bind="click: $root.editar" title="Editar"><i class="icon-edit"></i></a> 
+						<a href="#" data-bind="click: $root.borrar" title="Borrar"><i class="icon-remove"></i></a>
+					</td>
 				</tr>
 			</tbody>
 		</table>
-		<div class="form-actions">
-			<div class="form-buttons-right">		
-				<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
-				<button id="volver" class="btn" data-bind="click: volver">Volver</button>
-			</div>
+		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
+			<span data-bind="text: mensajeSuccess"></span>
+		</div>
+		<div data-bind="visible: mostrarFormError" class="alert alert-error">
+			<span data-bind="text: mensajeFormError"></span>
+		</div>				
+		<div class="form-actions" style="text-align:right ">
+			<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
+			<button id="volver" class="btn" data-bind="click: volver">Volver</button>
 		</div>
 	</div>
 </div>
@@ -48,7 +56,11 @@
 		self.choferes = ko.observableArray();
 		self.cargando = ko.observable(true);
 		self.mostrarError = ko.observable(false);
-		self.mensajeError = ko.observable("Hubo un problema al buscar los Choferes.");
+		self.mensajeError = ko.observable("");
+		self.mostrarFormError = ko.observable(false);
+		self.mensajeFormError = ko.observable("");
+		self.mostrarSuccess = ko.observable(false);
+		self.mensajeSuccess = ko.observable("");
 		self.isAdmin = ko.computed(function() {
 			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
 		});
@@ -94,6 +106,30 @@
 			amplify.store.sessionStorage("sterilav.choferEditado", chofer.id);
 			$("#container").load("./cliente/paginas/chofer.html?id=" + chofer.id);
 		};
+		
+		self.borrar = function(chofer) {
+			self.mostrarFormError(false);
+			var exito = function(data) {
+				if(data.status != "OK") {
+					self.mensajeFormError(data.data);
+					self.mostrarFormError(true);
+				} else {
+					self.mensajeSuccess(data.data);
+					self.mostrarSuccess(true);
+				}			
+			};
+			var falla = function(data) {
+				self.mensajeFormError(data.data);
+				self.mostrarFormError(true);
+			};		
+			$.ajax({
+				url:"./servidor/sterilav.php?op=borrarChofer&id="+chofer.id,
+				success:exito,
+				error:falla,
+				type:"GET",
+				dataType:"json"
+			});
+		};		
 		
 		self.cargar();
 	};

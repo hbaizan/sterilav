@@ -1,6 +1,7 @@
 <div class="row">
 	<div class="well span6" id="listaProductoForm">
 		<h4>Listado de Productos</h4>
+		<hr>
 		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
 			<h4 class="alert-heading">Problema al obtener los productos.</h4>
 			<span data-bind="html: mensajeError"></span>
@@ -10,18 +11,17 @@
 				<tr>
 					<th>ID</th>
 					<th>Descripcion</th>
-					<th>Estado</th>
-					<th>Cantidad</th>
+					<th>Subgrupo</th>
 					<th data-bind="visible: isAdmin">Acciones</th>
 				</tr>
 			</thead>
 			<tbody data-bind="visible: cargando()">
 				<tr>
-					<td colspan="5">Cargando <img class="icon-refresh" /></td>
+					<td colspan="5">Cargando <i class="icon-refresh"></i></td>
 				</tr>
 			</tbody>
 			<tbody data-bind="visible: productos().length == 0 && !cargando()">
-				<tr>
+				<tr class="alert alert-info">
 					<td colspan="5">No hay productos en el sistema.</td>
 				</tr>
 			</tbody>		
@@ -29,17 +29,16 @@
 				<tr>
 					<td data-bind="text: id"></td>
 					<td data-bind="text: descripcion"></td>
-					<td data-bind="text: estado"></td>
-					<td data-bind="text: cantidad"></td>
-					<td data-bind="visible: $parent.isAdmin"><a href="#" data-bind="click: $root.editar">Editar</a></td>
+					<td data-bind="text: subgrupo"></td>
+					<td data-bind="visible: $parent.isAdmin">
+						<a href="#" data-bind="click: $root.editar" title="Editar"><i class="icon-edit"></i></a> 
+					</td>
 				</tr>
 			</tbody>
 		</table>
-		<div class="form-actions">
-			<div class="form-buttons-right">		
-				<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
-				<button id="volver" class="btn" data-bind="click: volver">Volver</button>
-			</div>
+		<div class="form-actions" style="text-align:right ">
+			<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
+			<button id="volver" class="btn" data-bind="click: volver">Volver</button>
 		</div>
 	</div>
 </div>
@@ -50,7 +49,7 @@
 		self.productos = ko.observableArray();
 		self.cargando = ko.observable(true);
 		self.mostrarError = ko.observable(false);
-		self.mensajeError = ko.observable("Hubo un problema al buscar los productos.");
+		self.mensajeError = ko.observable("Hubo un problema al buscar los Productos.");
 		self.isAdmin = ko.computed(function() {
 			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
 		});
@@ -68,9 +67,7 @@
 					var newProducto = new Producto();
 					newProducto.id = data.data[i].id;
 					newProducto.descripcion = data.data[i].descripcion;
-					newProducto.estado = data.data[i].estado;
-					newProducto.cantidad = data.data[i].cantidad;
-					newProducto.grupo = data.data[i].grupo;
+					newProducto.subgrupo = data.data[i].subgrupo;
 					self.productos.push(newProducto);
 				}
 			};
@@ -91,7 +88,7 @@
 		};
 
 		self.volver = function() {
-			window.location.href = "./index.html";
+			window.location.href = "./Index.html";
 		};
 		
 		self.nuevo = function() {
@@ -111,9 +108,7 @@
 		var self = this;
 		self.id = "";
 		self.descripcion = "";
-		self.estado = "";
-		self.cantidad = 0;
-		self.grupo = 0;
+		self.subgrupo = 0;
 	};
 
 	var productoModelo = new ListaProducto();

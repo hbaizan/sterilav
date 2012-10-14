@@ -474,7 +474,7 @@
 
             return required && (testVal + '').length > 0;
         },
-        message: 'This field is required.'
+        message: 'Es requerido.'
     };
 
     ko.validation.rules['min'] = {

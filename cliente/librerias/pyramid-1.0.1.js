@@ -526,7 +526,7 @@ Pyramid.setTypeRenderer({
 Pyramid.setTypeRenderer({
 	name: 'css',
 	isExtension: true,
-	template: '<link rel="stylesheet" href="${file}" type="text/css"/>\n'
+	template: '<link rel="stylesheet" media="" href="${file}" type="text/css"/>\n'
 	});
 
 //if the file has no extension, then the text from the file will be included

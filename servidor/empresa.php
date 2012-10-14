@@ -2,19 +2,17 @@
 
 function listaEmpresas() {
 	global $conn;
-	$query = "SELECT * FROM empresa";
+	$query = "SELECT * FROM empresa, iva WHERE iva_idiva=idiva";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
 	$result = '{"status":"OK","data":[';
 	while($row = mysql_fetch_assoc($recordset)) {
-		//$query2 = "SELECT * FROM deposito WHERE empresa_idempresa = ".$recordset['idempresa'];
-		//$recordset2 = mysql_query($query2, $conn) or die(mysql_error());
-
 		$result .= '{"id":"'.$row['idempresa'].'",';
 		$result .= '"razonSocial":"'.$row['empresa_razon_social'].'",';
 		$result .= '"cuit":"'.$row['empresa_cuit'].'",';
-		$result .= '"depositos":'.listaDepositosPorEmpresa($row['idempresa']).'';
-		
+		$result .= '"depositos":'.listaDepositosPorEmpresa($row['idempresa']).',';
+		$result .= '"idiva":"'.$row['iva_idiva'].'",';
+		$result .= '"iva":"'.$row['iva_condicion'].'"';
 		$result .= '},';
 	}
 	if(mysql_num_rows($recordset)>0) {
@@ -27,7 +25,7 @@ function listaEmpresas() {
 
 function getEmpresa($id) {
 	global $conn;
-	$query = "SELECT * FROM empresa WHERE idempresa = ".$id;
+	$query = "SELECT * FROM empresa,iva WHERE iva_idiva=idiva AND idempresa = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
 	
@@ -38,7 +36,10 @@ function getEmpresa($id) {
 		if($row = mysql_fetch_assoc($recordset)) {
 			$result .= '{"id":"'.$row['idempresa'].'",';
 			$result .= '"razonSocial":"'.$row['empresa_razon_social'].'",';
-			$result .= '"cuit":"'.$row['empresa_cuit'].'"';
+			$result .= '"cuit":"'.$row['empresa_cuit'].'",';
+			$result .= '"depositos":'.listaDepositosPorEmpresa($row['idempresa']).',';
+			$result .= '"idiva":"'.$row['iva_idiva'].'",';			
+			$result .= '"iva":"'.$row['iva_condicion'].'"';			
 			$result .= '},';
 		}
 		$result = substr($result, 0, strlen($result)-1);
@@ -54,8 +55,9 @@ function putEmpresa() {
 	$response = "";
 	$razonSocial = chequearCampo($_POST['razonSocial']);
 	$cuit = chequearCampo($_POST['cuit']);
+	$iva = chequearCampo($_POST['iva']);
 	
-	$query = "INSERT INTO empresa (empresa_razon_social,empresa_cuit) VALUES ('$razonSocial','$cuit')";
+	$query = "INSERT INTO empresa (empresa_razon_social,empresa_cuit,iva_idiva) VALUES ('$razonSocial','$cuit',$iva)";
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		$response = '{"status":"error","data":"'.mysql_error().'"}';
@@ -73,8 +75,9 @@ function updateEmpresa() {
 	$id = chequearCampo($_POST['id']);
 	$razonSocial = chequearCampo($_POST['razonSocial']);
 	$cuit = chequearCampo($_POST['cuit']);
+	$iva = chequearCampo($_POST['iva']);
 
-	$query = "UPDATE empresa SET empresa_razon_social='$razonSocial',empresa_cuit='$cuit' WHERE idempresa = ".$id;
+	$query = "UPDATE empresa SET empresa_razon_social='$razonSocial',empresa_cuit='$cuit',iva_idiva=$iva WHERE idempresa = ".$id;
 	$result = mysql_query($query, $conn);
 	if(!$result) {
 		$response = '{"status":"error","data":"'.mysql_error().'"}';

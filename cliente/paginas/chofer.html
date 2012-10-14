@@ -1,20 +1,21 @@
 <div class="row" id="choferForm">
 	<div class="span5 well">
-		<h4 data-bind="text: title">Chofer</h4>	
+		<h4 data-bind="text: title">Chofer</h4>
+		<hr>
 		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
 		<fieldset data-bind="with: choferNuevo">
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: nombre">
 				<label class="control-label" for="inputNombre">Nombre:</label>
-				<div class="controls" data-bind="validationElement: nombre">
+				<div class="controls">
 					<input type="text" id="inputNombre" data-bind="value: nombre" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: nombre"></span>
+					<span class="help-inline error" data-bind="validationMessage: nombre"></span>
 				</div>
 			</div>
-			<div class="control-group">
+			<div class="control-group" data-bind="validationElement: apellido">
 				<label class="control-label" for="inputApellido">Apellido:</label>
-				<div class="controls" data-bind="validationElement: apellido">
+				<div class="controls">
 					<input type="text" id="inputApellido" data-bind="value: apellido" class="input-large">
-					<span class="help-block error" data-bind="validationMessage: apellido"></span>
+					<span class="help-inline error" data-bind="validationMessage: apellido"></span>
 				</div>
 			</div>
 			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
@@ -31,7 +32,7 @@
 		</fieldset>
 		</form>
 		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
-			<span data-bind="text: successMensaje"></span>
+			<span data-bind="html: successMensaje"></span>
 		</div>
 		<div data-bind="visible: mostrarError" class="alert alert-error">
 			<span data-bind="text: errorMensaje"></span>
@@ -79,7 +80,7 @@
 					$("#errorMsg").append(data.data);
 				} else {
 					self.mostrarForm(false);
-					self.successMensaje("El chofer se actualizó correctamente.");
+					self.successMensaje(data.data + "<br><a href='#' onclick='abrir();'>Volver</a>");
 					self.mostrarSuccess(true);
 					amplify.store.sessionStorage("sterilav.choferEditado", null);
 				}
@@ -111,7 +112,7 @@
 		};
 		self.volver = function() {
 			amplify.store.sessionStorage("sterilav.choferEditado", null);
-			window.location.href = "./index.html";
+			window.location.href = "./Index.html";
 		};
 		
 		if(amplify.store.sessionStorage("sterilav.choferEditado")) {
@@ -126,6 +127,10 @@
 		self.nombre = ko.observable().extend({required: true});
 		self.apellido = ko.observable().extend({required: true});
 	};
+
+	function abrir() {
+		$("#container").load("./cliente/paginas/listaChoferes.html");
+	}
 	
 	var choferModelo = new NuevoChofer();
 	ko.applyBindings(choferModelo, document.getElementById("choferForm"));  	

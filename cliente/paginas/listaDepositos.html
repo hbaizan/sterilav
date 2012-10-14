@@ -1,6 +1,7 @@
 <div class="row">
-	<div class="well span6" id="listaDepositoForm">
+	<div class="well span8" id="listaDepositoForm">
 		<h4>Listado de Depositos</h4>
+		<hr>
 		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
 			<h4 class="alert-heading">Problema al obtener los Depositos.</h4>
 			<span data-bind="html: mensajeError"></span>
@@ -10,19 +11,18 @@
 				<tr>
 					<th>ID</th>
 					<th>Nombre</th>
-					<th>Capita</th>
-					<th>Faltante</th>
 					<th>Empresa</th>
+					<th>Estado</th>					
 					<th data-bind="visible: isAdmin">Acciones</th>
 				</tr>
 			</thead>
 			<tbody data-bind="visible: cargando()">
 				<tr>
-					<td colspan="5">Cargando <img class="icon-refresh" /></td>
+					<td colspan="5">Cargando <i class="icon-refresh"></i></td>
 				</tr>
 			</tbody>
 			<tbody data-bind="visible: depositos().length == 0 && !cargando()">
-				<tr>
+				<tr class="alert alert-info">
 					<td colspan="5">No hay Depositos en el sistema.</td>
 				</tr>
 			</tbody>		
@@ -30,18 +30,24 @@
 				<tr>
 					<td data-bind="text: id"></td>
 					<td data-bind="text: nombre"></td>
-					<td data-bind="text: capita"></td>
-					<td data-bind="text: faltante"></td>
 					<td data-bind="text: empresa"></td>
-					<td data-bind="visible: $parent.isAdmin"><a href="#" data-bind="click: $root.editar">Editar</a></td>
+					<td data-bind="text: (activo==='0') ? 'ACTIVO' : 'INACTIVO'"></td>
+					<td data-bind="visible: $parent.isAdmin">
+						<a href="#" data-bind="click: $root.editar" title="Editar"><i class="icon-edit"></i></a> 
+						<a href="#" data-bind="click: $root.borrar" title="Borrar"><i class="icon-remove"></i></a>
+					</td>
 				</tr>
 			</tbody>
 		</table>
-		<div class="form-actions">
-			<div class="form-buttons-right">		
-				<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
-				<button id="volver" class="btn" data-bind="click: volver">Volver</button>
-			</div>
+		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
+			<span data-bind="text: mensajeSuccess"></span>
+		</div>
+		<div data-bind="visible: mostrarFormError" class="alert alert-error">
+			<span data-bind="text: mensajeFormError"></span>
+		</div>		
+		<div class="form-actions" style="text-align:right ">
+			<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
+			<button id="volver" class="btn" data-bind="click: volver">Volver</button>
 		</div>
 	</div>
 </div>
@@ -52,22 +58,25 @@
 		self.depositos = ko.observableArray();
 		self.cargando = ko.observable(true);
 		self.mostrarError = ko.observable(false);
-		self.mensajeError = ko.observable("Hubo un problema al buscar los Depositos.");
+		self.mensajeError = ko.observable("");
+		self.mostrarFormError = ko.observable(false);
+		self.mensajeFormError = ko.observable("");
+		self.mostrarSuccess = ko.observable(false);
+		self.mensajeSuccess = ko.observable("");
 		self.isAdmin = ko.computed(function() {
 			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
 		});
 
 		self.cargar = function() {
-			//Llamar a la base de datos
+			self.depositos.removeAll();
 			var exito = function(data) {
 				self.cargando(false);
 				for(i=0; i<data.data.length;i++) {
 					var newDeposito = new Deposito();
 					newDeposito.id = data.data[i].id;
 					newDeposito.nombre = data.data[i].nombre;
-					newDeposito.faltante = data.data[i].faltante;
-					newDeposito.capita = data.data[i].capita;
 					newDeposito.empresa = data.data[i].empresa;
+					newDeposito.activo = data.data[i].activo;					
 					self.depositos.push(newDeposito);
 				}
 			};
@@ -88,7 +97,7 @@
 		};
 
 		self.volver = function() {
-			window.location.href = "./index.html";
+			window.location.href = "./Index.html";
 		};
 		
 		self.nuevo = function() {
@@ -101,6 +110,32 @@
 			$("#container").load("./cliente/paginas/deposito.html?id=" + deposito.id);
 		};
 		
+		self.borrar = function(deposito) {
+			self.mostrarFormError(false);
+			self.mostrarSuccess(false);
+			var exito = function(data) {
+				if(data.status != "OK") {
+					self.mensajeFormError(data.data);
+					self.mostrarFormError(true);
+				} else {
+					self.mensajeSuccess(data.data);
+					self.mostrarSuccess(true);
+					self.cargar();
+				}			
+			};
+			var falla = function(data) {
+				self.mensajeFormError(data.data);
+				self.mostrarFormError(true);
+			};		
+			$.ajax({
+				url:"./servidor/sterilav.php?op=borrarDeposito&id="+deposito.id,
+				success:exito,
+				error:falla,
+				type:"GET",
+				dataType:"json"
+			});
+		};		
+		
 		self.cargar();
 	};
 
@@ -108,9 +143,8 @@
 		var self = this;
 		self.id = "";
 		self.nombre = "";
-		self.faltante = "";
-		self.capita = "";
 		self.empresa = "";
+		self.activo = 0;		
 	};
 
 	var depositoModelo = new ListaDeposito();

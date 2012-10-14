@@ -1,4 +1,20 @@
 <?php
+function getProximoRemito() {
+	global $conn;
+	$query = "SELECT MAX(idremito) AS idremito FROM remito";
+	$recordset = mysql_query($query, $conn) or die(mysql_error());
+	$result = "";
+	
+	if(mysql_num_rows($recordset)==0) {
+		$result = '{"status":"OK","data":"{"id":"1"}"}';
+	} else {
+		$result = '{"status":"OK","data":';
+		if($row = mysql_fetch_assoc($recordset)) {
+			$result .= '{"id":"'.($row['idremito'] + 1).'"}}';
+		}
+	}
+	return $result;
+}
 
 function listaRemitos() {
 	global $conn, $tabla;
@@ -124,10 +140,13 @@ function putRemito() {
 	$result = mysql_query($query, $conn);
     
    //actualizacion del remito 
+   // HAY QUE CONTROLAR EL TIPO DE REMITO, DE ACUERDO A ESO NO ES UPDATE, ES INSERT
+   // VER ARCHIVO REMITO2.PHP, SUBIDO SOLO COMO EJEMPLO!!!!!!!!!!!!!
   $queryrem = "UPDATE remito SET persona_idpersona=$idpersona, deposito_iddeposito=$iddeposito, chofer_idchofer=$idchofer, remito_tipo_idremito_tipo=$iremitotipo, vehiculo_idvehiculo=$idvehiculo, remito_fecha=$rfecha , remito_hora_entrega=$rhoraentrega, remito_hora_retiro=$rhoraretiro WHERE iddeposito = deposito_iddeposito";   
   $resultrem = mysql_query($queryrem, $conn); 
    
-    //actualizacion del remito_has_producto rhp
+    //actualizacion del remito_has_producto php
+
   $queryrhp = "UPDATE remito_has_producto SET remito_idremito=$idremito, producto_idproducto=$idproducto, cantidad_real=$cantidadreal, cantidad_faltante=$cantidadfaltante WHERE idremito = idremito";   
   $resultrhp = mysql_query($queryrhp, $conn); 
 

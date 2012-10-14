@@ -1,5 +1,6 @@
 <?php require_once('./db.php');
 require_once('./grupo.php');
+require_once('./subgrupo.php');
 require_once('./perfil.php');
 require_once('./producto.php');
 require_once('./usuario.php');
@@ -19,11 +20,17 @@ if(!isset($_GET['op'])) {
 	exit;
 }
 switch($_GET['op']) {
+	case "getProximoRemito":
+		echo getProximoRemito();
+		break;
 	case "listaRemitos":
 		echo listaRemitos();
 		break;
 	case "putRemito":
 		echo putRemito();
+		break;
+	case "getRemito":
+		echo getRemito($_GET['id']);
 		break;
 	case "updateRemito":
 		echo updateRemito();
@@ -40,6 +47,18 @@ switch($_GET['op']) {
 	case "updateGrupo":
 		echo updateGrupo();
 		break;
+	case "listaSubgrupos":
+		echo listaSubgrupos();
+		break;
+	case "getSubgrupo":
+		echo getSubgrupo($_GET['id']);
+		break;
+	case "putSubgrupo":
+		echo putSubgrupo();
+		break;
+	case "updateSubgrupo":
+		echo updateSubgrupo();
+		break;
 	case "listaPerfiles":
 		echo listaPerfiles();
 		break;
@@ -51,6 +70,9 @@ switch($_GET['op']) {
 		break;
 	case "listaProductos":
 		echo listaProductos();
+		break;
+	case "listaProductosParaRemito":
+		echo listaProductosParaRemito();
 		break;
 	case "getProducto":
 		echo getProducto($_GET['id']);
@@ -64,8 +86,14 @@ switch($_GET['op']) {
 	case "listaUsuarios":
 		echo listaUsuarios();
 		break;
+	case "listaUsuariosParaRemito":
+		echo listaUsuariosParaRemito();
+		break;
 	case "getUsuario":
 		echo getUsuario($_GET['id']);
+		break;
+	case "getUsuarioPorNombre":
+		echo getUsuarioPorNombre($_GET['nombre']);
 		break;
 	case "putUsuario":
 		echo putUsuario();
@@ -73,9 +101,18 @@ switch($_GET['op']) {
 	case "updateUsuario":
 		echo updateUsuario();
 		break;
+	case "usuarioTieneRemito":
+		echo usuarioTieneRemito($_GET['id']);
+		break;
+	case "borrarUsuario":
+		echo borrarUsuario($_GET['id']);
+		break;
 	case "validarUsuario":
 		echo validarUsuario($_GET['usuario'],$_GET['password']);
 		break;	
+	case "borrarUsuario":
+		echo borrarUsuario($_GET['id']);
+		break;
 	case "listaIvas":
 		echo listaIvas();
 		break;
@@ -112,6 +149,9 @@ switch($_GET['op']) {
 	case "updateChofer":
 		echo updateChofer();
 		break;
+	case "borrarChofer":
+		echo borrarChofer($_GET['id']);
+		break;
 	case "listaEmpresas":
 		echo listaEmpresas();
 		break;
@@ -147,6 +187,15 @@ switch($_GET['op']) {
 		break;
 	case "updateDeposito":
 		echo updateDeposito();
+		break;
+	case "depositoTieneRemito":
+		echo depositoTieneRemito($_GET['id']);
+		break;
+	case "borrarDeposito":
+		echo borrarDeposito($_GET['id']);
+		break;
+	default:
+		echo "Operacion no permitida";
 		break;
 }
 
