@@ -1,0 +1,111 @@
+<div class="row">
+	<div class="well span6" id="listaSubgrupoForm">
+		<h4>Listado de Subgrupos</h4>
+		<hr>
+		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
+			<h4 class="alert-heading">Problema al obtener los Subgrupos.</h4>
+			<span data-bind="html: mensajeError"></span>
+		</div>	
+		<table data-bind="visible: !mostrarError()" class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Descripcion</th>
+					<th>Grupo</th>
+					<th data-bind="visible: isAdmin">Acciones</th>
+				</tr>
+			</thead>
+			<tbody data-bind="visible: cargando()">
+				<tr>
+					<td colspan="5">Cargando <i class="icon-refresh"></i></td>
+				</tr>
+			</tbody>
+			<tbody data-bind="visible: subgrupos().length == 0 && !cargando()">
+				<tr class="alert alert-info">
+					<td colspan="5">No hay Subgrupos en el sistema.</td>
+				</tr>
+			</tbody>		
+			<tbody data-bind="foreach: subgrupos(), visible: subgrupos().length > 0 && !cargando()">
+				<tr>
+					<td data-bind="text: id"></td>
+					<td data-bind="text: descripcion"></td>
+					<td data-bind="text: grupo"></td>
+					<td data-bind="visible: $parent.isAdmin">
+						<a href="#" data-bind="click: $root.editar" title="Editar"><i class="icon-edit"></i></a> 
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="form-actions" style="text-align:right ">
+			<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
+			<button id="volver" class="btn" data-bind="click: volver">Volver</button>
+		</div>
+	</div>
+</div>
+<script language="javascript">
+	function ListaSubgrupo() {
+		var self = this;
+
+		self.subgrupos = ko.observableArray();
+		self.cargando = ko.observable(true);
+		self.mostrarError = ko.observable(false);
+		self.mensajeError = ko.observable("Hubo un problema al buscar los Subgrupos.");
+		self.isAdmin = ko.computed(function() {
+			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
+		});
+
+		self.cargar = function() {
+			//Llamar a la base de datos
+			var exito = function(data) {
+				self.cargando(false);
+				for(i=0; i<data.data.length;i++) {
+					var newSubgrupo = new Subgrupo();
+					newSubgrupo.id = data.data[i].id;
+					newSubgrupo.descripcion = data.data[i].descripcion;
+					newSubgrupo.grupo = data.data[i].grupo;
+					self.subgrupos.push(newSubgrupo);
+				}
+			};
+			var falla = function(data) {
+				self.cargando(false);
+				if (data) {
+					self.mensajeError(data.responseText);
+				}
+				self.mostrarError(true);
+			};		
+			$.ajax({
+				url:"./servidor/sterilav.php?op=listaSubgrupos",
+				success:exito,
+				error:falla,
+				type:"GET",
+				dataType:"json"
+			});
+		};
+
+		self.volver = function() {
+			window.location.href = "./Index.html";
+		};
+		
+		self.nuevo = function() {
+			amplify.store.sessionStorage("sterilav.subgrupoEditado", null);		
+			$("#container").load("./cliente/paginas/subgrupo.html");		
+		};
+		
+		self.editar = function(subgrupo) {
+			amplify.store.sessionStorage("sterilav.subgrupoEditado", subgrupo.id);		
+			$("#container").load("./cliente/paginas/subgrupo.html?id=" + subgrupo.id);
+		};
+		
+		self.cargar();
+	};
+
+	function Subgrupo() {
+		var self = this;
+		self.id = "";
+		self.descripcion = "";
+		self.grupo = "";
+	};
+
+	var subgrupoModelo = new ListaSubgrupo();
+	ko.applyBindings(subgrupoModelo, document.getElementById("listaSubgrupoForm"));  
+</script>

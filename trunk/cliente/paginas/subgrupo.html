@@ -1,0 +1,139 @@
+<div class="row" id="subgrupoForm">
+	<div class="span5 well">
+		<h4 data-bind="text: title">Subgrupo</h4>
+		<hr>
+		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
+		<fieldset data-bind="with: subgrupoNuevo">
+			<div class="control-group" data-bind="validationElement: grupo">
+				<label class="control-label" for="selectGrupo">Grupo:</label>
+				<div class="controls">
+					<select id="selectGrupo" data-bind="options: $root.grupos, optionsText: 'descripcion', optionsValue: 'id', value: grupo" class="input-large"></select>
+					<span class="help-inline error" data-bind="validationMessage: grupo"></span>
+				</div>
+			</div>
+			<div class="control-group" data-bind="validationElement: descripcion">
+				<label class="control-label" for="inputDescripcion">Descripcion:</label>
+				<div class="controls">
+					<input type="text" id="inputDescripcion" data-bind="value: descripcion" class="input-large">
+					<span class="help-inline error" data-bind="validationMessage: descripcion"></span>
+				</div>
+			</div>
+			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
+				<h4 class="alert-heading">Error en el formulario!</h4>
+				Hay valores invalidos en el formulario.
+			</div>
+			<div data-bind="visible: $root.mostrarFormError" class="alert alert-error">
+				<span data-bind="text: $root.formErrorMensaje"></span>
+			</div>			
+			<div class="form-actions">
+				<button id="registro" class="btn btn-primary" data-bind="click: $root.registro">Salvar</button>
+				<button id="registro" class="btn" data-bind="click: $root.volver">Cancelar</button>
+			</div>
+		</fieldset>
+		</form>
+		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
+			<span data-bind="html: successMensaje"></span>
+		</div>
+		<div data-bind="visible: mostrarError" class="alert alert-error">
+			<span data-bind="text: errorMensaje"></span>
+		</div>
+	</div>
+</div>
+<script language="javascript">
+	function NuevoSubgrupo() {
+		var self = this;
+
+		self.title = ko.observable("Administrar Subgrupo");
+		self.mostrarForm = ko.observable(true);
+		self.mostrarSuccess = ko.observable(false);
+		self.successMensaje = ko.observable("");
+		self.mostrarError = ko.observable(false);
+		self.errorMensaje = ko.observable("");
+		self.mostrarFormError = ko.observable(false);
+		self.formErrorMensaje = ko.observable("");
+		self.grupos = ko.observableArray();
+		sterilav.cargaListas(self.grupos(), "Grupos");
+
+		self.subgrupoNuevo = ko.validatedObservable(new CSubgrupo());		
+				
+		self.cargar = function() {
+			var exito = function(data) {
+				if(data.status != "OK") {
+				} else {
+					self.subgrupoNuevo().descripcion(data.data.descripcion);
+					self.subgrupoNuevo().grupo(data.data.grupo);
+				}
+			};
+			var falla = function(data) {
+			};
+			getData("./servidor/sterilav.php?op=getSubgrupo&id=" + amplify.store.sessionStorage("sterilav.subgrupoEditado"),exito,falla);
+		};
+		
+		self.registro = function() {
+			self.subgrupoNuevo().errors.showAllMessages(true);
+			if (!self.subgrupoNuevo().isValid()) {
+				return;
+			}
+			//Guardar en la base de datos
+			self.mostrarFormError(false);
+			var exito = function(data) {
+				if(data.status != "OK") {
+					self.errorMensaje(data.data);
+					self.mostrarError(true);
+				} else {
+					self.mostrarForm(false);
+					self.successMensaje(data.data + "<br><a href='#' onclick='abrir();'>Volver</a>");
+					self.mostrarSuccess(true);
+					amplify.store.sessionStorage("sterilav.subgrupoEditado", null);
+				}
+			};
+			var falla = function(data) {
+				if(data.data) {
+					self.formErrorMensaje(data.data);
+				} else {
+					self.formErrorMensaje("Hubo un error tratando de actualizar el Subgrupo.");
+				}
+				self.mostrarFormError(true);				
+			};
+			var subgrupoCreado = {
+				id: amplify.store.sessionStorage("sterilav.subgrupoEditado"),
+				descripcion: self.subgrupoNuevo().descripcion(),
+				grupo: self.subgrupoNuevo().grupo()
+			};
+			var url = "";
+			if(amplify.store.sessionStorage("sterilav.subgrupoEditado")) {
+				url = "./servidor/sterilav.php?op=updateSubgrupo";
+			} else {
+				url = "./servidor/sterilav.php?op=putSubgrupo";
+			}
+			postData(url,exito,falla,subgrupoCreado);
+		};
+
+		self.ingreso = function() {
+			$("#container").load("./cliente/paginas/login.html");
+		};
+		self.volver = function() {
+			amplify.store.sessionStorage("sterilav.subgrupoEditado", null);
+			window.location.href = "./Index.html";
+		};
+		
+		if(amplify.store.sessionStorage("sterilav.subgrupoEditado")) {
+			self.cargar();
+		}
+	};
+
+	function CSubgrupo() {
+		var self = this;
+		
+		self.id = ko.observable();
+		self.descripcion = ko.observable().extend({required: true});
+		self.grupo = ko.observable().extend({required: true});
+	};
+
+	function abrir() {
+		$("#container").load("./cliente/paginas/listaSubgrupos.html");
+	}
+	
+	var subgrupoModelo = new NuevoSubgrupo();
+	ko.applyBindings(subgrupoModelo, document.getElementById("subgrupoForm"));  	
+</script>

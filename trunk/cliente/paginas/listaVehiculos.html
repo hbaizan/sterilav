@@ -1,0 +1,106 @@
+<div class="row">
+	<div class="well span6" id="listaVehiculoForm">
+		<h4>Listado de Vehiculos</h4>
+		<hr>
+		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
+			<h4 class="alert-heading">Problema al obtener los Vehiculos.</h4>
+			<span data-bind="html: mensajeError"></span>
+		</div>	
+		<table data-bind="visible: !mostrarError()" class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Patente</th>
+					<th data-bind="visible: isAdmin">Acciones</th>
+				</tr>
+			</thead>
+			<tbody data-bind="visible: cargando()">
+				<tr>
+					<td colspan="5">Cargando <i class="icon-refresh"></i></td>
+				</tr>
+			</tbody>
+			<tbody data-bind="visible: vehiculos().length == 0 && !cargando()">
+				<tr class="alert alert-info">
+					<td colspan="5">No hay Vehiculos en el sistema.</td>
+				</tr>
+			</tbody>		
+			<tbody data-bind="foreach: vehiculos(), visible: vehiculos().length > 0 && !cargando()">
+				<tr>
+					<td data-bind="text: id"></td>
+					<td data-bind="text: patente"></td>
+					<td data-bind="visible: $parent.isAdmin">
+						<a href="#" data-bind="click: $root.editar" title="Editar"><i class="icon-edit"></i></a> 
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="form-actions" style="text-align:right ">
+			<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
+			<button id="volver" class="btn" data-bind="click: volver">Volver</button>
+		</div>
+	</div>
+</div>
+<script language="javascript">
+	function ListaVehiculo() {
+		var self = this;
+
+		self.vehiculos = ko.observableArray();
+		self.cargando = ko.observable(true);
+		self.mostrarError = ko.observable(false);
+		self.mensajeError = ko.observable("Hubo un problema al buscar los Vehiculos.");
+		self.isAdmin = ko.computed(function() {
+			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
+		});
+
+		self.cargar = function() {
+			//Llamar a la base de datos
+			var exito = function(data) {
+				self.cargando(false);
+				for(i=0; i<data.data.length;i++) {
+					var newVehiculo = new Vehiculo();
+					newVehiculo.id = data.data[i].id;
+					newVehiculo.patente = data.data[i].patente;
+					self.vehiculos.push(newVehiculo);
+				}
+			};
+			var falla = function(data) {
+				self.cargando(false);
+				if (data) {
+					self.mensajeError(data.responseText);
+				}
+				self.mostrarError(true);
+			};		
+			$.ajax({
+				url:"./servidor/sterilav.php?op=listaVehiculos",
+				success:exito,
+				error:falla,
+				type:"GET",
+				dataType:"json"
+			});
+		};
+
+		self.volver = function() {
+			window.location.href = "./Index.html";
+		};
+		
+		self.nuevo = function() {
+			amplify.store.sessionStorage("sterilav.vehiculoEditado", null);		
+			$("#container").load("./cliente/paginas/vehiculo.html");		
+		};
+		
+		self.editar = function(vehiculo) {
+			amplify.store.sessionStorage("sterilav.vehiculoEditado", vehiculo.id);
+			$("#container").load("./cliente/paginas/vehiculo.html?id=" + vehiculo.id);
+		};
+		
+		self.cargar();
+	};
+
+	function Vehiculo() {
+		var self = this;
+		self.patente = "";
+	};
+
+	var vehiculoModelo = new ListaVehiculo();
+	ko.applyBindings(vehiculoModelo, document.getElementById("listaVehiculoForm"));  
+</script>
