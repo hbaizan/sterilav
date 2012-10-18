@@ -1,0 +1,127 @@
+<div class="row" id="vehiculoForm">
+	<div class="span5 well">
+		<h4 data-bind="text: title">Vehiculo</h4>
+		<hr>
+		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
+		<fieldset data-bind="with: vehiculoNuevo">
+			<div class="control-group" data-bind="validationElement: patente">
+				<label class="control-label" for="inputPatente">Patente:</label>
+				<div class="controls">
+					<input type="text" id="inputPatente" data-bind="value: patente" class="input-large">
+					<span class="help-inline error" data-bind="validationMessage: patente"></span>
+				</div>
+			</div>
+			<div data-bind="visible: isAnyMessageShown()" class="alert alert-block" id="errorMsg">
+				<h4 class="alert-heading">Error en el formulario!</h4>
+				Hay valores invalidos en el formulario.
+			</div>
+			<div data-bind="visible: $root.mostrarFormError" class="alert alert-error">
+				<span data-bind="text: $root.formErrorMensaje"></span>
+			</div>			
+			<div class="form-actions">
+				<button id="registro" class="btn btn-primary" data-bind="click: $root.registro">Salvar</button>
+				<button id="registro" class="btn" data-bind="click: $root.volver">Cancelar</button>
+			</div>
+		</fieldset>
+		</form>
+		<div data-bind="visible: mostrarSuccess" class="alert alert-success">
+			<span data-bind="html: successMensaje"></span>
+		</div>
+		<div data-bind="visible: mostrarError" class="alert alert-error">
+			<span data-bind="text: errorMensaje"></span>
+		</div>		
+	</div>
+</div>
+<script language="javascript">
+	function NuevoVehiculo() {
+		var self = this;
+
+		self.title = ko.observable("Administrar Vehiculo");
+		self.mostrarForm = ko.observable(true);
+		self.mostrarSuccess = ko.observable(false);
+		self.successMensaje = ko.observable("");
+		self.mostrarError = ko.observable(false);
+		self.errorMensaje = ko.observable("");
+		self.mostrarFormError = ko.observable(false);
+		self.formErrorMensaje = ko.observable("");
+
+		self.vehiculoNuevo = ko.validatedObservable(new CVehiculo());		
+				
+		self.cargar = function() {
+			var exito = function(data) {
+				if(data.status != "OK") {
+				} else {
+					self.vehiculoNuevo().patente(data.data.patente);
+				}
+			};
+			var falla = function(data) {
+			};
+			getData("./servidor/sterilav.php?op=getVehiculo&id=" + amplify.store.sessionStorage("sterilav.vehiculoEditado"),exito,falla);
+		};
+		
+		self.registro = function() {
+			self.vehiculoNuevo().errors.showAllMessages(true);
+			if (!self.vehiculoNuevo().isValid()) {
+				return;
+			}
+			//Guardar en la base de datos
+			self.mostrarFormError(false);
+			var exito = function(data) {
+				if(data.status != "OK") {
+					$("#errorMsg").show();
+					$("#errorMsg").append(data.data);
+				} else {
+					self.mostrarForm(false);
+					self.successMensaje(data.data + "<br><a href='#' onclick='abrir();'>Volver</a>");
+					self.mostrarSuccess(true);
+					amplify.store.sessionStorage("sterilav.vehiculoEditado", null);
+				}
+			};
+			var falla = function(data) {
+				if(data.data) {
+					self.formErrorMensaje(data.data);
+				} else {
+					self.formErrorMensaje("Hubo un error tratando de actualizar el vehiculo.");
+				}
+				self.mostrarFormError(true);				
+			};
+			var vehiculoCreado = {
+				id: amplify.store.sessionStorage("sterilav.vehiculoEditado"),
+				patente: self.vehiculoNuevo().patente()
+			};
+			var url = "";
+			if(amplify.store.sessionStorage("sterilav.vehiculoEditado")) {
+				url = "./servidor/sterilav.php?op=updateVehiculo";
+			} else {
+				url = "./servidor/sterilav.php?op=putVehiculo";
+			}
+			postData(url,exito,falla,vehiculoCreado);
+		};
+
+		self.ingreso = function() {
+			$("#container").load("./cliente/paginas/login.html");
+		};
+		self.volver = function() {
+			amplify.store.sessionStorage("sterilav.vehiculoEditado", null);
+			window.location.href = "./Index.html";
+		};
+		
+		if(amplify.store.sessionStorage("sterilav.vehiculoEditado")) {
+			self.cargar();
+		}
+	};
+
+	function CVehiculo() {
+		var self = this;
+		
+		self.id = ko.observable();
+		self.patente = ko.observable().extend({required: true});
+	};
+
+	function abrir() {
+		$("#container").load("./cliente/paginas/listaVehiculos.html");
+	}
+		
+	var vehiculoModelo = new NuevoVehiculo();
+	ko.applyBindings(vehiculoModelo, document.getElementById("vehiculoForm"));  	
+</script>

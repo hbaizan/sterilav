@@ -30,12 +30,28 @@ function listaProductosParaRemito() {
 	
 	$result = '{"status":"OK","data":[';
 	while($row = mysql_fetch_assoc($recordset)) {
+		//Para cada producto, busco el ultimo remito de salida
+		$queryrem = "SELECT MAX(idremito) AS idremito FROM remito WHERE remito_tipo_idremito_tipo=3 AND deposito_iddeposito=".$row['deposito_iddeposito'];
+		$recordrem = mysql_query($queryrem, $conn) or die(mysql_error());
+		$idremito = 0;
+		if($rowrem = mysql_fetch_assoc($recordrem)) {
+			$idremito = $rowrem['idremito'];
+		}
+		//Si hay remito de salida, busco el producto para ver si tiene faltanta
+		if($idremito != 0) {
+			$queryprod = "SELECT * FROM remito_has_producto WHERE producto_idproducto=".$row['producto_idproducto']." AND remito_idremito=$idremito";
+			$recordprod = mysql_query($queryprod, $conn) or die(mysql_error());
+			$faltante = 0;
+			if($rowprod = mysql_fetch_assoc($recordprod)) {
+				$faltante = $rowprod['cantidad_faltante'];
+			}
+		}
 		$result .= '{"codigo":"'.$row['producto_idproducto'].'",';
 		$result .= '"deposito":"'.$row['deposito_iddeposito'].'",';
 		$result .= '"descripcion":"'.$row['producto_nombre'].'",';
-		$result .= '"faltante":"'.$row['cantidad_tope'].'",';
-		$result .= '"stock":"'.$row['stock_inicial'].'",';
-		$result .= '"capita":"'.$row['deposito_capita'].'"';
+		$result .= '"faltante":'.$faltante.',';
+		$result .= '"stock":'.$row['stock_inicial'].',';
+		$result .= '"capita":'.$row['deposito_capita'];
 		$result .= '},';
 	}
 	if(mysql_num_rows($recordset)>0) {
@@ -79,8 +95,8 @@ function listaProductosPorRemito($idremito) {
 	while($row = mysql_fetch_assoc($recordset)) {
 		$result .= '{"codigo":"'.$row['producto_idproducto'].'",';
 		$result .= '"descripcion":"'.$row['producto_nombre'].'",';
-		$result .= '"entrega":"'.$row['cantidad_real'].'",';
-		$result .= '"retira":"'.($row['cantidad_real']+$row['cantidad_faltante']).'",';
+		$result .= '"entrega":"'.($row['ingreso']+$row['cantidad_faltante']).'",';
+		$result .= '"retira":"'.$row['egreso'].'",';
 		$result .= '"faltante":"'.$row['cantidad_faltante'].'"';
 		$result .= '},';
 	}

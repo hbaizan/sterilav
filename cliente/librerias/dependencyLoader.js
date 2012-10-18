@@ -31,6 +31,7 @@ Pyramid.newDependency({
 name:'main',
 files: [
 	'Index.js',
+	'clases/vehiculo.js',
 	'clases/deposito.js',
 	'clases/empresa.js',	
 	'clases/chofer.js',

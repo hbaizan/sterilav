@@ -64,11 +64,11 @@ function putRemito() {
 	$deposito = $_POST['deposito']['id'];
 	$chofer = $_POST['chofer']['id'];
 	$tipo = 1;
-	$vehiculo = 1;
+	$vehiculo = $_POST['vehiculo']['id'];
 	$fecha = $_POST['fecha'];
-	$entrega = 0;
-	$retiro = 0;
-	$observaciones = "";
+	$entrega = $_POST['horaEntrega'];
+	$retiro = $_POST['horaRetiro'];
+	$observaciones = $_POST['observaciones'];
 	
 	$query = "INSERT INTO remito (deposito_iddeposito, chofer_idchofer, remito_tipo_idremito_tipo, vehiculo_idvehiculo, ";
 	$query .= "remito_fecha, remito_hora_entrega, remito_hora_retiro, remito_observaciones, persona_idpersona)";

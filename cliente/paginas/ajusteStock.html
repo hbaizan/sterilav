@@ -1,0 +1,110 @@
+<div class="row">
+	<div class="well span6" id="ajusteStockForm">
+		<h4>Ajuste de Stock</h4>
+		<hr>
+		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
+			<h4 class="alert-heading">Problema al obtener los Productos.</h4>
+			<span data-bind="html: mensajeError"></span>
+		</div>
+		<div class="form-horizontal">
+			<div>
+				<div class="controls-row">
+					<label class="control-label" for="selectEmpresa">Deposito:&nbsp;&nbsp;</label>
+					<select id="selectEmpresa" data-bind="options: empresas, optionsText: 'razonSocial', value: empresa" class="span2"></select>
+					<select id="selectDeposito" data-bind="options: empresa().depositos, optionsText: 'nombre', value: deposito" class="span2"></select>
+				</div>
+				<br>					
+			</div>					
+		</div>
+		<table data-bind="visible: !mostrarError()" class="table table-striped table-bordered">
+			<thead>
+				<tr>
+					<th>Codigo</th>
+					<th>Descripcion</th>
+					<th>Stock</th>
+				</tr>
+			</thead>
+			<tbody data-bind="visible: cargando()">
+				<tr>
+					<td colspan="5">Cargando <i class="icon-refresh"></i></td>
+				</tr>
+			</tbody>
+			<tbody data-bind="visible: productosFiltrados().length==0 && !cargando()">
+				<tr class="alert alert-info">
+					<td colspan="5">No hay Productos para este deposito.</td>
+				</tr>
+			</tbody>		
+			<tbody data-bind="foreach: productosFiltrados, visible: productosFiltrados().length>0 && !cargando()">
+				<tr>
+					<td data-bind="text: codigo"></td>
+					<td data-bind="text: descripcion"></td>
+					<td data-bind="text: stock"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<script language="javascript">
+	function AjusteStock() {
+		var self = this;
+
+		self.empresas = ko.observableArray();
+		self.empresa = ko.observable();
+		self.deposito = ko.observable();
+		sterilav.cargaListas(self.empresas(), "Empresas");
+		self.productos = ko.observableArray();
+		sterilav.cargaListas(self.productos(), "ProductosParaRemito");
+		self.empresa(self.empresas()[0].id);
+		self.deposito(self.empresas()[0].depositos[0].id);		
+		self.productosFiltrados = ko.computed(function() {
+ 			return ko.utils.arrayFilter(self.productos(), function(item) {
+            	return item.deposito == self.deposito().id;
+        	});		
+		}, this);
+		
+		
+		self.cargando = ko.observable(false);
+		self.mostrarError = ko.observable(false);
+		self.mensajeError = ko.observable("");
+
+		self.cargar = function() {
+			self.cargando(true);
+			var exito = function(data) {
+				for(i=0; i<data.data.length;i++) {
+					var newChofer = new Chofer();
+					newChofer.id = data.data[i].id;
+					newChofer.nombre = data.data[i].nombre;
+					newChofer.apellido = data.data[i].apellido;
+					self.choferes.push(newChofer);
+				}
+				self.cargando(false);
+			};
+			var falla = function(data) {
+				self.cargando(false);
+				if (data) {
+					self.mensajeError(data.responseText);
+				}
+				self.mostrarError(true);
+			};		
+			$.ajax({
+				url:"./servidor/sterilav.php?op=listaChoferes",
+				success:exito,
+				error:falla,
+				type:"GET",
+				dataType:"json"
+			});
+		};
+
+		self.volver = function() {
+			window.location.href = "./Index.html";
+		};
+
+		self.actualizar = function() {
+			console.log("actualizando");
+		};
+		
+	};
+
+	var ajusteStock = new AjusteStock();
+	ko.applyBindings(ajusteStock, document.getElementById("ajusteStockForm"));  
+</script>
