@@ -15,10 +15,10 @@ function CRemito() {
 
 		self.id(jsonData.id);
 		self.deposito(new CDeposito());
-		self.deposito().cargar(jsonData.deposito);
-		self.empresa().cargar(jsonData.empresa);
+		//self.deposito().cargar(jsonData.deposito);
+		//self.empresa().cargar(jsonData.empresa);
 		self.persona(jsonData.persona);
-		self.chofer().cargar(jsonData.chofer);
+		//self.chofer().cargar(jsonData.chofer);
 		self.fecha(jsonData.fecha);
 		self.tipo(jsonData.tipo);
 	};	

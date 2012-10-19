@@ -17,7 +17,7 @@ function CDeposito() {
 		self.nombre(jsonData.nombre);
 		self.domicilio(jsonData.domicilio);
 		self.departamento(jsonData.departamento);
-		self.empresa().cargar(jsonData.empresa);
+		self.empresa().cargar(jsonData.idempresa);
 		self.remito(jsonData.remito);
 		self.activo(jsonData.activo);
 	};

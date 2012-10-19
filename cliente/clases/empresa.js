@@ -7,22 +7,24 @@ function CEmpresa() {
 	self.iva = ko.observable().extend({required: true});
 
 	self.cargar = function(jsonData) {
-		console.log("inicia carga Empresa");
-		var exitoEmpresa = function(empData){
-			self.id(empData.data.id);
-			self.razonSocial(empData.data.razonSocial);
-			self.cuit(empData.data.cuit);
-			self.iva(empData.data.iva);
-		};
-		var fallaEmpresa = function(empError){
-		};
-		if(!jsonData.id) {
-			getDataSync("./servidor/sterilav.php?op=getEmpresa&id=" + jsonData,exitoEmpresa,fallaEmpresa);
-		} else {
-			self.id(jsonData.id);
-			self.razonSocial(jsonData.razonSocial);
-			self.cuit(jsonData.cuit);
-			self.iva(jsonData.iva);
+		if(jsonData) {
+			console.log("inicia carga Empresa");
+			var exitoEmpresa = function(empData){
+				self.id(empData.data.id);
+				self.razonSocial(empData.data.razonSocial);
+				self.cuit(empData.data.cuit);
+				self.iva(empData.data.iva);
+			};
+			var fallaEmpresa = function(empError){
+			};
+			if(!jsonData.id) {
+				getDataSync("./servidor/sterilav.php?op=getEmpresa&id=" + jsonData,exitoEmpresa,fallaEmpresa);
+			} else {
+				self.id(jsonData.id);
+				self.razonSocial(jsonData.razonSocial);
+				self.cuit(jsonData.cuit);
+				self.iva(jsonData.iva);
+			}
 		}
 	};
 	

@@ -129,7 +129,7 @@
 							<a href="#" data-bind="click: $root.aceptar, attr: {id: 'saveProd' + $data.codigo()}" style="display:none;"><i class="icon-ok"></i></a>
 						</td>
 						<td data-bind="visible: faltante() > 0">
-							Faltante: <span data-bind="text: faltante"></span>
+							<span class="label">Faltante: <span data-bind="text: faltante"></span></span>
 						</td>
 					</tr>
 				</tbody>
@@ -244,7 +244,7 @@
 			produ.descripcion(prod.descripcion());
 			produ.deposito(prod.deposito());
 			produ.faltante(prod.faltante());
-			self.codigos.push(produ);
+			self.codigos().push(produ);
 		};
 						
 		self.aceptar = function(prod) {
@@ -318,7 +318,7 @@
 			getDataSync("./servidor/sterilav.php?op=listaVehiculos",exitoVehiculo,fallaVehiculo);
 		};
 		self.cargaProductos = function() {
-			var exitoProducto = function(productos) {
+			var exitoDelProducto = function(productos) {
 				if(productos.status != "OK") {
 				} else {
 					for(var i=0; i< productos.data.length; i++) {
@@ -328,7 +328,7 @@
 			};
 			var fallaProducto = function(data) {
 			};
-			getDataSync("./servidor/sterilav.php?op=listaProductosParaRemito",exitoProducto,fallaProducto);
+			getDataSync("./servidor/sterilav.php?op=listaProductosParaRemito",exitoDelProducto,fallaProducto);
 		};
 		self.cargaPersonas = function() {
 			var exitoPersona = function(personas) {
@@ -431,9 +431,9 @@
 		} else {
 			$("#guardar").text("Guardar");
 		}
+		self.cargaProductos();
 		self.cargaPersonas();
 		self.cargaEmpresas();
-		self.cargaProductos();
 		self.cargaChoferes();
 		self.cargaVehiculos();		
 		var exitoprox = function(data) {

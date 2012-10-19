@@ -71,7 +71,6 @@ function Pantalla() {
 	self.aplicacion = ko.observable("");
 	
 	self.abrir = function(item) {
-		amplify.store.sessionStorage("sterilav.remitoEditado", null);
 		if(self.esNuevoObjeto(item.aplicacion)) {
 			self.limpiarObjetos();
 		}

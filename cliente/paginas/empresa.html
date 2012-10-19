@@ -146,15 +146,6 @@
 		
 	};
 
-	function CEmpresa() {
-		var self = this;
-		
-		self.id = ko.observable();
-		self.razonSocial = ko.observable().extend({required: true});
-		self.cuit = ko.observable().extend({required: true});
-		self.iva = ko.observable().extend({required: true});
-	};
-
 	function abrir() {
 		$("#container").load("./cliente/paginas/listaEmpresas.html");
 	}
