@@ -34,6 +34,7 @@ function listaProductosParaRemito() {
 		$queryrem = "SELECT MAX(idremito) AS idremito FROM remito WHERE remito_tipo_idremito_tipo=3 AND deposito_iddeposito=".$row['deposito_iddeposito'];
 		$recordrem = mysql_query($queryrem, $conn) or die(mysql_error());
 		$idremito = 0;
+		$faltante = 0;
 		if($rowrem = mysql_fetch_assoc($recordrem)) {
 			$idremito = $rowrem['idremito'];
 		}
@@ -41,10 +42,12 @@ function listaProductosParaRemito() {
 		if($idremito != 0) {
 			$queryprod = "SELECT * FROM remito_has_producto WHERE producto_idproducto=".$row['producto_idproducto']." AND remito_idremito=$idremito";
 			$recordprod = mysql_query($queryprod, $conn) or die(mysql_error());
-			$faltante = 0;
 			if($rowprod = mysql_fetch_assoc($recordprod)) {
 				$faltante = $rowprod['cantidad_faltante'];
 			}
+		}
+		if($faltante=='' || !isset($faltante)) {
+			$faltante=0;
 		}
 		$result .= '{"codigo":"'.$row['producto_idproducto'].'",';
 		$result .= '"deposito":"'.$row['deposito_iddeposito'].'",';

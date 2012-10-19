@@ -294,19 +294,6 @@
 		}
 	};
 
-	function CDeposito() {
-		var self = this;
-		
-		self.id = ko.observable();
-		self.nombre = ko.observable().extend({required: true});
-		self.domicilio = ko.observable().extend({required: true});
-		self.departamento = ko.observable().extend({required: true});
-		self.empresa = ko.observable().extend({required: true});
-		self.remito = ko.observable(false).extend({required: true});
-		self.activo = ko.observable(false).extend({required: true});		
-		self.productos = ko.observableArray();		
-	};
-
 	function abrir() {
 		$("#container").load("./cliente/paginas/listaDepositos.html");
 	}
