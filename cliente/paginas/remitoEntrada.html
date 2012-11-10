@@ -2,9 +2,9 @@
 	<div class="print">		
 	<div>
 		<div class="span8 well" data-bind="visible: $root.mostrarForm">
-			<h4>Remito Numero: <span data-bind="text: id"></span></h4>
+			<h4><span data-bind="text: tipoRemito"></span> Numero: <span data-bind="text: id"></span></h4>
 			<hr>
-			<table width="100%">
+			<table width="100%" id="datosRemito">
 				<tr>
 					<td><label class="span2 label" for="selectEmpresa">Fecha:</label></td>
 					<td><input class="input-small uneditable-input" readonly="" id="inputFecha" data-bind="value: fecha" /></td>
@@ -20,45 +20,42 @@
 				<tr>
 					<td><label class="span2 label" for="selectEmpresa">Cliente:</label></td>
 					<td>
-						<input class="span3 uneditable-input" readonly="" id="inputPersona" data-bind="value: persona().nombre" />
-					</td>
-					<td>
 						<!-- ko ifnot: $root.editando() -->
-							<select id="selectEmpresa" data-bind="options: $root.empresas, optionsText: 'razonSocial', value: empresa" class="span2"></select>
+							<select id="selectEmpresa" data-bind="options: $root.empresas, optionsText: 'razonSocial', value: empresa" class="span4"></select>
 						<!-- /ko -->
 						<!-- ko if: $root.editando() -->
-							<input class="span2 uneditable-input" readonly="" id="inputEmpresa" data-bind="value: empresa().razonSocial" />
+							<input class="span2 uneditable-input" readonly="" id="inputEmpresa" data-bind="value: empresa() ? empresa().razonSocial: ''" />
 						<!-- /ko -->
 					</td>
-					<td>
+					<td colspan="2">
 						<!-- ko ifnot: $root.editando() -->
-							<select id="selectDeposito" data-bind="options: empresa().depositos, optionsText: 'nombre', value: deposito" class="span2"></select>
+							<select id="selectDeposito" data-bind="options: empresa().depositos, optionsText: 'nombre', value: deposito" class="span4"></select>
 						<!-- /ko -->
 						<!-- ko if: $root.editando() -->
-							<input class="span2 uneditable-input" readonly="" id="inputDeposito" data-bind="value: deposito().nombre" />
+							<input class="span2 uneditable-input" readonly="" id="inputDeposito" data-bind="value: deposito() ? deposito().nombre : ''" />
 						<!-- /ko -->
 					</td>
 				</tr>
 				<tr>
 					<td><label class="span2 label" for="inputApellido">Domicilio:</label></td>
-					<td colspan="3"><input class="span6 uneditable-input" readonly="" id="inputApellido" data-bind="value: deposito().domicilio"></input></td>
+					<td colspan="3"><input class="span6 uneditable-input" readonly="" id="inputApellido" data-bind="value: deposito() ? deposito().domicilio : ''"></input></td>
 				</tr>
 				<tr>
 					<td><label class="span2 label" for="inputCalle">Departamento:</label></td>
-					<td><input class="span3 uneditable-input" readonly="" id="inputCalle" data-bind="value: deposito().departamento"></input></td>
+					<td><input class="span3 uneditable-input" readonly="" id="inputCalle" data-bind="value: deposito() ? deposito().departamento : ''"></input></td>
 					<td><label class="span2 label" for="inputCUIT">N&uacute;mero de CUIT :</label></td>
-					<td><input class="input-medium uneditable-input" readonly="" id="inputCUIT" data-bind="value: empresa().cuit"></input></td>
+					<td><input class="input-medium uneditable-input" readonly="" id="inputCUIT" data-bind="value: empresa() ? empresa().cuit : ''"></input></td>
 				</tr>
 				<tr>
 					<td><label class="span2 label" for="inputIVA">Condici&oacute;n de IVA:</label></td>
-					<td><input class="span3 uneditable-input" readonly="" id="inputIVA" data-bind="value: empresa().iva"></input></td>
+					<td><input class="span3 uneditable-input" readonly="" id="inputIVA" data-bind="value: empresa() ? empresa().iva : ''"></input></td>
 					<td><label class="span2 label" for="selectChofer">Chofer:</label></td>
 					<td>
 						<!-- ko ifnot: $root.editando() -->
 							<select id="selectChofer" data-bind="options: $root.choferes, optionsText: 'nombre', value: chofer" class="span2"></select>
 						<!-- /ko -->
 						<!-- ko if: $root.editando() -->
-							<input class="span2 uneditable-input" readonly="" id="inputChofer" data-bind="value: chofer().nombre" />
+							<input class="span2 uneditable-input" readonly="" id="inputChofer" data-bind="value: chofer() ? chofer().nombre : ''" />
 						<!-- /ko -->
 					</td>
 				</tr>
@@ -69,7 +66,7 @@
 							<select id="selectVehiculo" data-bind="options: $root.vehiculos, optionsText: 'patente', value: vehiculo"></select>
 						<!-- /ko -->
 						<!-- ko if: $root.editando() -->
-							<input class="span2 uneditable-input" readonly="" id="inputVehiculo" data-bind="value: vehiculo().patente" />
+							<input class="span2 uneditable-input" readonly="" id="inputVehiculo" data-bind="value: vehiculo() ? vehiculo().patente : ''" />
 						<!-- /ko -->
 					</td>
 				</tr>
@@ -92,17 +89,17 @@
 				<thead>
 					<tr>
 						<th>Codigo</th>
+						<th>Descripcion</th>
 						<th>Entrega</th>
 						<th>Retira</th>
-						<th>Descripcion</th>
 					</tr>
 				</thead>
 				<tbody class="table table-condensed">
 					<tr>
-						<td><select rel="noprint" type="text" id="inputCodigo" data-bind="visible: $parent.productos().length > 0, options: $parent.productos, optionsText: 'codigo', value: $parent.codigoSeleccionado" class="input-medium"></select></td>
-						<td><input rel="noprint" type="text" id="inputEntrega" class="input-small" data-bind="visible: $parent.productos().length > 0"></td>
-						<td><input rel="noprint" type="text" id="inputRetira" class="input-small" data-bind="visible: $parent.productos().length > 0"></td>
-						<td><input rel="noprint" type="text" id="inputDescripcion" data-bind="visible: $parent.productos().length > 0, value: $parent.codigoSeleccionado() ? $parent.codigoSeleccionado().descripcion : ''" class="input-medium" disabled></td>
+						<td colspan="2"><select rel="noprint" type="text" id="inputCodigo" data-bind="visible: $parent.productos().length > 0, options: $parent.productos, optionsText: 'codigoTexto', value: $parent.codigoSeleccionado" class="span3"></select></td>
+						<td><input rel="noprint" type="text" id="inputEntrega" class="input-small" data-bind="visible: $parent.productos().length > 0" placeholder="0"></td>
+						<td><input rel="noprint" type="text" id="inputRetira" class="input-small" data-bind="visible: $parent.productos().length > 0" placeholder="0"></td>
+						<!--<td><input rel="noprint" type="text" id="inputDescripcion" data-bind="visible: $parent.productos().length > 0, value: $parent.codigoSeleccionado() ? $parent.codigoSeleccionado().descripcion : ''" class="input-medium" disabled></td>-->
 						<td><input type="button" rel="noprint" id="registro" class="btn" data-bind="visible: $parent.productos().length > 0, click: $parent.agregar" value="Agregar" /></td>
 					</tr>
 				</tbody>
@@ -114,15 +111,15 @@
 						<td>
 							<span data-bind="text: codigo, attr: {id: 'showCodigo' + $data.codigo()}"></span>
 						</td>
+						<td data-bind="text: descripcion"></td>
 						<td>
-							<input data-bind="value: entrega, attr: {id: 'editEntrega' + $data.codigo()}" style="display:none;" class="input-medium">
+							<input data-bind="value: entrega, attr: {id: 'editEntrega' + $data.codigo()}" style="display:none;" class="input-medium" placeholder="0">
 							<span data-bind="text: entrega, attr: {id: 'showEntrega' + $data.codigo()}"></span>
 						</td>
 						<td>
-							<input data-bind="value: retira, attr: {id: 'editRetira' + $data.codigo()}" style="display:none;" class="input-medium">
+							<input data-bind="value: retira, attr: {id: 'editRetira' + $data.codigo()}" style="display:none;" class="input-medium" placeholder="0">
 							<span data-bind="text: retira, attr: {id: 'showRetira' + $data.codigo()}"></span>
 						</td>
-						<td data-bind="text: descripcion"></td>
 						<td>
 							<a href="#" data-bind="click: $root.editar, attr: {id: 'editProd' + $data.codigo()}"><i class="icon-edit"></i></a> 
 							<a href="#" data-bind="click: $root.borrar, attr: {id: 'delProd' + $data.codigo()}"><i class="icon-remove"></i></a> 
@@ -169,7 +166,7 @@
 		
 		self.id = ko.observable(null);
 		self.tipo = ko.observable("1");
-		/*self.tipoRemito = ko.computed(function() {
+		self.tipoRemito = ko.computed(function() {
 			if(self.tipo()=="1") {
 				return "Remito";
 			} else if (self.tipo()=="2") {
@@ -177,7 +174,7 @@
 			} else if (self.tipo()=="3") {
 				return "Remito";
 			}
-		});*/
+		});
 		self.deposito = ko.observable(null);
 		self.empresa = ko.observable(null);
 		self.persona = ko.observable(null);
@@ -189,6 +186,7 @@
 		self.horaEntrega = ko.observable(nuevafecha.getHours() + ":" + nuevafecha.getMinutes());
 		self.horaRetiro = ko.observable(nuevafecha.getHours() + ":" + nuevafecha.getMinutes());
 		self.vehiculo = ko.observable(null);
+		self.editando = ko.observable(amplify.store.sessionStorage("sterilav.remitoEditado"));
 	}
 	
 	function RemitoModelo() {
@@ -209,6 +207,7 @@
 		self.empresas = ko.observableArray();
 		self.choferes = ko.observableArray();
 		self.vehiculos = ko.observableArray();
+		self.productos = ko.observable();
 		
 		self.remito = ko.validatedObservable(new Remito());
 		self.editando = ko.observable(amplify.store.sessionStorage("sterilav.remitoEditado"));
@@ -352,21 +351,15 @@
 		};
 		
 		self.generar = function() {
-			console.log("Generando");
 			self.remito().errors.showAllMessages(true);
-			/*if (!self.remito().isValid()) {
-				self.remito().showAllMessages();
-				self.errorMensaje("Hay datos invalidos. Por favor controle el remito.");
-				self.mostrarError(true);				
-				return;
-			}*/
 			var exito = function(data) {
 				if(data.status != "OK") {
 					self.errorMensaje(data.data);
-					self.mostrarError(true);				
+					self.mostrarError(true);
 				} else {
+					self.mostrarError(false);
 					self.mostrarForm(false);
-					self.successMensaje("El Remito de Entrada se ha generado.");
+					self.successMensaje(data.data);
 					self.mostrarSuccess(true);
 					amplify.store.sessionStorage("sterilav.remitoEditado", null);
 				}
@@ -402,6 +395,7 @@
 					self.remito().chofer = ko.observable(new CChofer());
 					self.remito().vehiculo = ko.observable(new CVehiculo());
 					self.remito().deposito().cargar(data.data.deposito);
+					self.remito().tipo(data.data.tipo);
 					self.remito().empresa().cargar(data.data.empresa);
 					self.remito().chofer().cargar(data.data.chofer);
 					self.remito().vehiculo().cargar(data.data.vehiculo);
@@ -414,10 +408,11 @@
 						linea.deposito(data.data.productos[i].deposito);			
 						linea.faltante(data.data.productos[i].faltante);			
 						linea.retira(data.data.productos[i].retira);			
-						linea.entrega(data.data.productos[i].entrega);			
+						linea.entrega(data.data.productos[i].entrega);
 						self.remito().lineaRemitos.push(linea);
 					}
 					self.remito().observaciones(data.data.observaciones);
+					ko.applyBindings(remitoModelo.remito(), document.getElementById("datosRemito"));  
 				}
 			};
 			var falla = function(data) {
@@ -445,15 +440,20 @@
 		var fallaprox = function(data) {
 			self.remito().id(-1);
 		};
-		getData("./servidor/sterilav.php?op=getProximoRemito",exitoprox,fallaprox);
+		getDataSync("./servidor/sterilav.php?op=getProximoRemito",exitoprox,fallaprox);
 
 		self.productos = ko.computed(function() {
- 			return ko.utils.arrayFilter(self.codigos(), function(item) {
-            	return item.deposito == self.remito().deposito().id();
-        	});		
+			if(!self.remito().deposito()) {
+				return self.codigos();
+			} else {
+				return ko.utils.arrayFilter(self.codigos(), function(item) {
+					return item.deposito == self.remito().deposito().id();
+				});		
+			}
 		}, this);		
 	}
 
+	ko.cleanNode(document.getElementById("remitoForm"));
 	var remitoModelo = new RemitoModelo();
 	ko.applyBindings(remitoModelo, document.getElementById("remitoForm"));  
 </script>
