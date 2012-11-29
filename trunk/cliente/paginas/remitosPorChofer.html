@@ -59,6 +59,11 @@
 					<td data-bind="text: observaciones ? observaciones : '&nbsp;'"></td>
 				</tr>
 			</tbody>
+			<tfoot data-bind="visible: !generando()">
+				<tr>
+					<td class="alert alert-info" colspan="4">Total de Viajes: <span data-bind="text: datos().length"></span></td>
+				</tr>
+			</tfoot>			
 			<tfoot data-bind="visible: !generando() && datos().length > 0">
 				<tr>
 					<td colspan="4">
