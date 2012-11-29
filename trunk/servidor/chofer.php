@@ -83,7 +83,7 @@ function updateChofer() {
 function borrarChofer($id) {
 	global $conn;
 
-	if(choferTieneRemito($id)) {
+	if(choferTieneRemito2($id)) {
 		return '{"status":"error","data":"El Chofer tiene remitos asociados y no puede ser eliminado."}';
 		exit;
 	}
@@ -108,6 +108,22 @@ function choferTieneRemito($id) {
 			return '{"status":"OK","data":false}';
 		} else {
 			return '{"status":"OK","data":true}';
+		}
+	}
+}
+
+function choferTieneRemito2($id) {
+	global $conn;
+	
+	$query = "SELECT * FROM remito WHERE chofer_idchofer=".$id;
+	$recordset = mysql_query($query, $conn);
+	if(!$recordset) {
+		return '{"status":"error","data":"'.mysql_error().'"}';
+	} else {
+		if(mysql_num_rows($recordset)==0) {
+			return false;
+		} else {
+			return true;
 		}
 	}
 }

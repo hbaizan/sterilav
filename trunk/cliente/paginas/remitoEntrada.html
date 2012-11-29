@@ -1,8 +1,13 @@
 <div class="row span8" id="remitoForm" data-bind="with: remito">
 	<div class="print">		
 	<div>
-		<div class="span8 well" data-bind="visible: $root.mostrarForm">
-			<h4><span data-bind="text: tipoRemito"></span> Numero: <span data-bind="text: id"></span></h4>
+		<div data-bind="visible: !$root.cargarForm()">
+			<div class="alert alert-info">
+				<label>Cargando <i class="icon-refresh"></i></label>
+			</div>
+		</div>
+		<div class="span8 well" data-bind="visible: $root.mostrarForm() && $root.cargarForm()" style="display:none ">
+			<h4><span data-bind="text: $root.tipoRemito"></span> Numero: <span data-bind="text: idActual"></span></h4>
 			<hr>
 			<table width="100%" id="datosRemito">
 				<tr>
@@ -51,23 +56,13 @@
 					<td><input class="span3 uneditable-input" readonly="" id="inputIVA" data-bind="value: empresa() ? empresa().iva : ''"></input></td>
 					<td><label class="span2 label" for="selectChofer">Chofer:</label></td>
 					<td>
-						<!-- ko ifnot: $root.editando() -->
-							<select id="selectChofer" data-bind="options: $root.choferes, optionsText: 'nombre', value: chofer" class="span2"></select>
-						<!-- /ko -->
-						<!-- ko if: $root.editando() -->
-							<input class="span2 uneditable-input" readonly="" id="inputChofer" data-bind="value: chofer() ? chofer().nombre : ''" />
-						<!-- /ko -->
+							<select id="selectChofer" data-bind="options: $root.choferes, optionsValue: 'id', optionsText: 'nombre', value: chofer" class="span2"></select>
 					</td>
 				</tr>
 				<tr>
 					<td><label class=" span2 label" for="selectvehiculo">Vehiculo:</label></td>
 					<td>
-						<!-- ko ifnot: $root.editando() -->
-							<select id="selectVehiculo" data-bind="options: $root.vehiculos, optionsText: 'patente', value: vehiculo"></select>
-						<!-- /ko -->
-						<!-- ko if: $root.editando() -->
-							<input class="span2 uneditable-input" readonly="" id="inputVehiculo" data-bind="value: vehiculo() ? vehiculo().patente : ''" />
-						<!-- /ko -->
+							<select id="selectVehiculo" data-bind="options: $root.vehiculos, optionsValue: 'id', optionsText: 'patente', value: vehiculo"></select>
 					</td>
 				</tr>
 				<tr>
@@ -76,7 +71,7 @@
 				</tr>
 			</table>
 		</div>
-		<div class="span8">
+		<div class="span8" data-bind="visible: !$root.mostrarForm() && $root.cargarForm()" style="display:none ">
 			<div data-bind="visible: $root.mostrarSuccess" class="alert alert-success">
 				<span data-bind="text: $root.successMensaje"></span>
 			</div>
@@ -84,27 +79,27 @@
 				<span data-bind="text: $root.errorMensaje"></span>
 			</div>
 		</div>
-		<div class="span8 well" data-bind="visible: $root.mostrarForm">										
-			<table class="span6">
+		<div class="span8 well" data-bind="visible: $root.mostrarForm() && $root.cargarForm()" style="display:none ">
+			<table class="span7">
 				<thead>
 					<tr>
 						<th>Codigo</th>
 						<th>Descripcion</th>
-						<th>Entrega</th>
-						<th>Retira</th>
+						<th data-bind="visible: $root.tipoActual()=='1' || $root.tipoActual()=='2'">Entrega</th>
+						<th data-bind="visible: $root.tipoActual()=='3' || $root.tipoActual()=='2'">Retira</th>
 					</tr>
 				</thead>
 				<tbody class="table table-condensed">
 					<tr>
-						<td colspan="2"><select rel="noprint" type="text" id="inputCodigo" data-bind="visible: $parent.productos().length > 0, options: $parent.productos, optionsText: 'codigoTexto', value: $parent.codigoSeleccionado" class="span3"></select></td>
-						<td><input rel="noprint" type="text" id="inputEntrega" class="input-small" data-bind="visible: $parent.productos().length > 0" placeholder="0"></td>
-						<td><input rel="noprint" type="text" id="inputRetira" class="input-small" data-bind="visible: $parent.productos().length > 0" placeholder="0"></td>
-						<!--<td><input rel="noprint" type="text" id="inputDescripcion" data-bind="visible: $parent.productos().length > 0, value: $parent.codigoSeleccionado() ? $parent.codigoSeleccionado().descripcion : ''" class="input-medium" disabled></td>-->
+						<td colspan="2"><select rel="noprint" type="text" id="inputCodigo" data-bind="visible: $parent.productos().length > 0, options: $parent.productos, optionsText: 'codigoTexto', value: $parent.codigoSeleccionado, css: {span6: $root.tipoActual()=='1' || $root.tipoActual()=='1', span3: $root.tipoActual()=='2'}"></select></td>
+						<td style="text-align:center " data-bind="visible: $root.tipoActual()=='1' || $root.tipoActual()=='2'"><input rel="noprint" type="text" id="inputEntrega" class="input-small" data-bind="visible: $parent.productos().length > 0" placeholder="0"></td>
+						<td style="text-align:center " data-bind="visible: $root.tipoActual()=='3' || $root.tipoActual()=='2'"><input rel="noprint" type="text" id="inputRetira" class="input-small" data-bind="visible: $parent.productos().length > 0" placeholder="0"></td>
 						<td><input type="button" rel="noprint" id="registro" class="btn" data-bind="visible: $parent.productos().length > 0, click: $parent.agregar" value="Agregar" /></td>
+						<td><span class="alert alert-error" data-bind="visible: $root.hayError, text: $root.cargaError" style="font-size:9px "></span></td>
 					</tr>
 				</tbody>
 				<tbody data-bind="visible: lineaRemitos().length == 0">
-					<tr class="alert alert-info"><td colspan="5">El Remito no tiene productos.</td></tr>
+					<tr class="alert alert-info"><td colspan="6">El Remito no tiene productos.</td></tr>
 				</tbody>				
 				<tbody class="table table-striped table-bordered" data-bind="foreach: lineaRemitos, visible: lineaRemitos().length > 0">
 					<tr>
@@ -112,11 +107,11 @@
 							<span data-bind="text: codigo, attr: {id: 'showCodigo' + $data.codigo()}"></span>
 						</td>
 						<td data-bind="text: descripcion"></td>
-						<td>
+						<td style="text-align:center " data-bind="visible: $root.tipoActual()=='1' || $root.tipoActual()=='2'">
 							<input data-bind="value: entrega, attr: {id: 'editEntrega' + $data.codigo()}" style="display:none;" class="input-medium" placeholder="0">
 							<span data-bind="text: entrega, attr: {id: 'showEntrega' + $data.codigo()}"></span>
 						</td>
-						<td>
+						<td style="text-align:center " data-bind="visible: $root.tipoActual()=='3' || $root.tipoActual()=='2'">
 							<input data-bind="value: retira, attr: {id: 'editRetira' + $data.codigo()}" style="display:none;" class="input-medium" placeholder="0">
 							<span data-bind="text: retira, attr: {id: 'showRetira' + $data.codigo()}"></span>
 						</td>
@@ -125,7 +120,7 @@
 							<a href="#" data-bind="click: $root.borrar, attr: {id: 'delProd' + $data.codigo()}"><i class="icon-remove"></i></a> 
 							<a href="#" data-bind="click: $root.aceptar, attr: {id: 'saveProd' + $data.codigo()}" style="display:none;"><i class="icon-ok"></i></a>
 						</td>
-						<td data-bind="visible: faltante() > 0">
+						<td data-bind="visible: faltante() > 0" colspan="2">
 							<span class="label">Faltante: <span data-bind="text: faltante"></span></span>
 						</td>
 					</tr>
@@ -134,18 +129,24 @@
 		</div>
 		</div>
 		</div>
-		<div class="span8 well" data-bind="visible: $root.mostrarForm">
-		<div class="form-actions" style="text-align:right">			
-			<button id="guardar" class="btn btn-primary" data-bind="click: $parent.generar">Guardar</button>
-			<select id="generar" class="input-small" data-bind="visible: $root.editando(), value: tipo">
-				<option value="1">Remito De Entrada</option>
-				<option value="2">Orden De Trabajo</option>
-				<option value="3">Remito De Salida</option>
-				<option value="4">Ajuste</option>
-				<option value="5">Recomposicion</option>
-			</select>
+		<div class="span8 well" data-bind="visible: $root.mostrarForm() && $root.cargarForm()" style="display:none ">
+			<div>
+				<div class="input-append span3">
+					<button id="generar" class="btn btn-primary" data-bind="click: $parent.generar">Generar</button>
+					<select id="generar" class="input-medium" data-bind="visible: $root.editando(), value: $root.tipo">
+						<!--<option value="1" data-bind="visible: tipo()!='1'">Remito De Entrada</option>-->
+						<option value="2" data-bind="visible: $root.tipo()=='1' || $root.tipo()=='2'">Orden De Trabajo</option>
+						<option value="3" data-bind="visible: $root.tipo()=='1' || $root.tipo()=='2' || $root.tipo()=='3'">Remito De Salida</option>
+						<!--<option value="4">Ajuste</option>
+						<option value="5">Recomposicion</option>-->
+					</select>
+				</div>
+				<label class="span1" style="margin-left:0px; margin-top:5px"> N&uacute;mero <span data-bind="text: id"></span></label>
+			</div>
+			<!-- ko if: $root.editando() -->
+				<button id="guardar" class="btn" data-bind="click: $parent.guardar">Guardar</button>
+			<!-- /ko -->
 			<button id="cancelar" class="btn" data-bind="click: $parent.cancelar">Cancelar</button>
-		</div>
 		</div>
 	</div>
 </div>
@@ -154,8 +155,8 @@
 		var self = this;
 		
 		self.codigo = ko.observable();
-		self.entrega = ko.observable();
-		self.retira = ko.observable();
+		self.entrega = ko.observable(0);
+		self.retira = ko.observable(0);
 		self.faltante = ko.observable();
 		self.descripcion = ko.observable();
 		self.deposito = ko.observable();
@@ -165,16 +166,8 @@
 		var self = this;
 		
 		self.id = ko.observable(null);
+		self.idActual = ko.observable(null);
 		self.tipo = ko.observable("1");
-		self.tipoRemito = ko.computed(function() {
-			if(self.tipo()=="1") {
-				return "Remito";
-			} else if (self.tipo()=="2") {
-				return "Orden de Trabajo";
-			} else if (self.tipo()=="3") {
-				return "Remito";
-			}
-		});
 		self.deposito = ko.observable(null);
 		self.empresa = ko.observable(null);
 		self.persona = ko.observable(null);
@@ -194,12 +187,15 @@
 		
 		self.title = ko.observable("Administrar Usuario");
 		self.mostrarForm = ko.observable(true);
+		self.cargarForm = ko.observable(false);
 		self.mostrarSuccess = ko.observable(false);
 		self.successMensaje = ko.observable("");
 		self.mostrarError = ko.observable(false);
 		self.errorMensaje = ko.observable("");
 		self.mostrarFormError = ko.observable(false);
 		self.formErrorMensaje = ko.observable("");
+		self.hayError = ko.observable(false);
+		self.cargaError = ko.observable("");
 				
 		self.nuevaLinea = ko.observable(new lineaRemito());
 		self.codigos = ko.observableArray();
@@ -208,6 +204,17 @@
 		self.choferes = ko.observableArray();
 		self.vehiculos = ko.observableArray();
 		self.productos = ko.observable();
+		self.tipo = ko.observable();
+		self.tipoActual = ko.observable("1");
+		self.tipoRemito = ko.computed(function() {
+			if(self.tipoActual()=="1") {
+				return "Remito";
+			} else if (self.tipoActual()=="2") {
+				return "Orden de Trabajo";
+			} else if (self.tipoActual()=="3") {
+				return "Remito";
+			}
+		});
 		
 		self.remito = ko.validatedObservable(new Remito());
 		self.editando = ko.observable(amplify.store.sessionStorage("sterilav.remitoEditado"));
@@ -215,8 +222,30 @@
 		self.agregar = function() {
 			var linea = new lineaRemito();
 			linea.codigo(self.codigoSeleccionado().codigo);			
-			linea.entrega($("#inputEntrega").val());			
-			linea.retira($("#inputRetira").val());			
+			var hayError = false;
+			if(!$("#inputEntrega").val()) {
+				if(self.tipoActual()!="3") {
+					hayError = true;
+				} else {
+					$("#inputEntrega").val(0);
+				}
+			}
+			if(!$("#inputRetira").val()) {
+				if(self.tipoActual()!="1") {
+					hayError = true;
+				} else {
+					$("#inputRetira").val(0);
+				}
+			}
+			self.hayError(hayError);
+			if(hayError) {
+				self.cargaError("Verifique los valores.");
+				return;
+			}
+			linea.entrega($("#inputEntrega").val());
+			linea.retira($("#inputRetira").val());
+			$("#inputEntrega").val(0);
+			$("#inputRetira").val(0);
 			linea.descripcion(self.codigoSeleccionado().descripcion);			
 			linea.deposito(self.codigoSeleccionado().deposito);
 			linea.faltante(self.codigoSeleccionado().faltante);
@@ -237,18 +266,22 @@
 		self.borrar = function(prod) {
 			self.remito().lineaRemitos.remove(prod);
 			var produ = {};
-			produ.codigo(prod.codigo());
-			produ.entrega(prod.entrega());
-			produ.retira(prod.retira());
-			produ.descripcion(prod.descripcion());
-			produ.deposito(prod.deposito());
-			produ.faltante(prod.faltante());
+			produ.codigo = prod.codigo();
+			produ.capita = 0;
+			produ.codigoTexto = prod.codigo() + " - " + prod.descripcion();
+			produ.descripcion = prod.descripcion();
+			produ.deposito = prod.deposito();
+			produ.faltante = prod.faltante();
+			produ.stock = 0;
 			self.codigos().push(produ);
+			self.codigos.sort(function(left, right) { 
+				return left.codigoTexto == right.codigoTexto ? 0 : (left.codigoTexto < right.codigoTexto ? -1 : 1) 
+			});			
+			self.codigos.valueHasMutated();
 		};
 						
 		self.aceptar = function(prod) {
 			var indexof = self.remito().lineaRemitos.indexOf(prod);
-			console.log(prod);
 			$("#saveProd" + prod.codigo()).hide();
 			$("#editEntrega" + prod.codigo()).hide();
 			$("#showEntrega" + prod.codigo()).show();
@@ -308,7 +341,10 @@
 				if(vehiculos.status != "OK") {
 				} else {
 					for(var i=0; i< vehiculos.data.length; i++) {
-						self.vehiculos().push(vehiculos.data[i]);
+						var newVehiculo = new CVehiculo();
+						newVehiculo.id(vehiculos.data[i].id);
+						newVehiculo.patente(vehiculos.data[i].patente);
+						self.vehiculos().push(newVehiculo);
 					}
 				}
 			};
@@ -350,6 +386,38 @@
 			getDataSync("./servidor/sterilav.php?op=getUsuarioPorNombre&nombre="+amplify.store.sessionStorage("sterilav.usuarioLogueado"),exitoPersona,fallaPersona);
 		};
 		
+		self.guardar = function() {
+			self.remito().errors.showAllMessages(true);
+			var exito = function(data) {
+				if(data.status != "OK") {
+					self.errorMensaje(data.data);
+					self.mostrarError(true);
+				} else {
+					self.mostrarError(false);
+					self.mostrarForm(false);
+					self.successMensaje(data.data);
+					self.mostrarSuccess(true);
+					amplify.store.sessionStorage("sterilav.remitoEditado", null);
+				}
+			};
+			var falla = function(data) {
+				if(data.data) {
+					self.errorMensaje(data.data);
+				} else {
+					self.errorMensaje("Hubo un error tratando de guardar el Remito.");
+				}
+				self.mostrarError(true);				
+			};
+			var url = "";
+			self.remito().tipo(self.tipo());
+			if(amplify.store.sessionStorage("sterilav.remitoEditado")) {
+				self.remito().id(amplify.store.sessionStorage("sterilav.remitoEditado"));
+				url = "./servidor/sterilav.php?op=saveRemito";
+			}
+			
+			postData(url,exito,falla,JSON.parse(ko.toJSON(self.remito())));
+		};
+		
 		self.generar = function() {
 			self.remito().errors.showAllMessages(true);
 			var exito = function(data) {
@@ -373,6 +441,7 @@
 				self.mostrarError(true);				
 			};
 			var url = "";
+			self.remito().tipo(self.tipo());
 			if(amplify.store.sessionStorage("sterilav.remitoEditado")) {
 				self.remito().id(amplify.store.sessionStorage("sterilav.remitoEditado"));
 				url = "./servidor/sterilav.php?op=updateRemito";
@@ -390,15 +459,20 @@
 			var exito = function(data) {
 				if(data.status != "OK") {
 				} else {
+					self.remito().idActual(data.data.id);
 					self.remito().deposito = ko.observable(new CDeposito());
 					self.remito().empresa = ko.observable(new CEmpresa());
-					self.remito().chofer = ko.observable(new CChofer());
-					self.remito().vehiculo = ko.observable(new CVehiculo());
+					//self.remito().chofer = ko.observable(new CChofer());
+					//self.remito().vehiculo = ko.observable(new CVehiculo());
 					self.remito().deposito().cargar(data.data.deposito);
-					self.remito().tipo(data.data.tipo);
+					//self.remito().tipo(data.data.tipo);
+					self.tipo(data.data.tipo);
+					self.tipoActual(data.data.tipo);
 					self.remito().empresa().cargar(data.data.empresa);
-					self.remito().chofer().cargar(data.data.chofer);
-					self.remito().vehiculo().cargar(data.data.vehiculo);
+					//self.remito().chofer().cargar(data.data.chofer);
+					self.remito().chofer(data.data.chofer.id);
+					//self.remito().vehiculo().cargar(data.data.vehiculo);
+					self.remito().vehiculo(data.data.vehiculo.id);
 					var nuevafecha = new Date();
 					self.remito().fecha((nuevafecha.getDate() + "/" + (nuevafecha.getMonth()+1) + "/" + nuevafecha.getFullYear()));
 					for(i=0; i<data.data.productos.length;i++) {
@@ -412,25 +486,23 @@
 						self.remito().lineaRemitos.push(linea);
 					}
 					self.remito().observaciones(data.data.observaciones);
-					ko.applyBindings(remitoModelo.remito(), document.getElementById("datosRemito"));  
+					//ko.applyBindings(self.remito(), document.getElementById("datosRemito"));  
 				}
 			};
 			var falla = function(data) {
 			};
-			getData("./servidor/sterilav.php?op=getRemito&id=" + amplify.store.sessionStorage("sterilav.remitoEditado"),exito,falla);
+			getDataSync("./servidor/sterilav.php?op=getRemito&id=" + amplify.store.sessionStorage("sterilav.remitoEditado"),exito,falla);
 		};
 		
 		if(amplify.store.sessionStorage("sterilav.remitoEditado")) {
 			self.cargar();
-			$("#guardar").text("Generar");
-		} else {
-			$("#guardar").text("Guardar");
 		}
 		self.cargaProductos();
 		self.cargaPersonas();
 		self.cargaEmpresas();
 		self.cargaChoferes();
-		self.cargaVehiculos();		
+		self.cargaVehiculos();
+		self.cargarForm(true);
 		var exitoprox = function(data) {
 			if(data.status != "OK") {
 			} else {
@@ -451,9 +523,13 @@
 				});		
 			}
 		}, this);		
+		self.codigos.sort(function(left, right) { 
+			return left.codigoTexto == right.codigoTexto ? 0 : (left.codigoTexto < right.codigoTexto ? -1 : 1) 
+		});			
 	}
 
 	ko.cleanNode(document.getElementById("remitoForm"));
 	var remitoModelo = new RemitoModelo();
+
 	ko.applyBindings(remitoModelo, document.getElementById("remitoForm"));  
 </script>

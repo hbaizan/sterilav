@@ -11,7 +11,6 @@ function CRemito() {
 	self.tipo = ko.observable();
 	
 	self.cargar = function(jsonData) {
-		console.log("inicia carga Remito");
 
 		self.id(jsonData.id);
 		self.deposito(new CDeposito());

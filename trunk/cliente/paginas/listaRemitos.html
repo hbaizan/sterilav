@@ -1,12 +1,30 @@
 <div class="row">
-	<div class="well span6" id="listaRemitoForm">
+	<div class="well span7" id="listaRemitoForm">
 		<h4>Listado de Remitos</h4>
 		<hr>
 		<div id="resultado" data-bind="visible: mostrarError" class="alert alert-error" style="display: none;">
 			<h4 class="alert-heading">Problema al obtener los Remitos.</h4>
 			<span data-bind="html: mensajeError"></span>
-		</div>	
+		</div>
 		<table data-bind="visible: !mostrarError()" class="table table-striped table-bordered">
+			<thead class="table-condensed">
+				<tr>
+					<th colspan="5" class="alert alert-info">Filtrar por:</th>
+				</tr>
+			</thead>
+			<thead class="table-condensed">
+				<tr>
+					<td><input type="text" class="input-small" data-bind="value: filtroId, valueUpdate:'afterkeydown'" placeholder="Id" /></td>
+					<td>&nbsp;</td>
+					<td><input type="text" class="input-medium" data-bind="value: filtroDeposito, valueUpdate:'afterkeydown'" placeholder="Deposito" /></td>
+					<td colspan="2"><select class="input-large" data-bind="value: filtroTipo">
+						<option value="Todos" selected>Todos</option>
+						<option value="Remito de Entrada">Remito de Entrada</option>
+						<option value="Orden de Trabajo">Orden de Trabajo</option>
+						<option value="Remito de Salida">Remito de Salida</option>
+					</select></td>
+				</tr>
+			</thead>
 			<thead>
 				<tr>
 					<th>ID</th>
@@ -26,17 +44,30 @@
 					<td colspan="5">No hay Remitos en el sistema.</td>
 				</tr>
 			</tbody>		
-			<tbody data-bind="foreach: remitos(), visible: remitos().length > 0 && !cargando()">
+			<tbody data-bind="foreach: remitosFiltrados(), visible: remitosFiltrados().length > 0 && !cargando()">
 				<tr>
 					<td data-bind="text: id"></td>
 					<td data-bind="text: fecha"></td>
 					<td data-bind="text: deposito"></td>
 					<td data-bind="text: tipo"></td>
 					<td data-bind="visible: $parent.isAdmin">
-						<a href="#" data-bind="click: $root.editar" title="Editar"><i class="icon-edit"></i></a> 
+						<a href="#" data-bind="click: $root.editar" title="Editar"><i class="icon-edit"></i></a>&nbsp;&nbsp;
 					</td>
 				</tr>
 			</tbody>
+			<tfoot class="table-condensed">
+				<tr class="label">
+					<td>
+						<a href="#" data-bind="click: primero" title="Primero" class="btn"><i class="icon-step-backward"></i></a>&nbsp;&nbsp;
+						<a href="#" data-bind="click: anterior" title="Anterior" class="btn"><i class="icon-backward"></i></a>
+					</td>
+					<td colspan="3">&nbsp;</td>
+					<td>
+						<a href="#" data-bind="click: siguiente" title="Siguiente" class="btn"><i class="icon-forward"></i></a>&nbsp;&nbsp;
+						<a href="#" data-bind="click: ultimo" title="Ultimo" class="btn"><i class="icon-step-forward"></i></a>
+					</td>
+				</tr>
+			</tfoot>
 		</table>
 		<div class="form-actions">
 			<div class="form-buttons-right">		
@@ -50,7 +81,34 @@
 	function ListaRemito() {
 		var self = this;
 
+		self.paginaActual = ko.observable(1);
+		self.paginas = ko.observable();
+		self.filtroId = ko.observable();
+		self.filtroDeposito = ko.observable();
+		self.filtroTipo = ko.observable();
+		
 		self.remitos = ko.observableArray();
+		self.remitosFiltrados = ko.computed(function() {
+			var filtroDeposito = "";
+			var filtroId = "";
+			var filtroTipo = "";
+			if(self.filtroDeposito()) {
+				filtroDeposito = self.filtroDeposito();
+			}
+			if(self.filtroId()) {
+				filtroId = self.filtroId();
+			}
+			if(self.filtroTipo() && self.filtroTipo()!="Todos") {
+				filtroTipo = self.filtroTipo();
+			}
+			return ko.utils.arrayFilter(self.remitos(), function(item) {
+				var esDeposito = (item.deposito.toLowerCase().indexOf(filtroDeposito.toLowerCase())>-1);
+				var esId = (item.id.toLowerCase().indexOf(filtroId.toLowerCase())>-1);
+				var esTipo = (item.tipo.toLowerCase().indexOf(filtroTipo.toLowerCase())>-1);
+				
+				return esDeposito && esId && esTipo;
+			});
+		});
 		self.cargando = ko.observable(true);
 		self.mostrarError = ko.observable(false);
 		self.mensajeError = ko.observable("Hubo un problema al buscar los Remitos.");
@@ -58,9 +116,34 @@
 			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
 		});
 
+		self.primero = function() {
+			self.paginaActual(1);
+			self.cargar();
+		};
+
+		self.anterior = function() {
+			if(self.paginaActual() > 1) {
+				self.paginaActual(self.paginaActual() - 1);
+				self.cargar();
+			}
+		};
+		
+		self.siguiente = function() {
+			if(self.paginaActual() < self.paginas()) {
+				self.paginaActual(self.paginaActual() + 1);
+				self.cargar();
+			}
+		};
+
+		self.ultimo = function() {
+			self.paginaActual(self.paginas());
+			self.cargar();
+		};
+		
 		self.cargar = function() {
-			//Llamar a la base de datos
+			self.remitos.removeAll();
 			var exito = function(data) {
+				self.paginas(data.paginas);
 				self.cargando(false);
 				for(i=0; i<data.data.length;i++) {
 					var newRemito = new Remito();
@@ -80,7 +163,7 @@
 				self.mostrarError(true);
 			};		
 			$.ajax({
-				url:"./servidor/sterilav.php?op=listaRemitos",
+				url:"./servidor/sterilav.php?op=listaRemitos&pagina=" + self.paginaActual(),
 				success:exito,
 				error:falla,
 				type:"GET",

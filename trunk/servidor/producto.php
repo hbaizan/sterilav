@@ -1,11 +1,19 @@
 <?php
 
-function listaProductos() {
-	global $conn;
+function listaProductos($pagina) {
+	global $conn, $tabla, $limite;
+	
+	$inicio = ($pagina-1) * $limite;
 	$query = "SELECT * FROM producto,subgrupo WHERE subgrupo_idsubgrupo=idsubgrupo";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
+	$recordcount = mysql_num_rows($recordset) or die(mysql_error());
+
+	$query .= " ORDER BY idproducto LIMIT $inicio, $limite";
+
+	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	
-	$result = '{"status":"OK","data":[';
+	$paginas = ceil($recordcount / $limite);
+	$result = '{"status":"OK","paginas":"'.$paginas.'","data":[';
 	while($row = mysql_fetch_assoc($recordset)) {
 		$result .= '{"id":"'.$row['idproducto'].'",';
 		$result .= '"descripcion":"'.$row['producto_nombre'].'",';
@@ -51,6 +59,7 @@ function listaProductosParaRemito() {
 		}
 		$result .= '{"codigo":"'.$row['producto_idproducto'].'",';
 		$result .= '"deposito":"'.$row['deposito_iddeposito'].'",';
+		$result .= '"codigoTexto":"'.$row['producto_idproducto'].' - '.$row['producto_nombre'].'",';
 		$result .= '"descripcion":"'.$row['producto_nombre'].'",';
 		$result .= '"faltante":'.$faltante.',';
 		$result .= '"stock":'.$row['stock_inicial'].',';

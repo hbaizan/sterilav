@@ -9,7 +9,6 @@ function CChofer() {
 	});
 
 	self.cargar = function(jsonData) {
-		console.log("inicia carga Chofer");
 		if(jsonData) {
 			self.id(jsonData.id);
 			self.nombre(jsonData.nombre);

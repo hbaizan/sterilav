@@ -23,7 +23,7 @@ function getRemito($id) {
 	$query = "SELECT * FROM remito,deposito,empresa WHERE deposito_iddeposito=iddeposito AND empresa_idempresa=idempresa AND idRemito = ".$id;
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
 	$result = "";
-  
+
 	if(mysql_num_rows($recordset)==0) {
 		$result = '{"status":"error","data":"No existe el Remito."}';
 	} else {
@@ -58,18 +58,18 @@ function putRemito() {
 	global $conn;
 
 	$response = "";
- 
+
 	$persona = $_POST['persona']['id'];
 	$deposito = $_POST['deposito']['id'];
-	$chofer = $_POST['chofer']['id'];
+	$chofer = $_POST['chofer'];
 	$tipo = 1;
-	$vehiculo = $_POST['vehiculo']['id'];
+	$vehiculo = $_POST['vehiculo'];
 	$fechaArray = explode("/", $_POST['fecha']);
 	$fecha = $fechaArray[2]."-".$fechaArray[1]."-".$fechaArray[0];
 	$entrega = $_POST['horaEntrega'];
 	$retiro = $_POST['horaRetiro'];
 	$observaciones = $_POST['observaciones'];
-  
+
 	$query = "INSERT INTO remito (deposito_iddeposito, chofer_idchofer, remito_tipo_idremito_tipo, vehiculo_idvehiculo, ";
 	$query .= "remito_fecha, remito_hora_entrega, remito_hora_retiro, remito_observaciones, persona_idpersona)";
 	$query .= " VALUES ($deposito, $chofer, $tipo, $vehiculo, '$fecha', '$entrega', '$retiro', '$observaciones', $persona)";
@@ -94,12 +94,20 @@ function putRemito() {
 	return $response;
 }
 
-function listaRemitos() {
-	global $conn, $tabla;
-	$query = "SELECT * FROM remito, deposito, remito_tipo WHERE deposito_iddeposito=iddeposito AND remito_tipo_idremito_tipo=idremito_tipo ORDER BY idremito";
+function listaRemitos($pagina) {
+	global $conn, $tabla, $limite;
+
+	$inicio = ($pagina-1) * $limite;
+	$query = "SELECT * FROM remito, deposito, remito_tipo WHERE deposito_iddeposito=iddeposito AND remito_tipo_idremito_tipo=idremito_tipo ";
 	$recordset = mysql_query($query, $conn) or die(mysql_error());
-	
-	$result = '{"status":"OK","data":[';
+	$recordcount = mysql_num_rows($recordset) or die(mysql_error());
+
+	$query .= "ORDER BY idremito DESC LIMIT $inicio, $limite";
+
+	$recordset = mysql_query($query, $conn) or die(mysql_error());
+
+	$paginas = ceil($recordcount / $limite);
+	$result = '{"status":"OK","paginas":"'.$paginas.'","data":[';
 	while($row = mysql_fetch_assoc($recordset)) {
 		$result .= '{"id":"'.$row['idremito'].'",';
 		$result .= '"idtipo":"'.$row['remito_tipo_idremito_tipo'].'",';
@@ -113,7 +121,7 @@ function listaRemitos() {
 		$result = substr($result, 0, strlen($result)-1);
 	}
 	$result .= ']}';
-	
+
 	return $result;
 }
 
@@ -132,8 +140,8 @@ function updateRemito() {
 	} else {
 		if($row = mysql_fetch_assoc($result)) {
 			$deposito = $row['deposito_iddeposito'];
-			$chofer =  $row['chofer_idchofer'];
-			$vehiculo =  $row['vehiculo_idvehiculo'];
+			$chofer =  $_POST['chofer'];
+			$vehiculo =  $_POST['vehiculo'];
 			$fechaArray = explode("/", $_POST['fecha']);
 			$fecha = $fechaArray[2]."-".$fechaArray[1]."-".$fechaArray[0];
 			$entrega =  $row['remito_hora_entrega'];
@@ -142,14 +150,14 @@ function updateRemito() {
 			$persona =  $row['persona_idpersona'];
 		}
 	}
-   
+
 	if ($tipo == 2) {
 		// orden de trabajo
 		$queryrem = "INSERT INTO remito (persona_idpersona, deposito_iddeposito, chofer_idchofer, remito_tipo_idremito_tipo, vehiculo_idvehiculo, remito_fecha, remito_hora_entrega, remito_hora_retiro, remito_observaciones)"; 
 		$queryrem .= "VALUES ($persona, $deposito, $chofer, $tipo, $vehiculo, '$fecha', '$entrega', '$retiro', '$observaciones')";  
 		$resultrem = mysql_query($queryrem, $conn);
 		$nuevoid = mysql_insert_id(); 
-	
+
 		//Si no se puede insertar el remito, termina        
 		if(!$resultrem) {
 			return '{"status":"error","data":"'.mysql_error().'"}';
@@ -175,11 +183,11 @@ function updateRemito() {
 				$response = '{"status":"error","data":"'.mysql_error().'"}';
 				break;
 			} else {
-				$response = '{"status":"OK","data":"La Orden de Trabajo ha sido actualizada."}';
+				$response = '{"status":"OK","data":"La Orden de Trabajo ha sido creada."}';
 			}
 		}         
 	}
-	
+
 elseif ($tipo == 3) {
         //Remito de Salida
         $queryrem = "INSERT INTO remito (persona_idpersona, deposito_iddeposito, chofer_idchofer, remito_tipo_idremito_tipo, vehiculo_idvehiculo, remito_fecha, remito_hora_entrega, remito_hora_retiro, remito_observaciones)";
@@ -210,11 +218,9 @@ elseif ($tipo == 3) {
                 $response = '{"status":"error","data":"'.mysql_error().'"}';
                 break;
             } else {
-                $response = '{"status":"OK","data":"El Remito de Salida ha sido actualizado."}';
+                $response = '{"status":"OK","data":"El Remito de Salida ha sido creado."}';
             }
         }                 
-            return '{"status":"OK","data":"Operacion no soportada."}';
-            break;
    } elseif ($tipo == 4) {
         //Ajuste
         return '{"status":"OK","data":"Operacion no soportada."}';
@@ -230,5 +236,50 @@ elseif ($tipo == 3) {
    return $response;
 }
 
+function saveRemito() {
+	global $conn;
 
+	$id = $_POST['id'];
+	$deposito = $_POST['deposito']['id'];
+	$chofer =  $_POST['chofer'];
+	$vehiculo =  $_POST['vehiculo'];
+	$fechaArray = explode("/", $_POST['fecha']);
+	$fecha = $fechaArray[2]."-".$fechaArray[1]."-".$fechaArray[0];
+	$entrega =  $_POST['horaEntrega'];
+	$retiro =  $_POST['horaRetiro'];
+	$observaciones =  $_POST['observaciones'];
+	$persona =  $_POST['persona']['id'];
+
+	$queryrem = "UPDATE remito SET persona_idpersona=$persona, deposito_iddeposito=$deposito, chofer_idchofer=$chofer, "; 
+	$queryrem .= "vehiculo_idvehiculo=$vehiculo, remito_fecha='$fecha', remito_hora_entrega='$entrega', remito_hora_retiro='$retiro', remito_observaciones='$observaciones' ";
+	$queryrem .= "WHERE idremito = $id";
+	$resultrem = mysql_query($queryrem, $conn);
+
+	//Si no se puede insertar el remito, termina        
+	if(!$resultrem) {
+		return '{"status":"error","data":"'.mysql_error().'"}';
+		break;
+	}
+	$querydel = "DELETE FROM remito_has_producto WHERE remito_idremito=$id"; 
+	$resultdel = mysql_query($querydel, $conn);
+	for($i=0; $i<count($_POST['lineaRemitos']); $i++) {
+		$linea = $_POST['lineaRemitos'][$i];
+		if(!isset($linea['faltante']) || $linea['faltante']=="") {
+			$faltante = 0;
+		} else {
+			$faltante = $linea['faltante'];
+		}
+		$query2 = "INSERT INTO remito_has_producto (ingreso,egreso,cantidad_faltante,remito_idremito,producto_idproducto) ";
+		$query2 .= "VALUES (".$linea['entrega'].",".$linea['retira'].",".$faltante.",".$id.",".$linea['codigo'].")";
+		$result2 = mysql_query($query2, $conn);
+		if(!$result2) {
+			$response = '{"status":"error","data":"'.mysql_error().' - '.$query2.'"}';
+			break;
+		} else {
+			$response = '{"status":"OK","data":"El Remito ha sido guardado."}';
+		}
+	}
+
+	return $response;
+}	
 ?>
