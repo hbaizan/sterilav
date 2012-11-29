@@ -15,12 +15,6 @@
 					<select id="selectDeposito" data-bind="options: empresa().depositos, optionsText: 'nombre', value: deposito" class="span4"></select>
 				</td>
 			</tr>
-			<!--<tr>
-				<td><label class="span2 label" for="selectProducto">Producto:</label></td>
-				<td colspan="3">
-					<select id="selectDeposito" data-bind="options: productos, optionsText: 'codigoTexto', value: producto" class="span4"></select>
-				</td>
-			</tr>-->
 			<tr>
 				<td><label class="span2 label" for="selectTipo">Tipo de Remito:</label></td>
 				<td colspan="3">
@@ -67,6 +61,11 @@
 					<td data-bind="text: observaciones ? observaciones : '&nbsp;'"></td>
 				</tr>
 			</tbody>
+			<tfoot data-bind="visible: !generando()">
+				<tr>
+					<td class="alert alert-info" colspan="4">Total de Clientes: <span data-bind="text: sumatoria"></span></td>
+				</tr>
+			</tfoot>
 			<tfoot data-bind="visible: !generando() && datos().length > 0">
 				<tr>
 					<td colspan="4">
@@ -95,6 +94,13 @@
 		self.codigos = ko.observableArray();
 		self.datos = ko.observableArray();
 		self.archivo = ko.observable();
+		self.sumatoria = ko.computed(function() {
+			var total = 0;
+			ko.utils.arrayForEach(self.datos(), function(item) {
+				return total += parseInt(item.cantidad);
+			});
+			return total;
+		});
 
 		self.empresa = ko.observable();
 		self.deposito = ko.observable();
