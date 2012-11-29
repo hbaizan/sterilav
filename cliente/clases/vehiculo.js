@@ -5,7 +5,6 @@ function CVehiculo() {
 	self.patente = ko.observable().extend({required: true});
 
 	self.cargar = function(jsonData) {
-		console.log("inicia carga Vehiculo");
 		if(jsonData) {
 			self.id(jsonData.id);
 			self.patente(jsonData.patente);
@@ -21,7 +20,7 @@ function CVehiculo() {
 	};
 
 	self.toString = function() {
-		var vehiculo = '{"id":"'+self.id()+'"patente":"'+self.patente()+'"}';
+		var vehiculo = '{"id":"'+self.id()+', "patente":"'+self.patente()+'"}';
 		return vehiculo;
 	};
 	

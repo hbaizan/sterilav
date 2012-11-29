@@ -78,6 +78,7 @@ function getDeposito($id) {
 			$result .= '"iddepartamento":"'.$row['departamento_iddepartamento'].'",';
 			$result .= '"departamento":"'.$row['departamento_nombre'].'",';
 			$result .= '"empresa":"'.$row['empresa_idempresa'].'",';
+			$result .= '"idempresa":"'.$row['empresa_idempresa'].'",';
 			$result .= '"activo":"'.$row['deposito_inactivo'].'",';
 			$result .= '"productos":'.listaProductosPorDeposito($row['iddeposito']).',';
 			$remito = json_decode(depositoTieneRemito($row['iddeposito']));

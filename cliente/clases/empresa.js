@@ -3,12 +3,11 @@ function CEmpresa() {
 	
 	self.id = ko.observable();
 	self.razonSocial = ko.observable().extend({required: true});
-	self.cuit = ko.observable().extend({required: true});
+	self.cuit = ko.observable().extend({required: true, number: {params: true, message:'Ingrese un CUIT válido'}, minLength: {params: 11, message:'Ingrese un CUIT válido'}, maxLength: {params: 11, message:'Ingrese un CUIT válido'}});
 	self.iva = ko.observable().extend({required: true});
 
 	self.cargar = function(jsonData) {
 		if(jsonData) {
-			console.log("inicia carga Empresa");
 			var exitoEmpresa = function(empData){
 				self.id(empData.data.id);
 				self.razonSocial(empData.data.razonSocial);
@@ -37,9 +36,17 @@ function CEmpresa() {
 		
 		return empresa;
 	};
+	
+	self.mockup = function() {
+		self.id(0);
+		self.razonSocial("empresa");
+		self.cuit("00000000000");
+		self.iva(0);
+	};
+	
 	self.toString = function() {
 	};
 	self.salvar = function() {	
-	};	
+	};
 }
 	

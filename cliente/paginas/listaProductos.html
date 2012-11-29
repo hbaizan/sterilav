@@ -7,6 +7,18 @@
 			<span data-bind="html: mensajeError"></span>
 		</div>	
 		<table data-bind="visible: !mostrarError()" class="table table-striped table-bordered">
+			<thead class="table-condensed">
+				<tr>
+					<th colspan="4" class="alert alert-info">Filtrar por:</th>
+				</tr>
+			</thead>
+			<thead class="table-condensed">
+				<tr>
+					<td><input type="text" class="input-small" data-bind="value: filtroId, valueUpdate:'afterkeydown'" placeholder="Id" /></td>
+					<td><input type="text" class="input-medium" data-bind="value: filtroDescripcion, valueUpdate:'afterkeydown'" placeholder="Descripcion" /></td>
+					<td colspan="2"><select id="selectSubgrupo" data-bind="options: subgrupos, optionsText: 'descripcion', optionsValue: 'descripcion', value: filtroSubgrupo" class="input-large"></select></td>
+				</tr>
+			</thead>
 			<thead>
 				<tr>
 					<th>ID</th>
@@ -17,15 +29,15 @@
 			</thead>
 			<tbody data-bind="visible: cargando()">
 				<tr>
-					<td colspan="5">Cargando <i class="icon-refresh"></i></td>
+					<td colspan="4">Cargando <i class="icon-refresh"></i></td>
 				</tr>
 			</tbody>
 			<tbody data-bind="visible: productos().length == 0 && !cargando()">
 				<tr class="alert alert-info">
-					<td colspan="5">No hay productos en el sistema.</td>
+					<td colspan="4">No hay productos en el sistema.</td>
 				</tr>
 			</tbody>		
-			<tbody data-bind="foreach: productos(), visible: productos().length > 0 && !cargando()">
+			<tbody data-bind="foreach: productosFiltrados(), visible: productosFiltrados().length > 0 && !cargando()">
 				<tr>
 					<td data-bind="text: id"></td>
 					<td data-bind="text: descripcion"></td>
@@ -35,6 +47,19 @@
 					</td>
 				</tr>
 			</tbody>
+			<tfoot class="table-condensed">
+				<tr class="label">
+					<td>
+						<a href="#" data-bind="click: primero" title="Primero" class="btn"><i class="icon-step-backward"></i></a>&nbsp;&nbsp;
+						<a href="#" data-bind="click: anterior" title="Anterior" class="btn"><i class="icon-backward"></i></a>
+					</td>
+					<td colspan="2">&nbsp;</td>
+					<td>
+						<a href="#" data-bind="click: siguiente" title="Siguiente" class="btn"><i class="icon-forward"></i></a>&nbsp;&nbsp;
+						<a href="#" data-bind="click: ultimo" title="Ultimo" class="btn"><i class="icon-step-forward"></i></a>
+					</td>
+				</tr>
+			</tfoot>
 		</table>
 		<div class="form-actions" style="text-align:right ">
 			<button id="nuevo" class="btn btn-primary" data-bind="visible: isAdmin, click: nuevo, enable: !mostrarError()">Agregar</button>
@@ -46,7 +71,39 @@
 	function ListaProducto() {
 		var self = this;
 
+		self.paginaActual = ko.observable(1);
+		self.paginas = ko.observable();
+		self.filtroId = ko.observable();
+		self.filtroDescripcion = ko.observable();
+		self.filtroSubgrupo = ko.observable();
+		self.subgrupos = ko.observableArray();
+		var todos = {};
+		todos.descripcion = "Todos";
+		self.subgrupos().push(todos);
+		sterilav.cargaListas(self.subgrupos(), "Subgrupos");
+
 		self.productos = ko.observableArray();
+		self.productosFiltrados = ko.computed(function() {
+			var filtroDescripcion = "";
+			var filtroId = "";
+			var filtroSubgrupo = "";
+			if(self.filtroDescripcion()) {
+				filtroDescripcion = self.filtroDescripcion();
+			}
+			if(self.filtroId()) {
+				filtroId = self.filtroId();
+			}
+			if(self.filtroSubgrupo() && self.filtroSubgrupo()!="Todos") {
+				filtroSubgrupo = self.filtroSubgrupo();
+			}
+			return ko.utils.arrayFilter(self.productos(), function(item) {
+				var esDescripcion = (item.descripcion.toLowerCase().indexOf(filtroDescripcion.toLowerCase())>-1);
+				var esId = (item.id.toLowerCase().indexOf(filtroId.toLowerCase())>-1);
+				var esSubgrupo = (item.subgrupo.toLowerCase().indexOf(filtroSubgrupo.toLowerCase())>-1);
+				
+				return esDescripcion && esId && esSubgrupo;
+			});
+		});
 		self.cargando = ko.observable(true);
 		self.mostrarError = ko.observable(false);
 		self.mensajeError = ko.observable("Hubo un problema al buscar los Productos.");
@@ -54,14 +111,39 @@
 			return amplify.store.sessionStorage("sterilav.perfilLogueado") == "1";
 		});
 
+		self.primero = function() {
+			self.paginaActual(1);
+			self.cargar();
+		};
+
+		self.anterior = function() {
+			if(self.paginaActual() > 1) {
+				self.paginaActual(self.paginaActual() - 1);
+				self.cargar();
+			}
+		};
+		
+		self.siguiente = function() {
+			if(self.paginaActual() < self.paginas()) {
+				self.paginaActual(self.paginaActual() + 1);
+				self.cargar();
+			}
+		};
+
+		self.ultimo = function() {
+			self.paginaActual(self.paginas());
+			self.cargar();
+		};
+		
 		self.cargar = function() {
-			//Llamar a la base de datos
+			self.productos.removeAll();
 			var exito = function(data) {
 				if(data.status != "OK") {
 					self.mensajeError(data.data);
 					self.mostrarError(true);
 					return;
 				}
+				self.paginas(data.paginas);
 				self.cargando(false);
 				for(i=0; i<data.data.length;i++) {
 					var newProducto = new Producto();
@@ -79,7 +161,7 @@
 				self.mostrarError(true);
 			};		
 			$.ajax({
-				url:"./servidor/sterilav.php?op=listaProductos",
+				url:"./servidor/sterilav.php?op=listaProductos&pagina=" + self.paginaActual(),
 				success:exito,
 				error:falla,
 				type:"GET",

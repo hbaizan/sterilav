@@ -57,6 +57,12 @@ function putEmpresa() {
 	$cuit = chequearCampo($_POST['cuit']);
 	$iva = chequearCampo($_POST['iva']);
 	
+	$query1 = "SELECT * FROM empresa WHERE empresa_razon_social LIKE '$razonSocial' OR empresa_cuit  LIKE '$cuit'";
+	$result1 = mysql_query($query1, $conn);
+	
+	if(mysql_num_rows($result1)>0) {
+		return '{"status":"error","data":"La empresa ya existe."}';
+	}
 	$query = "INSERT INTO empresa (empresa_razon_social,empresa_cuit,iva_idiva) VALUES ('$razonSocial','$cuit',$iva)";
 	$result = mysql_query($query, $conn);
 	if(!$result) {

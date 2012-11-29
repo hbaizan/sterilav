@@ -1,8 +1,13 @@
 <div class="row" id="productoForm">
-	<div class="span5 well">
+	<div class="span5" data-bind="visible: !mostrarForm()">
+		<div class="alert alert-info">
+			<label>Cargando <i class="icon-refresh"></i></label>
+		</div>
+	</div>
+	<div class="span5 well" data-bind="visible: mostrarForm" style="display:none ">
 		<h4 data-bind="text: title">Producto</h4>
 		<hr>
-		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
+		<form id="login-form" class="form-horizontal">
 		<fieldset data-bind="with: productoNuevo">
 			<div class="control-group" data-bind="validationElement: descripcion">
 				<label class="control-label" for="inputDescripcion">Descripcion:</label>
@@ -50,7 +55,7 @@
 		var self = this;
 
 		self.title = ko.observable("Administrar Producto");
-		self.mostrarForm = ko.observable(true);
+		self.mostrarForm = ko.observable(false);
 		self.mostrarSuccess = ko.observable(false);
 		self.successMensaje = ko.observable("");
 		self.mostrarError = ko.observable(false);
@@ -136,6 +141,7 @@
 		if(amplify.store.sessionStorage("sterilav.productoEditado")) {
 			self.cargar();
 		}
+		self.mostrarForm(true);
 	};
 
 	function CProducto() {

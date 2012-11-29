@@ -1,8 +1,13 @@
 <div class="row" id="empresaForm">
-	<div class="span5 well">
+	<div class="span5" data-bind="visible: !$root.mostrarForm()">
+		<div class="alert alert-info">
+			<label>Cargando <i class="icon-refresh"></i></label>
+		</div>
+	</div>
+	<div class="span5 well" data-bind="visible: $root.mostrarForm" style="display:none ">
 		<h4 data-bind="text: title">Empresa</h4>
 		<hr>
-		<form id="login-form" class="form-horizontal" data-bind="visible: mostrarForm">
+		<form id="login-form" class="form-horizontal">
 		<fieldset data-bind="with: empresaNuevo">
 			<div class="control-group" data-bind="validationElement: razonSocial">
 				<label class="control-label" for="inputRazonSocial">Razon Social:</label>
@@ -12,9 +17,9 @@
 				</div>
 			</div>
 			<div class="control-group" data-bind="validationElement: cuit">
-				<label class="control-label" for="inputCUIT">CUIT:</label>
+				<label class="control-label" for="inputCUIT">CUIT (sin guiones):</label>
 				<div class="controls">
-					<input type="text" id="inputCUIT" data-bind="value: cuit" class="input-large">
+					<input type="text" id="inputCUIT" data-bind="value: cuit" class="input-large" size="11" maxlength="11">
 					<span class="help-inline error" data-bind="validationMessage: cuit"></span>
 				</div>
 			</div>
@@ -69,7 +74,7 @@
 				} else {
 					self.empresaNuevo().razonSocial(data.data.razonSocial);
 					self.empresaNuevo().cuit(data.data.cuit);
-					self.empresaNuevo().iva(data.data.iva);
+					self.empresaNuevo().iva(data.data.idiva);
 				}
 			};
 			var falla = function(data) {
@@ -86,8 +91,8 @@
 			self.mostrarFormError(false);
 			var exito = function(data) {
 				if(data.status != "OK") {
-					$("#errorMsg").show();
-					$("#errorMsg").append(data.data);
+					self.mostrarFormError(true);
+					self.formErrorMensaje(data.data);
 				} else {
 					self.mostrarForm(false);
 					self.successMensaje(data.data + "<br><a href='#' onclick='abrir();'>Volver</a>");
@@ -101,7 +106,7 @@
 				} else {
 					self.formErrorMensaje("Hubo un error tratando de actualizar la empresa.");
 				}
-				self.mostrarFormError(true);				
+				self.mostrarFormError(true);
 			};
 			var empresaCreado = {
 				id: amplify.store.sessionStorage("sterilav.empresaEditado"),
@@ -143,6 +148,7 @@
 			getDataSync("./servidor/sterilav.php?op=listaIvas",exitoIva,fallaIva);
 		};
 		self.cargaIvas();
+		self.mostrarForm(true);
 		
 	};
 
