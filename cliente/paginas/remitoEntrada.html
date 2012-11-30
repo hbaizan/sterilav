@@ -130,23 +130,26 @@
 		</div>
 		</div>
 		<div class="span8 well" data-bind="visible: $root.mostrarForm() && $root.cargarForm()" style="display:none ">
-			<div>
-				<div class="input-append span3">
-					<button id="generar" class="btn btn-primary" data-bind="click: $parent.generar">Generar</button>
-					<select id="generar" class="input-medium" data-bind="visible: $root.editando(), value: $root.tipo">
-						<!--<option value="1" data-bind="visible: tipo()!='1'">Remito De Entrada</option>-->
-						<option value="2" data-bind="visible: $root.tipo()=='1' || $root.tipo()=='2'">Orden De Trabajo</option>
-						<option value="3" data-bind="visible: $root.tipo()=='1' || $root.tipo()=='2' || $root.tipo()=='3'">Remito De Salida</option>
-						<!--<option value="4">Ajuste</option>
-						<option value="5">Recomposicion</option>-->
+			<div data-bind="visible: $root.tipoActual()!='3'">
+				<div class="input-append span3" style="margin-left: 0px !important;">
+					<button id="generar" class="btn btn-warning" data-bind="click: $parent.generar">Generar</button>
+					<select id="generar" class="span2" data-bind="visible: $root.editando(), value: $root.tipo">
+						<!-- ko if: $root.tipoActual()=='1' -->
+							<option value="2">Orden De Trabajo</option>
+						<!-- /ko -->
+						<!-- ko if: $root.tipoActual()=='2' -->
+							<option value="3">Remito De Salida</option>
+						<!-- /ko -->
 					</select>
 				</div>
-				<label class="span1" style="margin-left:0px; margin-top:5px"> N&uacute;mero <span data-bind="text: id"></span></label>
+				<label class="span1 label" style="margin-left:-20px; margin-top:5px; margin-right: 50px"> N&uacute;mero <span data-bind="text: id"></span></label>
 			</div>
-			<!-- ko if: $root.editando() -->
-				<button id="guardar" class="btn" data-bind="click: $parent.guardar">Guardar</button>
-			<!-- /ko -->
-			<button id="cancelar" class="btn" data-bind="click: $parent.cancelar">Cancelar</button>
+			<div style="text-align:right " data-bind="css: {span3: $root.tipoActual()!='3', span7: $root.tipoActual()=='3'}">
+				<!-- ko if: $root.editando() -->
+					<button id="guardar" class="btn btn-primary" data-bind="click: $parent.guardar">Guardar</button>
+				<!-- /ko -->
+				<button id="cancelar" class="btn" data-bind="click: $parent.cancelar">Cancelar</button>
+			</div>
 		</div>
 	</div>
 </div>
@@ -462,16 +465,10 @@
 					self.remito().idActual(data.data.id);
 					self.remito().deposito = ko.observable(new CDeposito());
 					self.remito().empresa = ko.observable(new CEmpresa());
-					//self.remito().chofer = ko.observable(new CChofer());
-					//self.remito().vehiculo = ko.observable(new CVehiculo());
 					self.remito().deposito().cargar(data.data.deposito);
-					//self.remito().tipo(data.data.tipo);
-					self.tipo(data.data.tipo);
 					self.tipoActual(data.data.tipo);
 					self.remito().empresa().cargar(data.data.empresa);
-					//self.remito().chofer().cargar(data.data.chofer);
 					self.remito().chofer(data.data.chofer.id);
-					//self.remito().vehiculo().cargar(data.data.vehiculo);
 					self.remito().vehiculo(data.data.vehiculo.id);
 					var nuevafecha = new Date();
 					self.remito().fecha((nuevafecha.getDate() + "/" + (nuevafecha.getMonth()+1) + "/" + nuevafecha.getFullYear()));
